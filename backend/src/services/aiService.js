@@ -298,71 +298,100 @@ Return strictly valid JSON with keys:
 - summary (concise 1-2 sentence executive summary for the CMO, max 260 chars)
 - reasoning (brief 1-sentence rationale for the department and priority suggestion)`;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
+  const candidateModels = Array.from(
+    new Set(
+      [
+        env.geminiModel,
+        'gemini-3.1-flash-lite',
+        'gemini-3.8-flash',
+        'gemini-flash-latest'
+      ].filter(Boolean)
+    )
+  );
 
-  try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      env.geminiModel
-    )}:generateContent?key=${encodeURIComponent(env.geminiApiKey)}`;
+  let lastErrorMessage = 'Unknown Gemini API error.';
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: 'application/json'
+  for (const modelName of candidateModels) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        modelName
+      )}:generateContent?key=${encodeURIComponent(env.geminiApiKey)}`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: 'application/json'
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        lastErrorMessage = `Gemini HTTP ${response.status} (${modelName}): ${errorText.slice(0, 140)}`;
+        if ([404, 429, 500, 503].includes(response.status)) {
+          continue;
         }
-      })
-    });
+        throw new Error(lastErrorMessage);
+      }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini HTTP ${response.status}: ${errorText.slice(0, 140)}`);
+      const payload = await response.json();
+      const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) {
+        lastErrorMessage = `Empty response returned by Gemini model ${modelName}.`;
+        continue;
+      }
+
+      const parsed = aiResponseSchema.parse(JSON.parse(rawText));
+      const validDeptCodes = new Set(
+        (departments.length ? departments : DEFAULT_DEPARTMENTS).map((d) => d.code)
+      );
+      const deptCode = validDeptCodes.has(parsed.suggestedDepartmentCode.toUpperCase())
+        ? parsed.suggestedDepartmentCode.toUpperCase()
+        : CATEGORY_TO_DEPARTMENT_CODE[normalizeCategory(parsed.suggestedCategory)] || 'LSGD';
+
+      return {
+        suggestedDepartmentCode: deptCode,
+        suggestedDepartmentName: resolveDepartmentName(deptCode, departments),
+        suggestedCategory: normalizeCategory(parsed.suggestedCategory, deptCode),
+        recommendedPriority: parsed.recommendedPriority,
+        summary: parsed.summary,
+        reasoning: parsed.reasoning,
+        potentialDuplicates,
+        source: 'gemini',
+        model: modelName,
+        isFallback: false,
+        fallbackReason: '',
+        analyzedAt: new Date()
+      };
+    } catch (error) {
+      lastErrorMessage = error.message || String(error);
+      if (error.name === 'AbortError') {
+        lastErrorMessage = `Gemini request timed out on ${modelName}`;
+      }
+      if (!/HTTP (400|401|403)/.test(lastErrorMessage)) {
+        continue;
+      }
+      break;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const payload = await response.json();
-    const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      throw new Error('Empty response returned by Gemini API.');
-    }
-
-    const parsed = aiResponseSchema.parse(JSON.parse(rawText));
-    const validDeptCodes = new Set(
-      (departments.length ? departments : DEFAULT_DEPARTMENTS).map((d) => d.code)
-    );
-    const deptCode = validDeptCodes.has(parsed.suggestedDepartmentCode.toUpperCase())
-      ? parsed.suggestedDepartmentCode.toUpperCase()
-      : CATEGORY_TO_DEPARTMENT_CODE[normalizeCategory(parsed.suggestedCategory)] || 'LSGD';
-
-    return {
-      suggestedDepartmentCode: deptCode,
-      suggestedDepartmentName: resolveDepartmentName(deptCode, departments),
-      suggestedCategory: normalizeCategory(parsed.suggestedCategory, deptCode),
-      recommendedPriority: parsed.recommendedPriority,
-      summary: parsed.summary,
-      reasoning: parsed.reasoning,
-      potentialDuplicates,
-      source: 'gemini',
-      model: env.geminiModel,
-      isFallback: false,
-      fallbackReason: '',
-      analyzedAt: new Date()
-    };
-  } catch (error) {
-    return analyzeWithFallback({
-      subject,
-      description,
-      district,
-      category,
-      departments,
-      existingGrievances,
-      fallbackReason: `Gemini API unavailable (${error.message}).`
-    });
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return analyzeWithFallback({
+    subject,
+    description,
+    district,
+    category,
+    departments,
+    existingGrievances,
+    fallbackReason: `Gemini API unavailable (${lastErrorMessage}).`
+  });
 }

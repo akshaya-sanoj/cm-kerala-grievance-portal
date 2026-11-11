@@ -24,7 +24,7 @@ flowchart TB
   subgraph External["Database, Storage & AI Services"]
     DB[("MongoDB Atlas (Mongoose)<br/>8 Domain Collections")]
     FS[("File Storage<br/>backend/uploads/ (RBAC Download)")]
-    AI["Google Gemini API (gemini-2.5-flash)<br/>+ Labelled Heuristic Fallback"]
+    AI["Google Gemini API (gemini-3.1-flash-lite)<br/>+ Labelled Heuristic Fallback"]
   end
 
   PUB & CIT & CMO & OFF -->|HTTPS / JSON & Multipart| SEC

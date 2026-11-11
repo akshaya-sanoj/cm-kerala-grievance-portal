@@ -20,7 +20,7 @@ export const env = {
   uploadDir: path.resolve(__dirname, '../../', process.env.UPLOAD_DIR || 'uploads'),
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB) || 5,
   geminiApiKey: process.env.GEMINI_API_KEY || '',
-  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
   autoSeedIfEmpty: process.env.AUTO_SEED_IF_EMPTY !== 'false',
   serveFrontend: process.env.SERVE_FRONTEND === 'true'
 };

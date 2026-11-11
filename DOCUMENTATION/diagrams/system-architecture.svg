@@ -76,7 +76,7 @@
 
   <rect x="735" y="490" width="325" height="150" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="2" />
   <text x="897" y="518" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">AI Grievance Assistant Layer</text>
-  <text x="897" y="546" text-anchor="middle" font-size="12" fill="#334155">Google Gemini API (gemini-2.5-flash)</text>
+  <text x="897" y="546" text-anchor="middle" font-size="12" fill="#334155">Google Gemini API (gemini-3.1-flash-lite)</text>
   <text x="897" y="568" text-anchor="middle" font-size="11" fill="#475569">Suggests Dept, Category, Priority &amp; Summary</text>
   <text x="897" y="590" text-anchor="middle" font-size="11" fill="#475569">Duplicate Similarity Check + Labelled Fallback</text>
   <text x="897" y="616" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">Human-in-the-loop Review Required</text>

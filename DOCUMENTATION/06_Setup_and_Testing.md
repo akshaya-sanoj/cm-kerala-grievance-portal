@@ -20,7 +20,7 @@ Copy the example environment templates into `backend/.env` and `frontend/.env` (
 | `UPLOAD_DIR` | Directory for uploaded attachments | `uploads` |
 | `MAX_FILE_SIZE_MB` | Upload size cap in MB | `5` |
 | `GEMINI_API_KEY` | Google Gemini API key | Your AI Studio key |
-| `GEMINI_MODEL` | Gemini model name | `gemini-2.5-flash` |
+| `GEMINI_MODEL` | Gemini model name | `gemini-3.1-flash-lite` |
 | `AUTO_SEED_IF_EMPTY` | Auto-seed demo data if DB is empty | `true` |
 | `SERVE_FRONTEND` | Let Express serve `frontend/dist` | `false` (or `true` for single-service deploy) |
 

@@ -10,7 +10,7 @@ The **AI Grievance Assistant** (`backend/src/services/aiService.js`) assists cit
 
 ## 2. Live Model Integration (Google Gemini API)
 - **Provider:** Google Gemini REST API (`generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent`)
-- **Default Model:** `gemini-2.5-flash` (configurable via `GEMINI_MODEL` in `.env`)
+- **Default Model:** `gemini-3.1-flash-lite` (configurable via `GEMINI_MODEL` in `.env`, with automatic failover across active Gemini Flash models)
 - **Structured Output & Validation:** Requests `responseMimeType: "application/json"` with `temperature: 0.2` and a 12-second `AbortController` timeout. Output is strictly validated using `zod` (`aiResponseSchema`) before returning to the client or persisting on `Grievance.aiAnalysis`.
 
 ### Prompt Design (`backend/src/services/aiService.js`)

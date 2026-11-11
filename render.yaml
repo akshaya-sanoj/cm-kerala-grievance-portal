@@ -14,7 +14,7 @@ services:
       - key: AUTO_SEED_IF_EMPTY
         value: "true"
       - key: GEMINI_MODEL
-        value: gemini-2.5-flash
+        value: gemini-3.1-flash-lite
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: JWT_SECRET

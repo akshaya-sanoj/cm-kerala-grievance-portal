@@ -21,7 +21,7 @@ A full-stack public grievance redressal platform connecting citizens, the Chief 
 4. **Department Officer Dashboard (`/officer/dashboard`)**
    - Department-scoped queue, attachment download, investigation progress updates (`In Progress`), and Action-Taken Report (ATR) + file upload back to CMO.
 5. **Mandatory AI Grievance Assistant (`backend/src/services/aiService.js`)**
-   - Uses **Google Gemini API (`gemini-2.5-flash`)** to suggest department, category, priority (`Low`/`Medium`/`High`), generate a short CMO summary, and flag potential duplicates.
+   - Uses **Google Gemini API (`gemini-3.1-flash-lite`)** to suggest department, category, priority (`Low`/`Medium`/`High`), generate a short CMO summary, and flag potential duplicates.
    - Clearly labels fallback mode (`heuristic-fallback-v1`) if `GEMINI_API_KEY` is unavailable. AI outputs are strictly advisory and require human review.
 
 ---
@@ -31,7 +31,7 @@ A full-stack public grievance redressal platform connecting citizens, the Chief 
 - **Frontend:** React 18, Vite 5, React Router v6, Tailwind CSS, Recharts, Lucide Icons, Axios
 - **Backend:** Node.js 20, Express.js, Mongoose 8, JWT (`jsonwebtoken`), `bcryptjs`, `multer` v2, `zod`, `helmet`, `express-rate-limit`
 - **Database:** MongoDB Atlas (8 collections: `User`, `Department`, `Grievance`, `GrievanceHistory`, `DepartmentAssignment`, `Attachment`, `CitizenFeedback`, `ContactEnquiry`)
-- **AI:** Google Gemini REST API (`gemini-2.5-flash`) + labelled fallback
+- **AI:** Google Gemini REST API (`gemini-3.1-flash-lite`) + labelled fallback
 - **Testing:** Vitest + Supertest
 
 ---

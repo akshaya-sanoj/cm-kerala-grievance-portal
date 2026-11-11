@@ -84,7 +84,7 @@ Analyzes complaint text via Google Gemini API (or labelled heuristic fallback) a
     "reasoning": "Active electrical sparking poses immediate public safety danger.",
     "potentialDuplicates": [],
     "source": "gemini",
-    "model": "gemini-2.5-flash",
+    "model": "gemini-3.1-flash-lite",
     "isFallback": false,
     "fallbackReason": ""
   }

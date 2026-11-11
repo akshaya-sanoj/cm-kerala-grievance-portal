@@ -10,7 +10,7 @@ Citizens across Kerala face public service issues spanning roads and infrastruct
 - Enable **registered citizens** to submit grievances across all 14 Kerala districts with optional supporting evidence and receive an immediate unique Reference ID (`KL-CMO-YYYY-XXXXXX`).
 - Empower the **Chief Minister's Office (CMO)** to monitor statewide volumes, filter by district/category/priority/status, detect overdue SLA items, assign departments/officers, add internal/public remarks, escalate delays, inspect district/department charts, and verify resolution reports.
 - Enable **Department Officers** to access department-assigned queues, log field investigation progress, upload Action-Taken Reports (ATR), and return grievances to the CMO for closure verification.
-- Integrate an **AI Grievance Assistant** powered by Google Gemini (`gemini-2.5-flash`) with a clearly labelled heuristic fallback to provide advisory department/category suggestions, priority recommendations, short CMO summaries, and potential duplicate alerts while keeping humans in final control.
+- Integrate an **AI Grievance Assistant** powered by Google Gemini (`gemini-3.1-flash-lite`) with a clearly labelled heuristic fallback to provide advisory department/category suggestions, priority recommendations, short CMO summaries, and potential duplicate alerts while keeping humans in final control.
 
 ## 3. Scope & Core Features
 | Module | Key Capabilities |
@@ -24,6 +24,6 @@ Citizens across Kerala face public service issues spanning roads and infrastruct
 ## 4. Tools & Third-Party Libraries Disclosed
 - **Frontend:** React 18, Vite 5, React Router DOM, Tailwind CSS, Recharts, Lucide React, Axios.
 - **Backend:** Node.js 20, Express 4, Mongoose 8 (MongoDB Atlas), JSON Web Tokens (`jsonwebtoken`), `bcryptjs`, `helmet`, `cors`, `express-rate-limit`, `multer` v2, `zod`, `morgan`.
-- **AI Provider:** Google Gemini REST API (`gemini-2.5-flash`) with rule-assisted heuristic fallback.
+- **AI Provider:** Google Gemini REST API (`gemini-3.1-flash-lite`) with rule-assisted heuristic fallback.
 - **Testing:** Vitest & Supertest.
 - **Development Assistance:** Built with Antigravity AI coding assistant using open-source npm packages listed above.
