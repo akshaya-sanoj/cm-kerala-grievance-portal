@@ -4,13 +4,41 @@ import { CheckCircle2, Copy, FilePlus2, Paperclip, Sparkles } from 'lucide-react
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { AiAssistantCard } from '../../components/AiAssistantCard.jsx';
 
+const FALLBACK_METADATA = {
+  districts: [
+    'Thiruvananthapuram',
+    'Kollam',
+    'Pathanamthitta',
+    'Alappuzha',
+    'Kottayam',
+    'Idukki',
+    'Ernakulam',
+    'Thrissur',
+    'Palakkad',
+    'Malappuram',
+    'Kozhikode',
+    'Wayanad',
+    'Kannur',
+    'Kasaragod'
+  ],
+  categories: [
+    'Public Infrastructure',
+    'Healthcare',
+    'Education',
+    'Electricity & Power',
+    'Water Supply & Drainage',
+    'Civic Services & Sanitation',
+    'Revenue & Land Records',
+    'Transport & Road Safety',
+    'Public Welfare & Ration',
+    'Other'
+  ],
+  priorities: ['Low', 'Medium', 'High']
+};
+
 export function SubmitGrievancePage() {
   const navigate = useNavigate();
-  const [metadata, setMetadata] = useState({
-    districts: [],
-    categories: [],
-    priorities: ['Low', 'Medium', 'High']
-  });
+  const [metadata, setMetadata] = useState(FALLBACK_METADATA);
   const [form, setForm] = useState({
     district: '',
     category: '',
@@ -60,10 +88,16 @@ export function SubmitGrievancePage() {
 
   function handleApplyAiSuggestions() {
     if (!aiAnalysis) return;
+    const rawCategory = String(aiAnalysis.suggestedCategory || '').trim().toLowerCase();
+    const matchedCategory = metadata.categories.find((c) => c.toLowerCase() === rawCategory);
+
+    const rawPriority = String(aiAnalysis.recommendedPriority || '').trim().toLowerCase();
+    const matchedPriority = metadata.priorities.find((p) => p.toLowerCase() === rawPriority);
+
     setForm((prev) => ({
       ...prev,
-      category: aiAnalysis.suggestedCategory || prev.category,
-      priority: aiAnalysis.recommendedPriority || prev.priority
+      category: matchedCategory || aiAnalysis.suggestedCategory || prev.category,
+      priority: matchedPriority || aiAnalysis.recommendedPriority || prev.priority
     }));
     setCitizenAcceptedAi(true);
   }
@@ -193,11 +227,21 @@ export function SubmitGrievancePage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Category *{' '}
+              {citizenAcceptedAi && (
+                <span className="ml-1 text-[11px] font-semibold text-emerald-700">
+                  (Synced from AI)
+                </span>
+              )}
+            </label>
             <select
               required
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, category: e.target.value });
+                setCitizenAcceptedAi(false);
+              }}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-civic-600 outline-none"
             >
               <option value="">Select Category</option>
@@ -253,6 +297,7 @@ export function SubmitGrievancePage() {
           <AiAssistantCard
             analysis={aiAnalysis}
             showApplyButton
+            applied={citizenAcceptedAi}
             onApplySuggestions={handleApplyAiSuggestions}
           />
         )}
@@ -260,11 +305,19 @@ export function SubmitGrievancePage() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Citizen-Selected Priority
+              Citizen-Selected Priority{' '}
+              {citizenAcceptedAi && (
+                <span className="ml-1 text-[11px] font-semibold text-emerald-700">
+                  (Synced from AI)
+                </span>
+              )}
             </label>
             <select
               value={form.priority}
-              onChange={(e) => setForm({ ...form, priority: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, priority: e.target.value });
+                setCitizenAcceptedAi(false);
+              }}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-civic-600 outline-none"
             >
               {metadata.priorities.map((p) => (

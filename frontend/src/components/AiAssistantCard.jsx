@@ -1,7 +1,12 @@
 import { AlertTriangle, CheckCircle2, Cpu, Sparkles } from 'lucide-react';
 import { PriorityBadge, StatusBadge } from './StatusBadge.jsx';
 
-export function AiAssistantCard({ analysis, onApplySuggestions, showApplyButton = false }) {
+export function AiAssistantCard({
+  analysis,
+  onApplySuggestions,
+  showApplyButton = false,
+  applied = false
+}) {
   if (!analysis || !analysis.summary) return null;
 
   const isFallback = Boolean(analysis.isFallback);
@@ -115,10 +120,16 @@ export function AiAssistantCard({ analysis, onApplySuggestions, showApplyButton 
           <button
             type="button"
             onClick={onApplySuggestions}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-xs font-semibold transition"
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              applied
+                ? 'bg-emerald-100 text-emerald-900 border border-emerald-400'
+                : 'bg-civic-700 hover:bg-civic-800 text-white'
+            }`}
           >
             <CheckCircle2 className="w-4 h-4" />
-            Apply Suggested Category & Priority
+            {applied
+              ? `Applied (${analysis.suggestedCategory} • ${analysis.recommendedPriority})`
+              : 'Apply Suggested Category & Priority'}
           </button>
         )}
       </div>
