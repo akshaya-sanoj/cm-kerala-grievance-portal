@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: cm-kerala-grievance-portal
+    runtime: node
+    plan: free
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_FRONTEND
+        value: "true"
+      - key: AUTO_SEED_IF_EMPTY
+        value: "true"
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

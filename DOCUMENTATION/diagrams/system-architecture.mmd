@@ -1,0 +1,25 @@
+flowchart TB
+  subgraph Client["Client Tier (React + Vite + Tailwind CSS)"]
+    PUB["Public Website<br/>Home, About, How It Works, Departments, Contact, FAQ, Tracker"]
+    CIT["Citizen Portal<br/>Register/Login, Submit + AI Assist, Dashboard, Feedback/Reopen"]
+    CMO["CMO Admin Dashboard<br/>Triage, Assign, Remarks, Escalate, ATR Review, Recharts Analytics"]
+    OFF["Department Officer Dashboard<br/>Assigned Queue, Investigation Updates, ATR & Document Upload"]
+  end
+
+  subgraph API["Backend Tier (Node.js + Express REST API)"]
+    SEC["Security & Middleware<br/>Helmet, CORS, Rate Limiter, JWT Auth, Role RBAC, Multer Upload, Zod"]
+    CTRL["Controllers<br/>auth, public, grievance, cmo, officer, ai, attachment"]
+    SVC["Domain Services<br/>grievanceService (Workflow + Audit) & aiService (Gemini + Fallback)"]
+  end
+
+  subgraph External["Database, Storage & AI Services"]
+    DB[("MongoDB Atlas (Mongoose)<br/>Users, Departments, Grievances, GrievanceHistory,<br/>DepartmentAssignments, Attachments, CitizenFeedback, ContactEnquiries")]
+    FS[("File Storage<br/>uploads/ (Controlled Download Endpoint)")]
+    AI["Google Gemini API<br/>(gemini-2.5-flash)<br/>+ Labelled Heuristic Fallback"]
+  end
+
+  PUB & CIT & CMO & OFF -->|HTTPS / JSON & Multipart| SEC
+  SEC --> CTRL --> SVC
+  SVC --> DB
+  CTRL --> FS
+  SVC -->|Structured JSON Prompt| AI

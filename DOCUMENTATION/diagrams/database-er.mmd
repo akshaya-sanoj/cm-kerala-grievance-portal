@@ -1,0 +1,116 @@
+erDiagram
+  USER {
+    ObjectId _id PK
+    string name
+    string email UK
+    string mobileNumber
+    string passwordHash
+    string role
+    ObjectId departmentId FK
+    string designation
+    string district
+    boolean isActive
+  }
+
+  DEPARTMENT {
+    ObjectId _id PK
+    string name UK
+    string code UK
+    string description
+    string headDesignation
+    number slaDays
+    array categories
+    boolean isActive
+  }
+
+  GRIEVANCE {
+    ObjectId _id PK
+    string referenceId UK
+    ObjectId citizenId FK
+    string district
+    string category
+    string subject
+    string description
+    string priority
+    string status
+    string workflowStage
+    ObjectId assignedDepartmentId FK
+    ObjectId assignedOfficerId FK
+    date dueDate
+    boolean isEscalated
+    string actionTakenReport
+    boolean atrSubmitted
+    object aiAnalysis
+    date resolvedAt
+  }
+
+  GRIEVANCE_HISTORY {
+    ObjectId _id PK
+    ObjectId grievanceId FK
+    string previousStatus
+    string newStatus
+    string workflowStage
+    string actionType
+    string remarks
+    boolean isInternal
+    ObjectId changedBy FK
+    string changedByName
+    string changedByRole
+    date createdAt
+  }
+
+  DEPARTMENT_ASSIGNMENT {
+    ObjectId _id PK
+    ObjectId grievanceId FK
+    ObjectId departmentId FK
+    ObjectId officerId FK
+    ObjectId assignedBy FK
+    string instructions
+    date dueDate
+    string status
+    date assignedAt
+  }
+
+  ATTACHMENT {
+    ObjectId _id PK
+    ObjectId grievanceId FK
+    ObjectId uploadedBy FK
+    string uploadedByRole
+    string attachmentType
+    string originalName
+    string storedName
+    string mimeType
+    number sizeBytes
+  }
+
+  CITIZEN_FEEDBACK {
+    ObjectId _id PK
+    ObjectId grievanceId FK
+    ObjectId citizenId FK
+    number rating
+    boolean isSatisfied
+    string comment
+  }
+
+  CONTACT_ENQUIRY {
+    ObjectId _id PK
+    string name
+    string email
+    string subject
+    string message
+    string status
+  }
+
+  DEPARTMENT ||--o{ USER : "has officers"
+  USER ||--o{ GRIEVANCE : "submits (citizenId)"
+  DEPARTMENT ||--o{ GRIEVANCE : "handles (assignedDepartmentId)"
+  USER ||--o{ GRIEVANCE : "investigates (assignedOfficerId)"
+  GRIEVANCE ||--o{ GRIEVANCE_HISTORY : "logs audit trail"
+  USER ||--o{ GRIEVANCE_HISTORY : "performs change"
+  GRIEVANCE ||--o{ DEPARTMENT_ASSIGNMENT : "routed via"
+  DEPARTMENT ||--o{ DEPARTMENT_ASSIGNMENT : "receives"
+  USER ||--o{ DEPARTMENT_ASSIGNMENT : "assigned by CMO / to officer"
+  GRIEVANCE ||--o{ ATTACHMENT : "includes files"
+  USER ||--o{ ATTACHMENT : "uploads"
+  GRIEVANCE ||--o| CITIZEN_FEEDBACK : "receives rating"
+  USER ||--o{ CITIZEN_FEEDBACK : "writes"

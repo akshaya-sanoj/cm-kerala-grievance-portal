@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 680" width="1100" height="680" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1100" height="680" fill="#f8fafc" />
+  <text x="550" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="#064e3b">CM Kerala Public Grievance Redressal Portal – System Architecture (Prototype)</text>
+
+  <!-- Client Tier -->
+  <rect x="40" y="65" width="1020" height="145" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2" />
+  <text x="60" y="92" font-size="14" font-weight="700" fill="#065f46">CLIENT TIER – React.js (Vite) + Tailwind CSS + Recharts + Axios</text>
+
+  <rect x="60" y="108" width="225" height="82" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.5" />
+  <text x="172" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Public Website</text>
+  <text x="172" y="155" text-anchor="middle" font-size="11" fill="#475569">Home, About, How It Works,</text>
+  <text x="172" y="171" text-anchor="middle" font-size="11" fill="#475569">Departments, Contact, FAQ, Track</text>
+
+  <rect x="310" y="108" width="230" height="82" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.5" />
+  <text x="425" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Citizen Portal</text>
+  <text x="425" y="155" text-anchor="middle" font-size="11" fill="#475569">Register/Login, Submit + AI Assist,</text>
+  <text x="425" y="171" text-anchor="middle" font-size="11" fill="#475569">Dashboard, Feedback &amp; Reopen</text>
+
+  <rect x="565" y="108" width="235" height="82" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.5" />
+  <text x="682" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">CMO Admin Dashboard</text>
+  <text x="682" y="155" text-anchor="middle" font-size="11" fill="#475569">Filter, Assign, Remarks, Escalate,</text>
+  <text x="682" y="171" text-anchor="middle" font-size="11" fill="#475569">ATR Review, Charts &amp; Stats</text>
+
+  <rect x="825" y="108" width="215" height="82" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.5" />
+  <text x="932" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Dept Officer Dashboard</text>
+  <text x="932" y="155" text-anchor="middle" font-size="11" fill="#475569">Forwarded Queue, Investigation,</text>
+  <text x="932" y="171" text-anchor="middle" font-size="11" fill="#475569">Action-Taken Report + Upload</text>
+
+  <!-- Arrows Client to API -->
+  <line x1="550" y1="210" x2="550" y2="255" stroke="#047857" stroke-width="2.5" marker-end="url(#arrow)" />
+  <text x="565" y="238" font-size="11" font-weight="600" fill="#064e3b">REST API (JSON / Multipart + JWT Bearer)</text>
+
+  <!-- Backend Tier -->
+  <rect x="40" y="260" width="1020" height="175" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+  <text x="60" y="287" font-size="14" font-weight="700" fill="#1e3a8a">APPLICATION &amp; API TIER – Node.js 20 + Express.js</text>
+
+  <rect x="60" y="303" width="300" height="112" rx="10" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="210" y="328" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Security &amp; Validation Middleware</text>
+  <text x="210" y="349" text-anchor="middle" font-size="11" fill="#475569">Helmet Headers • CORS Allowlist</text>
+  <text x="210" y="367" text-anchor="middle" font-size="11" fill="#475569">Express Rate Limiter • Zod Schemas</text>
+  <text x="210" y="385" text-anchor="middle" font-size="11" fill="#475569">JWT Auth &amp; Role-Based Access (RBAC)</text>
+  <text x="210" y="403" text-anchor="middle" font-size="11" fill="#475569">Multer File Type/Size Guard (5 MB)</text>
+
+  <rect x="395" y="303" width="305" height="112" rx="10" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="547" y="328" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">REST Controllers</text>
+  <text x="547" y="349" text-anchor="middle" font-size="11" fill="#475569">/api/auth • /api/public &amp; /api/departments</text>
+  <text x="547" y="367" text-anchor="middle" font-size="11" fill="#475569">/api/grievances (Submit, My, Track, Reopen)</text>
+  <text x="547" y="385" text-anchor="middle" font-size="11" fill="#475569">/api/cmo (Stats, Assign, Escalate, ATR)</text>
+  <text x="547" y="403" text-anchor="middle" font-size="11" fill="#475569">/api/officer • /api/ai • /api/attachments</text>
+
+  <rect x="735" y="303" width="305" height="112" rx="10" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="887" y="328" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Business &amp; AI Services</text>
+  <text x="887" y="350" text-anchor="middle" font-size="11" fill="#475569">grievanceService: Lifecycle Transitions,</text>
+  <text x="887" y="366" text-anchor="middle" font-size="11" fill="#475569">Audit History, SLA Overdue Computation</text>
+  <text x="887" y="387" text-anchor="middle" font-size="11" fill="#475569">aiService: Gemini API Structured Analysis,</text>
+  <text x="887" y="403" text-anchor="middle" font-size="11" fill="#475569">Duplicate Similarity &amp; Labelled Fallback</text>
+
+  <!-- Arrows Backend to Persistence/AI -->
+  <line x1="250" y1="435" x2="250" y2="485" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)" />
+  <line x1="560" y1="435" x2="560" y2="485" stroke="#334155" stroke-width="2.5" marker-end="url(#arrow)" />
+  <line x1="890" y1="435" x2="890" y2="485" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- Persistence & External Tier -->
+  <rect x="40" y="490" width="420" height="150" rx="14" fill="#f0fdf4" stroke="#15803d" stroke-width="2" />
+  <text x="250" y="518" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">MongoDB Atlas (Mongoose ODM)</text>
+  <text x="250" y="544" text-anchor="middle" font-size="12" fill="#334155">Users • Departments • Grievances</text>
+  <text x="250" y="566" text-anchor="middle" font-size="12" fill="#334155">GrievanceHistory • DepartmentAssignments</text>
+  <text x="250" y="588" text-anchor="middle" font-size="12" fill="#334155">Attachments • CitizenFeedback • ContactEnquiries</text>
+  <text x="250" y="616" text-anchor="middle" font-size="11" fill="#166534">Indexed by referenceId, status, district, departmentId</text>
+
+  <rect x="485" y="490" width="225" height="150" rx="14" fill="#f8fafc" stroke="#475569" stroke-width="2" />
+  <text x="597" y="518" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">File Storage</text>
+  <text x="597" y="550" text-anchor="middle" font-size="12" fill="#475569">Local Disk (uploads/)</text>
+  <text x="597" y="572" text-anchor="middle" font-size="11" fill="#475569">UUID Filenames + Path Guard</text>
+  <text x="597" y="594" text-anchor="middle" font-size="11" fill="#475569">RBAC-Checked Download API</text>
+
+  <rect x="735" y="490" width="325" height="150" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="2" />
+  <text x="897" y="518" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">AI Grievance Assistant Layer</text>
+  <text x="897" y="546" text-anchor="middle" font-size="12" fill="#334155">Google Gemini API (gemini-2.5-flash)</text>
+  <text x="897" y="568" text-anchor="middle" font-size="11" fill="#475569">Suggests Dept, Category, Priority &amp; Summary</text>
+  <text x="897" y="590" text-anchor="middle" font-size="11" fill="#475569">Duplicate Similarity Check + Labelled Fallback</text>
+  <text x="897" y="616" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">Human-in-the-loop Review Required</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155" />
+    </marker>
+  </defs>
+</svg>

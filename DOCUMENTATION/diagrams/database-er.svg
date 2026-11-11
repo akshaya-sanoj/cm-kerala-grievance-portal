@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 760" width="1160" height="760" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1160" height="760" fill="#f8fafc" />
+  <text x="580" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#064e3b">CM Kerala Grievance Portal – Database Entity-Relationship Diagram (MongoDB / Mongoose)</text>
+
+  <!-- USER -->
+  <rect x="40" y="70" width="250" height="190" rx="10" fill="#ffffff" stroke="#047857" stroke-width="2" />
+  <rect x="40" y="70" width="250" height="34" rx="10" fill="#047857" />
+  <text x="165" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">User</text>
+  <text x="54" y="122" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="54" y="140" font-size="11.5" fill="#334155">name, email (unique), mobileNumber</text>
+  <text x="54" y="158" font-size="11.5" fill="#334155">passwordHash (select: false)</text>
+  <text x="54" y="176" font-size="11.5" fill="#334155">role : citizen | cmo_admin | officer</text>
+  <text x="54" y="194" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> departmentId → Department</text>
+  <text x="54" y="212" font-size="11.5" fill="#334155">designation, district, isActive</text>
+  <text x="54" y="232" font-size="11" fill="#64748b">createdAt, updatedAt</text>
+
+  <!-- DEPARTMENT -->
+  <rect x="40" y="315" width="250" height="165" rx="10" fill="#ffffff" stroke="#047857" stroke-width="2" />
+  <rect x="40" y="315" width="250" height="34" rx="10" fill="#047857" />
+  <text x="165" y="337" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Department</text>
+  <text x="54" y="368" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="54" y="386" font-size="11.5" fill="#334155">name (unique), code (unique)</text>
+  <text x="54" y="404" font-size="11.5" fill="#334155">description, headDesignation</text>
+  <text x="54" y="422" font-size="11.5" fill="#334155">slaDays, categories[], contactEmail</text>
+  <text x="54" y="440" font-size="11.5" fill="#334155">isActive, createdAt, updatedAt</text>
+
+  <!-- CONTACT ENQUIRY -->
+  <rect x="40" y="535" width="250" height="145" rx="10" fill="#ffffff" stroke="#475569" stroke-width="2" />
+  <rect x="40" y="535" width="250" height="34" rx="10" fill="#475569" />
+  <text x="165" y="557" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">ContactEnquiry</text>
+  <text x="54" y="588" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="54" y="606" font-size="11.5" fill="#334155">name, email, subject, message</text>
+  <text x="54" y="624" font-size="11.5" fill="#334155">status : New | Reviewed | Responded</text>
+  <text x="54" y="644" font-size="11" fill="#64748b">createdAt, updatedAt</text>
+
+  <!-- GRIEVANCE (CENTER) -->
+  <rect x="415" y="70" width="320" height="330" rx="10" fill="#ffffff" stroke="#0f766e" stroke-width="2.5" />
+  <rect x="415" y="70" width="320" height="36" rx="10" fill="#0f766e" />
+  <text x="575" y="94" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">Grievance (Core Entity)</text>
+  <text x="432" y="126" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="432" y="144" font-size="11.5" fill="#0f172a"><tspan font-weight="700">UK</tspan> referenceId : KL-CMO-YYYY-XXXXXX</text>
+  <text x="432" y="162" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> citizenId → User</text>
+  <text x="432" y="180" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> assignedDepartmentId → Department</text>
+  <text x="432" y="198" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> assignedOfficerId → User</text>
+  <text x="432" y="216" font-size="11.5" fill="#334155">district (14 Kerala districts), category</text>
+  <text x="432" y="234" font-size="11.5" fill="#334155">subject, description, priority (Low/Med/High)</text>
+  <text x="432" y="252" font-size="11.5" fill="#334155">status : Submitted | Under Review | In Progress |</text>
+  <text x="470" y="268" font-size="11.5" fill="#334155">Resolved | Reopened</text>
+  <text x="432" y="286" font-size="11.5" fill="#334155">workflowStage, dueDate, isEscalated</text>
+  <text x="432" y="304" font-size="11.5" fill="#334155">actionTakenReport, atrSubmitted, resolvedAt</text>
+  <text x="432" y="322" font-size="11.5" fill="#92400e">aiAnalysis { dept, category, priority, summary,</text>
+  <text x="442" y="338" font-size="11.5" fill="#92400e">potentialDuplicates[], source, isFallback }</text>
+  <text x="432" y="362" font-size="11" fill="#64748b">reopenedCount, createdAt, updatedAt</text>
+
+  <!-- GRIEVANCE HISTORY -->
+  <rect x="850" y="70" width="270" height="195" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="2" />
+  <rect x="850" y="70" width="270" height="34" rx="10" fill="#1d4ed8" />
+  <text x="985" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">GrievanceHistory</text>
+  <text x="866" y="122" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="866" y="140" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> grievanceId → Grievance</text>
+  <text x="866" y="158" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> changedBy → User</text>
+  <text x="866" y="176" font-size="11.5" fill="#334155">previousStatus, newStatus, workflowStage</text>
+  <text x="866" y="194" font-size="11.5" fill="#334155">actionType, remarks, isInternal</text>
+  <text x="866" y="212" font-size="11.5" fill="#334155">changedByName, changedByRole</text>
+  <text x="866" y="232" font-size="11" fill="#64748b">createdAt (immutable timeline)</text>
+
+  <!-- DEPARTMENT ASSIGNMENT -->
+  <rect x="850" y="300" width="270" height="190" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="2" />
+  <rect x="850" y="300" width="270" height="34" rx="10" fill="#1d4ed8" />
+  <text x="985" y="322" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">DepartmentAssignment</text>
+  <text x="866" y="352" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="866" y="370" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> grievanceId → Grievance</text>
+  <text x="866" y="388" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> departmentId → Department</text>
+  <text x="866" y="406" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> officerId, assignedBy → User</text>
+  <text x="866" y="424" font-size="11.5" fill="#334155">instructions, dueDate</text>
+  <text x="866" y="442" font-size="11.5" fill="#334155">status : Active | Completed | Reassigned</text>
+  <text x="866" y="462" font-size="11" fill="#64748b">assignedAt, completedAt</text>
+
+  <!-- ATTACHMENT -->
+  <rect x="415" y="510" width="320" height="175" rx="10" fill="#ffffff" stroke="#7c3aed" stroke-width="2" />
+  <rect x="415" y="510" width="320" height="34" rx="10" fill="#7c3aed" />
+  <text x="575" y="532" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Attachment</text>
+  <text x="432" y="564" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="432" y="582" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> grievanceId → Grievance</text>
+  <text x="432" y="600" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> uploadedBy → User</text>
+  <text x="432" y="618" font-size="11.5" fill="#334155">attachmentType : evidence | atr</text>
+  <text x="432" y="636" font-size="11.5" fill="#334155">originalName, storedName, mimeType</text>
+  <text x="432" y="654" font-size="11.5" fill="#334155">sizeBytes, storagePath</text>
+
+  <!-- CITIZEN FEEDBACK -->
+  <rect x="850" y="530" width="270" height="155" rx="10" fill="#ffffff" stroke="#d97706" stroke-width="2" />
+  <rect x="850" y="530" width="270" height="34" rx="10" fill="#d97706" />
+  <text x="985" y="552" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">CitizenFeedback</text>
+  <text x="866" y="582" font-size="11.5" fill="#0f172a"><tspan font-weight="700">PK</tspan> _id : ObjectId</text>
+  <text x="866" y="600" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> grievanceId (unique) → Grievance</text>
+  <text x="866" y="618" font-size="11.5" fill="#0369a1"><tspan font-weight="700">FK</tspan> citizenId → User</text>
+  <text x="866" y="636" font-size="11.5" fill="#334155">rating (1–5), isSatisfied, comment</text>
+  <text x="866" y="656" font-size="11" fill="#64748b">createdAt, updatedAt</text>
+
+  <!-- Relationship Connectors -->
+  <line x1="290" y1="150" x2="415" y2="150" stroke="#475569" stroke-width="2" />
+  <text x="352" y="142" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">1 : N</text>
+
+  <line x1="165" y1="260" x2="165" y2="315" stroke="#475569" stroke-width="2" />
+  <text x="190" y="292" font-size="11" font-weight="600" fill="#334155">N : 1</text>
+
+  <line x1="290" y1="365" x2="415" y2="210" stroke="#475569" stroke-width="2" />
+  <text x="345" y="275" font-size="11" font-weight="600" fill="#334155">1 : N</text>
+
+  <line x1="735" y1="160" x2="850" y2="160" stroke="#1d4ed8" stroke-width="2" />
+  <text x="792" y="152" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">1 : N</text>
+
+  <line x1="735" y1="280" x2="850" y2="375" stroke="#1d4ed8" stroke-width="2" />
+  <text x="798" y="315" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">1 : N</text>
+
+  <line x1="575" y1="400" x2="575" y2="510" stroke="#7c3aed" stroke-width="2" />
+  <text x="600" y="460" font-size="11" font-weight="600" fill="#6d28d9">1 : N</text>
+
+  <line x1="735" y1="360" x2="850" y2="590" stroke="#d97706" stroke-width="2" />
+  <text x="802" y="485" font-size="11" font-weight="600" fill="#b45309">1 : 0..1</text>
+</svg>
