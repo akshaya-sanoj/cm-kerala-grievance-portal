@@ -266,8 +266,8 @@ export function HomePage() {
         <div className="hero-grid absolute inset-0 pointer-events-none" />
         <div className="animate-float-slow absolute -top-20 -right-16 w-96 h-96 rounded-full bg-amber-400/20 blur-3xl pointer-events-none" />
         <div className="animate-float-slow absolute -bottom-24 -left-16 w-[28rem] h-[28rem] rounded-full bg-indigo-400/25 blur-3xl pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-22 grid lg:grid-cols-12 gap-12 items-center relative z-10">
-          <div className="lg:col-span-7 space-y-6 animate-fade-up">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-20 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+          <div className="lg:col-span-7 min-w-0 space-y-5 sm:space-y-6 animate-fade-up">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-amber-200 text-xs font-semibold">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-80" />
@@ -315,7 +315,7 @@ export function HomePage() {
                 <Radio className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                 Real-Time Redressal Pipeline
               </p>
-              <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                 {WORKFLOW_STEPS.map((st, idx) => {
                   const active = heroStage === idx;
                   return (
@@ -348,9 +348,9 @@ export function HomePage() {
           </div>
 
           {/* Single Clean Quick-Track Card */}
-          <div className="lg:col-span-5 relative animate-fade-up-delayed">
+          <div className="lg:col-span-5 min-w-0 relative animate-fade-up-delayed">
             <div className="animate-float-slow absolute -inset-2 bg-gradient-to-tr from-indigo-500/35 via-amber-400/25 to-sky-400/30 rounded-[28px] blur-xl pointer-events-none" />
-            <div className="relative bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/20">
+            <div className="relative bg-white text-slate-900 rounded-3xl p-5 sm:p-7 shadow-2xl border border-white/20">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h2 className="text-lg font-bold text-slate-900">{t.quickTrackTitle}</h2>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -399,8 +399,8 @@ export function HomePage() {
       </section>
 
       {/* 2. Clean 4-Metric Bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-10 relative z-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           <StatCard
             icon={<TrendingUp className="w-5 h-5 text-indigo-600" />}
             label="Total Grievances"
@@ -442,15 +442,15 @@ export function HomePage() {
 
       {/* Continuous Live Scrolling Ticker Ribbon */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        <div className="marquee-wrapper bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-md overflow-hidden flex items-center">
-          <div className="shrink-0 bg-amber-400 text-slate-950 px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 z-10">
+        <div className="marquee-wrapper w-full min-w-0 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-md overflow-hidden flex items-center">
+          <div className="shrink-0 bg-amber-400 text-slate-950 px-3 sm:px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 z-10">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-900 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-900" />
             </span>
             Live Ticker
           </div>
-          <div className="overflow-hidden flex-1 py-2">
+          <div className="overflow-hidden flex-1 min-w-0 py-2">
             <div className="animate-marquee flex items-center gap-6 px-4">
               {tickerItems.map((item, idx) => (
                 <Link
@@ -475,9 +475,9 @@ export function HomePage() {
       {/* 3. Spacious 2-Column Interactive Workflow & Live Gemini AI Playground */}
       <Reveal>
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
-          <div className="grid lg:grid-cols-12 gap-10 items-start">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             {/* Left: Clean Interactive 5-Step Lifecycle with Auto-Play */}
-            <div className="lg:col-span-6 space-y-5">
+            <div className="lg:col-span-6 min-w-0 space-y-5">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">
@@ -558,7 +558,7 @@ export function HomePage() {
             </div>
 
             {/* Right: Live Gemini AI Interactive Sandbox */}
-            <div className="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-7 shadow-sm space-y-4">
+            <div className="lg:col-span-6 min-w-0 bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
@@ -677,13 +677,13 @@ export function HomePage() {
           </div>
 
           {/* Interactive SLA & Routing Estimator */}
-          <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+          <div className="civic-gradient rounded-3xl p-5 sm:p-8 text-white shadow-xl">
             <div className="grid lg:grid-cols-12 gap-6 items-center">
-              <div className="lg:col-span-5 space-y-2">
+              <div className="lg:col-span-5 min-w-0 space-y-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
                   <Compass className="w-4 h-4" /> Instant Routing &amp; SLA Estimator
                 </p>
-                <h3 className="text-2xl font-extrabold">
+                <h3 className="text-xl sm:text-2xl font-extrabold">
                   Check Target Resolution Time Before Submitting
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300">
@@ -691,7 +691,7 @@ export function HomePage() {
                   department and committed SLA window.
                 </p>
               </div>
-              <div className="lg:col-span-7 bg-white text-slate-900 rounded-2xl p-5 shadow-lg space-y-4">
+              <div className="lg:col-span-7 min-w-0 bg-white text-slate-900 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">

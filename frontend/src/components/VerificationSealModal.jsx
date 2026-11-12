@@ -116,8 +116,8 @@ export function VerificationSealModal({ grievance, onClose }) {
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
-          <div className="flex items-center gap-5 bg-slate-50 border border-slate-200 rounded-2xl p-4">
+        <div className="p-5 sm:p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 bg-slate-50 border border-slate-200 rounded-2xl p-4">
             <div className="bg-white p-2 rounded-xl border border-slate-200 shrink-0 shadow-sm text-center">
               {qrDataUrl ? (
                 <img
