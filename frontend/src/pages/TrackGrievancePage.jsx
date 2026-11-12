@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -13,6 +13,7 @@ import {
   Star
 } from 'lucide-react';
 import { api, getApiErrorMessage } from '../api/client.js';
+import { LiveSyncBar } from '../components/LiveSyncBar.jsx';
 import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { StatusStepper } from '../components/StatusStepper.jsx';
 import { Timeline } from '../components/Timeline.jsx';
@@ -23,25 +24,33 @@ export function TrackGrievancePage() {
   const initialRef = searchParams.get('ref') || '';
   const [refId, setRefId] = useState(initialRef);
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [autoSync, setAutoSync] = useState(true);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [error, setError] = useState('');
   const [grievance, setGrievance] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  async function lookupGrievance(targetRef) {
-    const cleaned = targetRef.trim().toUpperCase();
+  const lookupGrievance = useCallback(async (targetRef, silent = false) => {
+    const cleaned = String(targetRef || '').trim().toUpperCase();
     if (!cleaned) return;
-    setLoading(true);
+    if (!silent) {
+      setLoading(true);
+      setGrievance(null);
+    }
+    setSyncing(true);
     setError('');
-    setGrievance(null);
     try {
       const res = await api.get(`/grievances/track/${encodeURIComponent(cleaned)}`);
       setGrievance(res.data.grievance);
+      setLastSyncedAt(new Date());
     } catch (err) {
       setError(getApiErrorMessage(err, 'Grievance not found.'));
     } finally {
       setLoading(false);
+      setSyncing(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     if (initialRef) {
@@ -133,6 +142,13 @@ export function TrackGrievancePage() {
 
       {grievance && (
         <div className="space-y-6">
+          <LiveSyncBar
+            autoSync={autoSync}
+            onToggleAutoSync={() => setAutoSync((prev) => !prev)}
+            onRefresh={(silent) => lookupGrievance(grievance.referenceId, silent)}
+            lastSyncedAt={lastSyncedAt}
+            syncing={syncing}
+          />
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

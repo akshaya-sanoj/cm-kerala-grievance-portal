@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Building2, CheckCircle2, Clock, Eye, FileCheck2, Search } from 'lucide-react';
 import { api, getApiErrorMessage } from '../../api/client.js';
+import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
@@ -20,26 +21,35 @@ export function OfficerDashboardPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [autoSync, setAutoSync] = useState(true);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [error, setError] = useState('');
 
-  async function loadQueue() {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.get('/officer/grievances', {
-        params: { status: statusFilter, search }
-      });
-      setGrievances(res.data.grievances || []);
-      setSummary(res.data.summary || summary);
-    } catch (err) {
-      setError(getApiErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  const loadQueue = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      setSyncing(true);
+      setError('');
+      try {
+        const res = await api.get('/officer/grievances', {
+          params: { status: statusFilter, search }
+        });
+        setGrievances(res.data.grievances || []);
+        setSummary(res.data.summary || summary);
+        setLastSyncedAt(new Date());
+      } catch (err) {
+        setError(getApiErrorMessage(err));
+      } finally {
+        setLoading(false);
+        setSyncing(false);
+      }
+    },
+    [statusFilter, search]
+  );
 
   useEffect(() => {
-    loadQueue();
+    loadQueue(false);
   }, [statusFilter]);
 
   return (
@@ -59,6 +69,14 @@ export function OfficerDashboardPage() {
           </p>
         </div>
       </div>
+
+      <LiveSyncBar
+        autoSync={autoSync}
+        onToggleAutoSync={() => setAutoSync((prev) => !prev)}
+        onRefresh={loadQueue}
+        lastSyncedAt={lastSyncedAt}
+        syncing={syncing}
+      />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <Stat label="Assigned Total" value={summary.total} />

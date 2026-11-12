@@ -21,7 +21,10 @@ Health and DB connectivity check.
 ```
 
 ### `GET /api/public/stats`
-Returns aggregated portal statistics (`totalGrievances`, `resolvedGrievances`, `inProgressGrievances`, `submittedGrievances`, `activeDepartments`, `averageRating`, `feedbackCount`).
+Returns aggregated portal statistics (`totalGrievances`, `resolvedGrievances`, `inProgressGrievances`, `submittedGrievances`, `activeDepartments`, `averageRating`, `feedbackCount`) plus `recentPublicFeed` (latest 5 sanitized public grievance summaries without PII).
+
+### `POST /api/public/ai-preview`
+Rate-limited public AI sandbox endpoint allowing visitors to test Gemini AI triage (`description`, optional `district`) without authentication or database writes.
 
 ### `GET /api/departments`
 Lists all active Kerala government departments (`name`, `code`, `description`, `headDesignation`, `slaDays`, `categories`, `contactEmail`).

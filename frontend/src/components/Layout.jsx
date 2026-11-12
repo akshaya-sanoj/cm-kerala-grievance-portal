@@ -31,12 +31,17 @@ export function Layout({ children }) {
     if (!user) {
       setActivity([]);
       setBellOpen(false);
-      return;
+      return undefined;
     }
-    api
-      .get('/auth/activity')
-      .then((res) => setActivity(res.data?.activity || []))
-      .catch(() => {});
+    const fetchActivity = () => {
+      api
+        .get('/auth/activity')
+        .then((res) => setActivity(res.data?.activity || []))
+        .catch(() => {});
+    };
+    fetchActivity();
+    const timer = setInterval(fetchActivity, 20000);
+    return () => clearInterval(timer);
   }, [user]);
 
   function handleLogout() {

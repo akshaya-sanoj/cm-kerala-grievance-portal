@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -26,7 +26,9 @@ import {
   YAxis
 } from 'recharts';
 import { api, getApiErrorMessage } from '../../api/client.js';
+import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
 const STATUS_COLORS = {
@@ -66,7 +68,11 @@ export function CmoDashboardPage() {
     search: ''
   });
 
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [autoSync, setAutoSync] = useState(true);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
@@ -81,13 +87,15 @@ export function CmoDashboardPage() {
       setMetadata(metaRes.data.metadata || {});
       setDepartments(deptRes.data.departments || []);
       setStats(statsRes.data.stats || null);
+      setLastSyncedAt(new Date());
     } catch (err) {
       setError(getApiErrorMessage(err));
     }
   }
 
-  async function loadGrievances(currentFilters = filters) {
-    setLoading(true);
+  async function loadGrievances(currentFilters = filters, silent = false) {
+    if (!silent) setLoading(true);
+    setSyncing(true);
     setError('');
     try {
       const res = await api.get('/cmo/grievances', {
@@ -103,12 +111,22 @@ export function CmoDashboardPage() {
         }
       });
       setGrievances(res.data.grievances || []);
+      setLastSyncedAt(new Date());
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
+      setSyncing(false);
     }
   }
+
+  const handleLiveRefresh = useCallback(
+    (silent = false) => {
+      loadInitialData();
+      loadGrievances(filters, silent);
+    },
+    [filters]
+  );
 
   async function loadEnquiries() {
     try {
@@ -152,6 +170,7 @@ export function CmoDashboardPage() {
     try {
       const res = await api.post('/cmo/escalate-overdue');
       setNotice(res.data.message);
+      addToast(res.data.message);
       await Promise.all([loadInitialData(), loadGrievances(filters)]);
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -203,6 +222,7 @@ export function CmoDashboardPage() {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+    addToast(`Exported ${grievances.length} grievance(s) to CSV.`);
   }
 
   const overview = stats?.overview || {
@@ -258,6 +278,14 @@ export function CmoDashboardPage() {
           />
         </div>
       </div>
+
+      <LiveSyncBar
+        autoSync={autoSync}
+        onToggleAutoSync={() => setAutoSync((prev) => !prev)}
+        onRefresh={handleLiveRefresh}
+        lastSyncedAt={lastSyncedAt}
+        syncing={syncing}
+      />
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
@@ -653,8 +681,16 @@ export function CmoDashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {stats.byDistrict.map((row) => (
-                    <tr key={row.district}>
-                      <td className="py-2 px-3 font-semibold">{row.district}</td>
+                    <tr
+                      key={row.district}
+                      onClick={() => {
+                        setActiveTab('grievances');
+                        updateFilter('district', row.district);
+                      }}
+                      title="Click to filter queue by this district"
+                      className="cursor-pointer hover:bg-indigo-50/70 transition"
+                    >
+                      <td className="py-2 px-3 font-semibold text-indigo-800">{row.district}</td>
                       <td className="py-2 px-3">{row.total}</td>
                       <td className="py-2 px-3 text-amber-700 font-medium">{row.pending}</td>
                       <td className="py-2 px-3 text-emerald-700 font-medium">{row.resolved}</td>
@@ -679,8 +715,16 @@ export function CmoDashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {stats.byDepartment.map((row) => (
-                    <tr key={row.code}>
-                      <td className="py-2 px-3 font-semibold">
+                    <tr
+                      key={row.code}
+                      onClick={() => {
+                        setActiveTab('grievances');
+                        updateFilter('departmentId', row.departmentId);
+                      }}
+                      title="Click to filter queue by this department"
+                      className="cursor-pointer hover:bg-indigo-50/70 transition"
+                    >
+                      <td className="py-2 px-3 font-semibold text-indigo-800">
                         {row.code} — {row.name}
                       </td>
                       <td className="py-2 px-3">{row.total}</td>

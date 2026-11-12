@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -10,6 +10,7 @@ import {
   Search
 } from 'lucide-react';
 import { api, getApiErrorMessage } from '../../api/client.js';
+import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
@@ -21,26 +22,35 @@ export function CitizenDashboardPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [autoSync, setAutoSync] = useState(true);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [error, setError] = useState('');
 
-  async function fetchGrievances() {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.get('/grievances/my', {
-        params: { status: statusFilter, search }
-      });
-      setGrievances(res.data.grievances || []);
-      setSummary(res.data.summary || { total: 0, pending: 0, resolved: 0 });
-    } catch (err) {
-      setError(getApiErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  const fetchGrievances = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      setSyncing(true);
+      setError('');
+      try {
+        const res = await api.get('/grievances/my', {
+          params: { status: statusFilter, search }
+        });
+        setGrievances(res.data.grievances || []);
+        setSummary(res.data.summary || { total: 0, pending: 0, resolved: 0 });
+        setLastSyncedAt(new Date());
+      } catch (err) {
+        setError(getApiErrorMessage(err));
+      } finally {
+        setLoading(false);
+        setSyncing(false);
+      }
+    },
+    [statusFilter, search]
+  );
 
   useEffect(() => {
-    fetchGrievances();
+    fetchGrievances(false);
   }, [statusFilter]);
 
   function handleSearchSubmit(e) {
@@ -71,6 +81,14 @@ export function CitizenDashboardPage() {
           Submit New Grievance
         </Link>
       </div>
+
+      <LiveSyncBar
+        autoSync={autoSync}
+        onToggleAutoSync={() => setAutoSync((prev) => !prev)}
+        onRefresh={fetchGrievances}
+        lastSyncedAt={lastSyncedAt}
+        syncing={syncing}
+      />
 
       {/* Summary Counts */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

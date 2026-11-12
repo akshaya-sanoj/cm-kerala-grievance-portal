@@ -637,4 +637,47 @@ describe('API Routes, Security, RBAC & Grievance Workflow', () => {
       expect.objectContaining({ isInternal: false })
     );
   });
+
+  it('serves rate-limited public AI preview and recent public feed without PII', async () => {
+    vi.spyOn(Department, 'find').mockReturnValue({
+      select: () => ({
+        lean: async () => [{ _id: ids.deptPwd, name: 'Public Works Department (PWD)', code: 'PWD' }]
+      })
+    });
+
+    const previewRes = await request(app).post('/api/public/ai-preview').send({
+      district: 'Ernakulam',
+      description: 'Severe culvert collapse and potholes causing daily traffic accidents.'
+    });
+    expect(previewRes.status).toBe(200);
+    expect(previewRes.body.preview.suggestedDepartmentCode).toBe('PWD');
+    expect(previewRes.body.preview.summary).toBeTruthy();
+
+    vi.spyOn(Grievance, 'aggregate').mockResolvedValue([{ _id: 'Submitted', count: 2 }]);
+    vi.spyOn(Department, 'countDocuments').mockResolvedValue(8);
+    vi.spyOn(CitizenFeedback, 'aggregate').mockResolvedValue([]);
+    vi.spyOn(Grievance, 'find').mockReturnValue({
+      select: () => ({
+        sort: () => ({
+          limit: () => ({
+            lean: async () => [
+              {
+                referenceId: 'KL-CMO-2026-100101',
+                district: 'Ernakulam',
+                category: 'Public Infrastructure',
+                subject: 'Road cave-in',
+                status: 'In Progress',
+                priority: 'High'
+              }
+            ]
+          })
+        })
+      })
+    });
+
+    const statsRes = await request(app).get('/api/public/stats');
+    expect(statsRes.status).toBe(200);
+    expect(statsRes.body.recentPublicFeed).toHaveLength(1);
+    expect(statsRes.body.recentPublicFeed[0].citizenId).toBeUndefined();
+  });
 });

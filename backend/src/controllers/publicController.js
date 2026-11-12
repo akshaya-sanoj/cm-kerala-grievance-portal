@@ -4,6 +4,7 @@ import { CitizenFeedback } from '../models/CitizenFeedback.js';
 import { ContactEnquiry } from '../models/ContactEnquiry.js';
 import { Department } from '../models/Department.js';
 import { Grievance } from '../models/Grievance.js';
+import { analyzeGrievance } from '../services/aiService.js';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_PRIORITIES,
@@ -16,6 +17,11 @@ const contactSchema = z.object({
   email: z.string().trim().email('Valid email is required').toLowerCase(),
   subject: z.string().trim().min(3, 'Subject is required').max(200),
   message: z.string().trim().min(10, 'Message must be at least 10 characters').max(3000)
+});
+
+const publicAiPreviewSchema = z.object({
+  description: z.string().trim().min(15, 'Enter at least 15 characters to test AI triage').max(800),
+  district: z.string().trim().optional().default('')
 });
 
 export function getHealth(_req, res) {
@@ -31,12 +37,17 @@ export function getHealth(_req, res) {
 
 export async function getPublicStats(_req, res, next) {
   try {
-    const [statusCounts, departmentCount, feedbackAgg] = await Promise.all([
+    const [statusCounts, departmentCount, feedbackAgg, recentPublicFeed] = await Promise.all([
       Grievance.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       Department.countDocuments({ isActive: true }),
       CitizenFeedback.aggregate([
         { $group: { _id: null, avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
-      ])
+      ]),
+      Grievance.find({})
+        .select('referenceId district category subject status priority updatedAt')
+        .sort({ updatedAt: -1 })
+        .limit(5)
+        .lean()
     ]);
 
     const countsByStatus = Object.fromEntries(
@@ -62,7 +73,8 @@ export async function getPublicStats(_req, res, next) {
           ? Number(feedbackAgg[0].avgRating.toFixed(1))
           : 4.5,
         feedbackCount: feedbackAgg[0]?.count || 0
-      }
+      },
+      recentPublicFeed
     });
   } catch (error) {
     return next(error);
@@ -106,6 +118,35 @@ export async function submitContactEnquiry(req, res, next) {
         email: enquiry.email,
         subject: enquiry.subject,
         createdAt: enquiry.createdAt
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function runPublicAiPreview(req, res, next) {
+  try {
+    const data = publicAiPreviewSchema.parse(req.body);
+    const departments = await Department.find({ isActive: true }).select('name code').lean();
+    const analysis = await analyzeGrievance({
+      description: data.description,
+      district: data.district,
+      departments,
+      existingGrievances: []
+    });
+
+    return res.json({
+      success: true,
+      preview: {
+        suggestedDepartmentCode: analysis.suggestedDepartmentCode,
+        suggestedDepartmentName: analysis.suggestedDepartmentName,
+        suggestedCategory: analysis.suggestedCategory,
+        recommendedPriority: analysis.recommendedPriority,
+        summary: analysis.summary,
+        source: analysis.source,
+        model: analysis.model,
+        isFallback: analysis.isFallback
       }
     });
   } catch (error) {

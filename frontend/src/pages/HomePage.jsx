@@ -12,14 +12,15 @@ import {
   Sparkles,
   TrendingUp
 } from 'lucide-react';
-import { api } from '../api/client.js';
+import { api, getApiErrorMessage } from '../api/client.js';
+import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const WORKFLOW_STEPS = [
   {
     step: '01',
     title: 'Citizen Submits Grievance',
-    desc: 'Select Kerala district, category, upload supporting photo/PDF, and optionally preview Gemini AI triage suggestions.'
+    desc: 'Select Kerala district, category, upload supporting photo/PDF, and preview Gemini AI triage suggestions.'
   },
   {
     step: '02',
@@ -46,33 +47,21 @@ const WORKFLOW_STEPS = [
 const AI_PRESETS = [
   {
     id: 'road',
-    label: 'Road Cave-in (Ernakulam)',
+    label: 'Road Cave-in',
     district: 'Ernakulam',
-    category: 'Public Infrastructure',
-    dept: 'Public Works Department (PWD)',
-    priority: 'High',
-    sla: '3 Days SLA',
-    text: 'Severe culvert collapse and deep potholes near Kakkanad Infopark junction causing commuter accidents.'
+    text: 'Severe culvert collapse and deep potholes near Kakkanad Infopark junction causing commuter accidents for two weeks.'
   },
   {
     id: 'power',
-    label: 'Transformer Sparking (Thrissur)',
+    label: 'Transformer Sparking',
     district: 'Thrissur',
-    category: 'Electricity & Power',
-    dept: 'Kerala State Electricity Board (KSEB)',
-    priority: 'High',
-    sla: '3 Days SLA',
-    text: 'Leaning 11kV electric pole and sparking fuse box right beside Ollur school bus stop.'
+    text: 'Leaning 11kV electric pole and sparking fuse box right beside Ollur school bus stop creating electrocution danger.'
   },
   {
     id: 'water',
-    label: 'Pipe Contamination (TVM)',
+    label: 'Tap Water Contamination',
     district: 'Thiruvananthapuram',
-    category: 'Water Supply & Drainage',
-    dept: 'Kerala Water Authority (KWA)',
-    priority: 'High',
-    sla: '3 Days SLA',
-    text: 'Muddy tap water with foul odor in Kazhakkoottam Ward 4 after nearby road excavation.'
+    text: 'Muddy tap water with foul odor in Kazhakkoottam Ward 4 after nearby road excavation ruptured a pipe.'
   }
 ];
 
@@ -81,8 +70,15 @@ export function HomePage() {
   const navigate = useNavigate();
   const [refInput, setRefInput] = useState('');
   const [activeStep, setActiveStep] = useState(0);
-  const [presetIdx, setPresetIdx] = useState(0);
 
+  // Live public AI playground state
+  const [aiText, setAiText] = useState(AI_PRESETS[0].text);
+  const [aiDistrict, setAiDistrict] = useState(AI_PRESETS[0].district);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiPreview, setAiPreview] = useState(null);
+  const [aiError, setAiError] = useState('');
+
+  // Live stats & recent activity feed
   const [stats, setStats] = useState({
     totalGrievances: 8,
     resolvedGrievances: 2,
@@ -90,15 +86,24 @@ export function HomePage() {
     activeDepartments: 8,
     averageRating: 4.8
   });
+  const [recentFeed, setRecentFeed] = useState([]);
   const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
-    api
-      .get('/public/stats')
-      .then((res) => {
-        if (res.data?.stats) setStats(res.data.stats);
-      })
-      .catch(() => {});
+    const loadStats = () => {
+      api
+        .get('/public/stats')
+        .then((res) => {
+          if (res.data?.stats) setStats(res.data.stats);
+          if (Array.isArray(res.data?.recentPublicFeed)) {
+            setRecentFeed(res.data.recentPublicFeed);
+          }
+        })
+        .catch(() => {});
+    };
+
+    loadStats();
+    const timer = setInterval(loadStats, 20000);
 
     api
       .get('/departments')
@@ -108,6 +113,8 @@ export function HomePage() {
         }
       })
       .catch(() => {});
+
+    return () => clearInterval(timer);
   }, []);
 
   function handleQuickTrack(e) {
@@ -117,12 +124,30 @@ export function HomePage() {
     navigate(`/track?ref=${encodeURIComponent(cleaned)}`);
   }
 
+  async function handleLiveAiPreview(customText = aiText, customDistrict = aiDistrict) {
+    if (customText.trim().length < 15) {
+      setAiError('Please enter at least 15 characters to run live AI triage.');
+      return;
+    }
+    setAiError('');
+    setAiLoading(true);
+    try {
+      const res = await api.post('/public/ai-preview', {
+        description: customText,
+        district: customDistrict
+      });
+      setAiPreview(res.data.preview);
+    } catch (err) {
+      setAiError(getApiErrorMessage(err, 'Unable to run AI preview right now.'));
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   const resolutionRate =
     stats.totalGrievances > 0
       ? Math.round((stats.resolvedGrievances / stats.totalGrievances) * 100)
       : 0;
-
-  const currentPreset = AI_PRESETS[presetIdx];
 
   return (
     <div>
@@ -132,8 +157,11 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-12 gap-12 items-center relative z-10">
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-amber-200 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              14 Kerala Districts • Gemini AI Triage • Full SLA Traceability
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              Live State Portal • 14 Kerala Districts • Gemini AI Triage
             </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.12]">
               Direct, Transparent{' '}
@@ -175,8 +203,9 @@ export function HomePage() {
             <div className="bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/10">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h2 className="text-lg font-bold text-slate-900">Track Grievance Status</h2>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  Public Lookup
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Live Lookup
                 </span>
               </div>
               <p className="text-xs text-slate-500 mb-5">
@@ -225,7 +254,7 @@ export function HomePage() {
             icon={<TrendingUp className="w-5 h-5 text-indigo-600" />}
             label="Total Grievances"
             value={stats.totalGrievances}
-            sub="Across 14 Kerala districts"
+            sub="Synced live from MongoDB"
           />
           <StatCard
             icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
@@ -248,8 +277,8 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 3. Spacious 2-Column Interactive Workflow & AI Preview */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      {/* 3. Spacious 2-Column Interactive Workflow & Live Gemini AI Playground */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12">
         <div className="grid lg:grid-cols-12 gap-10 items-start">
           {/* Left: Clean Interactive 5-Step Lifecycle */}
           <div className="lg:col-span-6 space-y-5">
@@ -299,77 +328,166 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* Right: Interactive AI Triage & District Pre-fill Preview */}
-          <div className="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-7 shadow-sm space-y-5">
-            <div className="flex items-center justify-between gap-2">
+          {/* Right: Live Gemini AI Interactive Sandbox */}
+          <div className="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-7 shadow-sm space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5" /> Interactive AI Preview
+                  <Cpu className="w-3.5 h-3.5" /> Interactive Gemini AI Sandbox
                 </p>
                 <h3 className="text-xl font-extrabold text-slate-900 mt-1">
-                  See Gemini AI Routing in Action
+                  Test Live AI Triage Now
                 </h3>
               </div>
+              {aiPreview && (
+                <span
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+                    aiPreview.isFallback
+                      ? 'bg-amber-50 text-amber-800 border-amber-300'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  }`}
+                >
+                  {aiPreview.isFallback
+                    ? `Fallback (${aiPreview.model})`
+                    : `Live Gemini (${aiPreview.model})`}
+                </span>
+              )}
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {AI_PRESETS.map((p, idx) => (
+            <div className="flex flex-wrap gap-1.5">
+              {AI_PRESETS.map((p) => (
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => setPresetIdx(idx)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
-                    presetIdx === idx
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50'
-                  }`}
+                  onClick={() => {
+                    setAiText(p.text);
+                    setAiDistrict(p.district);
+                    handleLiveAiPreview(p.text, p.district);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-800 border-slate-200 transition"
                 >
                   {p.label}
                 </button>
               ))}
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-700 leading-relaxed">
-              &ldquo;{currentPreset.text}&rdquo;
-            </div>
+            <textarea
+              rows={3}
+              value={aiText}
+              onChange={(e) => setAiText(e.target.value)}
+              placeholder="Type any Kerala civic complaint to test live Gemini AI classification..."
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
+            />
 
-            <div className="grid sm:grid-cols-2 gap-3 text-xs">
-              <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3.5">
-                <span className="text-[10px] font-bold uppercase text-indigo-700 block mb-0.5">
-                  Suggested Department
-                </span>
-                <span className="font-bold text-slate-900 text-sm">{currentPreset.dept}</span>
-              </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5">
-                <span className="text-[10px] font-bold uppercase text-amber-800 block mb-0.5">
-                  Recommended Priority
-                </span>
-                <span className="font-bold text-slate-900 text-sm">
-                  {currentPreset.priority} • {currentPreset.sla}
-                </span>
-              </div>
-            </div>
+            {aiError && (
+              <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                {aiError}
+              </p>
+            )}
 
-            <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="text-xs text-slate-500 inline-flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                District: <strong>{currentPreset.district}</strong>
+                District: <strong>{aiDistrict}</strong>
               </span>
-              <Link
-                to={
-                  user?.role === 'citizen'
-                    ? `/citizen/submit?district=${encodeURIComponent(
-                        currentPreset.district
-                      )}&category=${encodeURIComponent(currentPreset.category)}`
-                    : '/login'
-                }
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition"
+              <button
+                type="button"
+                disabled={aiLoading}
+                onClick={() => handleLiveAiPreview()}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-amber-300 text-xs font-bold transition"
               >
-                Try Live in Portal <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                <Sparkles className="w-3.5 h-3.5" />
+                {aiLoading ? 'Analyzing with Gemini...' : 'Run Live AI Preview'}
+              </button>
             </div>
+
+            {aiPreview && (
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <div className="grid sm:grid-cols-3 gap-2.5 text-xs">
+                  <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3">
+                    <span className="text-[10px] font-bold uppercase text-indigo-700 block">
+                      Department
+                    </span>
+                    <span className="font-bold text-slate-900">
+                      {aiPreview.suggestedDepartmentName}
+                    </span>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <span className="text-[10px] font-bold uppercase text-slate-500 block">
+                      Category
+                    </span>
+                    <span className="font-bold text-slate-900">{aiPreview.suggestedCategory}</span>
+                  </div>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                    <span className="text-[10px] font-bold uppercase text-amber-800 block">
+                      Priority
+                    </span>
+                    <div className="mt-1">
+                      <PriorityBadge priority={aiPreview.recommendedPriority} />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-700 bg-slate-50 rounded-xl p-3 border border-slate-200">
+                  <strong>CMO Summary:</strong> {aiPreview.summary}
+                </p>
+                <div className="flex justify-end">
+                  <Link
+                    to={
+                      user?.role === 'citizen'
+                        ? `/citizen/submit?district=${encodeURIComponent(
+                            aiDistrict
+                          )}&category=${encodeURIComponent(aiPreview.suggestedCategory)}`
+                        : '/login'
+                    }
+                    className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:text-indigo-900"
+                  >
+                    Submit this grievance in portal <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Live Public Redressal Feed */}
+        {recentFeed.length > 0 && (
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                </span>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Live Public Grievance Activity
+                </h3>
+              </div>
+              <Link to="/track" className="text-xs font-semibold text-indigo-700 hover:underline">
+                Track any ID →
+              </Link>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {recentFeed.map((item) => (
+                <Link
+                  key={item.referenceId}
+                  to={`/track?ref=${encodeURIComponent(item.referenceId)}`}
+                  className="rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-indigo-50/50 hover:border-indigo-300 p-3.5 transition block"
+                >
+                  <div className="flex items-center justify-between gap-1 mb-1.5">
+                    <span className="font-mono text-[11px] font-bold text-indigo-700 truncate">
+                      {item.referenceId}
+                    </span>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-900 line-clamp-1">
+                    {item.subject}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1">{item.district}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 4. Spacious Featured Departments */}
@@ -388,7 +506,7 @@ export function HomePage() {
               to="/departments"
               className="text-sm font-semibold text-indigo-700 hover:text-indigo-900 inline-flex items-center gap-1"
             >
-              View all departments &amp; SLAs <ArrowRight className="w-4 h-4" />
+              View all departments &amp; 14 districts <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
