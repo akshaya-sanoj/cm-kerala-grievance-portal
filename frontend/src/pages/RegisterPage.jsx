@@ -69,7 +69,7 @@ export function RegisterPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="e.g., Arjun Krishnan"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
             />
           </div>
 
@@ -83,7 +83,7 @@ export function RegisterPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="citizen@example.com"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
             />
           </div>
 
@@ -98,7 +98,7 @@ export function RegisterPage() {
                 value={form.mobileNumber}
                 onChange={(e) => setForm({ ...form, mobileNumber: e.target.value })}
                 placeholder="9847000000"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
               />
             </div>
 
@@ -109,7 +109,7 @@ export function RegisterPage() {
               <select
                 value={form.district}
                 onChange={(e) => setForm({ ...form, district: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-civic-600 outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
               >
                 <option value="">Select District</option>
                 {districts.map((d) => (
@@ -130,14 +130,14 @@ export function RegisterPage() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Minimum 6 characters"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-civic-700 hover:bg-civic-800 disabled:opacity-60 text-white font-semibold text-sm transition"
+            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold text-sm transition"
           >
             {loading ? 'Creating Account...' : 'Create Citizen Account'}
           </button>
@@ -145,7 +145,7 @@ export function RegisterPage() {
 
         <p className="mt-5 text-center text-xs text-slate-600">
           Already registered?{' '}
-          <Link to="/login" className="font-bold text-civic-700 hover:underline">
+          <Link to="/login" className="font-bold text-indigo-600 hover:underline">
             Sign In here
           </Link>
         </p>

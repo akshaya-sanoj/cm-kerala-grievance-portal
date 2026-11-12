@@ -116,7 +116,7 @@ export function OfficerGrievanceDetailPage() {
       <div className="no-print flex flex-wrap items-center justify-between gap-2">
         <Link
           to="/officer/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-civic-700 hover:text-civic-900"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-900"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Officer Queue
         </Link>
@@ -143,7 +143,7 @@ export function OfficerGrievanceDetailPage() {
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-xs font-bold text-civic-700">{grievance.referenceId}</p>
+            <p className="font-mono text-xs font-bold text-indigo-600">{grievance.referenceId}</p>
             <h1 className="text-2xl font-extrabold text-slate-900 mt-1">{grievance.subject}</h1>
             <p className="text-xs text-slate-500 mt-1">
               Citizen: {grievance.citizenId?.name} • {grievance.district} • {grievance.category}
@@ -237,7 +237,7 @@ export function OfficerGrievanceDetailPage() {
                 Upload ATR Document / Photo (Optional)
               </label>
               <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-slate-300 cursor-pointer text-xs text-slate-600 bg-slate-50">
-                <Paperclip className="w-4 h-4 text-civic-700 shrink-0" />
+                <Paperclip className="w-4 h-4 text-indigo-600 shrink-0" />
                 <span className="truncate">
                   {atrFile ? atrFile.name : 'Choose PDF, DOC, JPG, or PNG...'}
                 </span>
@@ -252,7 +252,7 @@ export function OfficerGrievanceDetailPage() {
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-civic-700 hover:bg-civic-800 text-white text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
             >
               <Send className="w-3.5 h-3.5" /> Submit ATR to CMO
             </button>

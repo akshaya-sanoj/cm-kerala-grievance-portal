@@ -52,7 +52,7 @@ export function AttachmentList({ attachments = [] }) {
             key={att._id}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-800"
           >
-            <Paperclip className="w-3.5 h-3.5 text-civic-700 shrink-0" />
+            <Paperclip className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
             <span className="max-w-[200px] truncate">{att.originalName}</span>
             <span className="text-slate-400">
               ({att.attachmentType === 'action_taken_report' ? 'ATR' : 'Citizen'} •{' '}
@@ -64,7 +64,7 @@ export function AttachmentList({ attachments = [] }) {
                 disabled={previewLoading}
                 onClick={() => handlePreview(att)}
                 title="Preview attachment"
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-slate-200 hover:border-civic-400 text-civic-700 font-semibold"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-slate-200 hover:border-indigo-400 text-indigo-600 font-semibold"
               >
                 <Eye className="w-3 h-3" /> Preview
               </button>

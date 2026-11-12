@@ -64,7 +64,7 @@ export function OfficerDashboardPage() {
         <Stat label="Assigned Total" value={summary.total} />
         <Stat label="Awaiting Investigation" value={summary.underReview} cls="text-amber-700" />
         <Stat label="In Progress" value={summary.inProgress} cls="text-sky-700" />
-        <Stat label="ATR Submitted" value={summary.atrSubmitted} cls="text-civic-700" />
+        <Stat label="ATR Submitted" value={summary.atrSubmitted} cls="text-indigo-600" />
         <Stat label="Overdue" value={summary.overdue} cls="text-rose-700" />
       </div>
 
@@ -77,7 +77,7 @@ export function OfficerDashboardPage() {
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
                 statusFilter === st
-                  ? 'bg-civic-700 text-white'
+                  ? 'bg-indigo-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -98,7 +98,7 @@ export function OfficerDashboardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search Ref ID or subject..."
-            className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-civic-600"
+            className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-indigo-600"
           />
           <button
             type="submit"
@@ -141,7 +141,7 @@ export function OfficerDashboardPage() {
               <tbody className="divide-y divide-slate-100">
                 {grievances.map((g) => (
                   <tr key={g._id} className="hover:bg-slate-50/70">
-                    <td className="py-3 px-4 font-mono text-xs font-bold text-civic-800 whitespace-nowrap">
+                    <td className="py-3 px-4 font-mono text-xs font-bold text-indigo-700 whitespace-nowrap">
                       {g.referenceId}
                       {g.isEscalated && (
                         <span className="block text-[10px] font-sans text-rose-700">
@@ -180,7 +180,7 @@ export function OfficerDashboardPage() {
                     <td className="py-3 px-4 text-right">
                       <Link
                         to={`/officer/grievances/${g._id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-xs font-semibold"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
                       >
                         <Eye className="w-3.5 h-3.5" /> Action
                       </Link>

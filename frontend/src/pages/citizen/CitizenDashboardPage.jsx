@@ -77,7 +77,7 @@ export function CitizenDashboardPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
             <span>Total Submitted</span>
-            <FolderOpen className="w-4 h-4 text-civic-700" />
+            <FolderOpen className="w-4 h-4 text-indigo-600" />
           </div>
           <p className="text-3xl font-extrabold text-slate-900">{summary.total}</p>
         </div>
@@ -107,7 +107,7 @@ export function CitizenDashboardPage() {
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 statusFilter === st
-                  ? 'bg-civic-700 text-white'
+                  ? 'bg-indigo-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -122,7 +122,7 @@ export function CitizenDashboardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search ID or subject..."
-            className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-civic-600 outline-none"
+            className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-600 outline-none"
           />
           <button
             type="submit"
@@ -148,7 +148,7 @@ export function CitizenDashboardPage() {
             <p className="text-slate-600 text-sm">No grievances found for this filter.</p>
             <Link
               to="/citizen/submit"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-civic-700 text-white text-xs font-semibold"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold"
             >
               <FilePlus2 className="w-4 h-4" /> Submit Your First Grievance
             </Link>
@@ -170,7 +170,7 @@ export function CitizenDashboardPage() {
               <tbody className="divide-y divide-slate-100">
                 {grievances.map((g) => (
                   <tr key={g._id} className="hover:bg-slate-50/70">
-                    <td className="py-3.5 px-4 font-mono text-xs font-bold text-civic-800 whitespace-nowrap">
+                    <td className="py-3.5 px-4 font-mono text-xs font-bold text-indigo-700 whitespace-nowrap">
                       {g.referenceId}
                       {g.isEscalated && (
                         <span className="ml-1.5 inline-flex items-center text-[10px] text-rose-700 font-sans">
@@ -199,7 +199,7 @@ export function CitizenDashboardPage() {
                     <td className="py-3.5 px-4 text-right">
                       <Link
                         to={`/citizen/grievances/${g._id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-civic-50 hover:bg-civic-100 text-civic-800 text-xs font-semibold transition"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition"
                       >
                         <Eye className="w-3.5 h-3.5" /> Details
                       </Link>

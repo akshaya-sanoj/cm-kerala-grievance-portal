@@ -160,14 +160,14 @@ export function SubmitGrievancePage() {
             unique Reference ID below to track status updates.
           </p>
 
-          <div className="bg-civic-50 border border-civic-200 rounded-xl p-4 inline-flex items-center gap-3">
-            <span className="font-mono text-xl font-extrabold text-civic-900">
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 inline-flex items-center gap-3">
+            <span className="font-mono text-xl font-extrabold text-indigo-900">
               {submittedResult.referenceId}
             </span>
             <button
               type="button"
               onClick={() => navigator.clipboard?.writeText(submittedResult.referenceId)}
-              className="p-2 rounded-lg bg-white border border-civic-200 hover:bg-civic-100 text-civic-800"
+              className="p-2 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-indigo-700"
               title="Copy Reference ID"
             >
               <Copy className="w-4 h-4" />
@@ -177,7 +177,7 @@ export function SubmitGrievancePage() {
           <div className="no-print pt-4 flex flex-wrap justify-center gap-3">
             <Link
               to={`/citizen/grievances/${submittedResult.grievance._id}`}
-              className="px-5 py-2.5 rounded-xl bg-civic-700 hover:bg-civic-800 text-white text-sm font-semibold"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold"
             >
               View Grievance Record
             </Link>
@@ -204,7 +204,7 @@ export function SubmitGrievancePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-civic-700">
+        <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
           Citizen Grievance Intake
         </p>
         <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Submit a New Grievance</h1>
@@ -231,7 +231,7 @@ export function SubmitGrievancePage() {
               required
               value={form.district}
               onChange={(e) => setForm({ ...form, district: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-civic-600 outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
             >
               <option value="">Select Kerala District</option>
               {metadata.districts.map((d) => (
@@ -258,7 +258,7 @@ export function SubmitGrievancePage() {
                 setForm({ ...form, category: e.target.value });
                 setCitizenAcceptedAi(false);
               }}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-civic-600 outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
             >
               <option value="">Select Category</option>
               {metadata.categories.map((c) => (
@@ -279,7 +279,7 @@ export function SubmitGrievancePage() {
             value={form.subject}
             onChange={(e) => setForm({ ...form, subject: e.target.value })}
             placeholder="Concise summary of the issue (e.g., Broken culvert on NH approach road)"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
           />
         </div>
 
@@ -292,7 +292,7 @@ export function SubmitGrievancePage() {
               type="button"
               onClick={handleRunAiAnalysis}
               disabled={aiLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white text-xs font-semibold transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-amber-300 text-xs font-semibold transition"
             >
               <Sparkles className="w-3.5 h-3.5" />
               {aiLoading ? 'Analyzing with AI...' : 'Analyze with AI Assistant'}
@@ -305,7 +305,7 @@ export function SubmitGrievancePage() {
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Describe exact location, duration of the issue, impact on citizens, and requested action..."
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
           />
         </div>
 
@@ -334,7 +334,7 @@ export function SubmitGrievancePage() {
                 setForm({ ...form, priority: e.target.value });
                 setCitizenAcceptedAi(false);
               }}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-civic-600 outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
             >
               {metadata.priorities.map((p) => (
                 <option key={p} value={p}>
@@ -348,8 +348,8 @@ export function SubmitGrievancePage() {
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Supporting Image / Document (Optional, max 5 MB)
             </label>
-            <label className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-dashed border-slate-300 hover:border-civic-500 cursor-pointer text-xs text-slate-600 bg-slate-50">
-              <Paperclip className="w-4 h-4 text-civic-700 shrink-0" />
+            <label className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-dashed border-slate-300 hover:border-indigo-500 cursor-pointer text-xs text-slate-600 bg-slate-50">
+              <Paperclip className="w-4 h-4 text-indigo-600 shrink-0" />
               <span className="truncate">{file ? file.name : 'Choose JPG, PNG, PDF, DOC...'}</span>
               <input
                 type="file"
@@ -368,7 +368,7 @@ export function SubmitGrievancePage() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-civic-700 hover:bg-civic-800 disabled:opacity-60 text-white font-semibold text-sm shadow transition"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold text-sm shadow transition"
           >
             <FilePlus2 className="w-4 h-4" />
             {submitting ? 'Submitting...' : 'Submit Grievance'}

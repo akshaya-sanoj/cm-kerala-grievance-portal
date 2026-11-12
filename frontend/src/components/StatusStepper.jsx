@@ -39,7 +39,7 @@ export function StatusStepper({ status }) {
               key={step.key}
               className={`rounded-lg p-3 border transition ${
                 active
-                  ? 'bg-white border-civic-600 ring-2 ring-civic-100 shadow-sm'
+                  ? 'bg-white border-indigo-600 ring-2 ring-indigo-100 shadow-sm'
                   : completed
                   ? 'bg-emerald-50/70 border-emerald-300'
                   : 'bg-white/60 border-slate-200 opacity-70'
@@ -51,7 +51,7 @@ export function StatusStepper({ status }) {
                     completed
                       ? 'bg-emerald-600 text-white'
                       : active
-                      ? 'bg-civic-700 text-white'
+                      ? 'bg-indigo-600 text-white'
                       : 'bg-slate-200 text-slate-600'
                   }`}
                 >

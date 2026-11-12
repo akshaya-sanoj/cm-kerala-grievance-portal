@@ -102,7 +102,7 @@ export function CitizenGrievanceDetailPage() {
       <div className="no-print flex flex-wrap items-center justify-between gap-2">
         <Link
           to="/citizen/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-civic-700 hover:text-civic-900"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-900"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Citizen Dashboard
         </Link>
@@ -129,7 +129,7 @@ export function CitizenGrievanceDetailPage() {
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-xs font-bold text-civic-700">{grievance.referenceId}</p>
+            <p className="font-mono text-xs font-bold text-indigo-600">{grievance.referenceId}</p>
             <h1 className="text-2xl font-extrabold text-slate-900 mt-1">{grievance.subject}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -254,7 +254,7 @@ export function CitizenGrievanceDetailPage() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="px-4 py-2 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
                 >
                   Submit Feedback
                 </button>

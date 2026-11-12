@@ -30,7 +30,7 @@ export function ContactPage() {
       <div className="grid md:grid-cols-12 gap-8">
         <div className="md:col-span-5 space-y-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-civic-700">
+            <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
               Helpdesk & General Enquiries
             </p>
             <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Contact Us</h1>
@@ -42,7 +42,7 @@ export function ContactPage() {
 
           <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 text-sm">
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-civic-700 shrink-0 mt-0.5" />
+              <MapPin className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-slate-900">Prototype Grievance Cell (Demo)</p>
                 <p className="text-slate-600 text-xs">
@@ -51,14 +51,14 @@ export function ContactPage() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Mail className="w-5 h-5 text-civic-700 shrink-0 mt-0.5" />
+              <Mail className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-slate-900">Helpdesk Email (Sample)</p>
                 <p className="text-slate-600 text-xs">helpdesk@demo.kerala-portal.example</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Phone className="w-5 h-5 text-civic-700 shrink-0 mt-0.5" />
+              <Phone className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-slate-900">Toll-Free Demo Helpline</p>
                 <p className="text-slate-600 text-xs">1800-000-0000 (Prototype Sample Only)</p>
@@ -96,7 +96,7 @@ export function ContactPage() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Your name"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
                   />
                 </div>
                 <div>
@@ -109,7 +109,7 @@ export function ContactPage() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="you@example.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
                   />
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function ContactPage() {
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   placeholder="Brief subject of your enquiry"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
                 />
               </div>
 
@@ -134,14 +134,14 @@ export function ContactPage() {
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder="Write your question or feedback..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-civic-700 hover:bg-civic-800 disabled:opacity-60 text-white font-semibold text-sm transition"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold text-sm transition"
               >
                 <Send className="w-4 h-4" />
                 {submitting ? 'Submitting...' : 'Submit Enquiry'}

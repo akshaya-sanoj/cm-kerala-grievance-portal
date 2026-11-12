@@ -4,7 +4,7 @@ export function AboutPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       <div className="space-y-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-civic-700">About the Initiative</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">About the Initiative</p>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
           Transparent Citizen-First Governance Prototype
         </h1>
@@ -18,7 +18,7 @@ export function AboutPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-civic-50 text-civic-700 flex items-center justify-center mb-4">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
             <Eye className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Vision</h2>
@@ -52,7 +52,7 @@ export function AboutPage() {
             'Post-resolution citizen feedback and guaranteed right to reopen unresolved matters'
           ].map((point) => (
             <li key={point} className="flex items-start gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-civic-700 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
               <span>{point}</span>
             </li>
           ))}

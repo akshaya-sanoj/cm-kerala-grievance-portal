@@ -265,7 +265,7 @@ export function CmoDashboardPage() {
           label="Total Grievances"
           value={overview.total}
           sub={`${overview.atrPendingReview} ATR ready for review`}
-          icon={<FolderOpen className="w-4 h-4 text-civic-700" />}
+          icon={<FolderOpen className="w-4 h-4 text-indigo-600" />}
         />
         <KpiCard
           label="Pending Action"
@@ -379,7 +379,7 @@ export function CmoDashboardPage() {
                     type="checkbox"
                     checked={filters.overdueOnly}
                     onChange={(e) => updateFilter('overdueOnly', e.target.checked)}
-                    className="rounded border-slate-300 text-civic-700"
+                    className="rounded border-slate-300 text-indigo-600"
                   />
                   Overdue Only
                 </label>
@@ -388,7 +388,7 @@ export function CmoDashboardPage() {
                     type="checkbox"
                     checked={filters.atrPendingOnly}
                     onChange={(e) => updateFilter('atrPendingOnly', e.target.checked)}
-                    className="rounded border-slate-300 text-civic-700"
+                    className="rounded border-slate-300 text-indigo-600"
                   />
                   ATR Pending CMO Review
                 </label>
@@ -424,7 +424,7 @@ export function CmoDashboardPage() {
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                   placeholder="Search reference ID or subject..."
-                  className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-civic-600"
+                  className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-indigo-600"
                 />
                 <button
                   type="submit"
@@ -462,7 +462,7 @@ export function CmoDashboardPage() {
                     {grievances.map((g) => (
                       <tr key={g._id} className="hover:bg-slate-50/70">
                         <td className="py-3 px-4 whitespace-nowrap">
-                          <span className="font-mono text-xs font-bold text-civic-800 block">
+                          <span className="font-mono text-xs font-bold text-indigo-700 block">
                             {g.referenceId}
                           </span>
                           {g.isEscalated && (
@@ -508,7 +508,7 @@ export function CmoDashboardPage() {
                         <td className="py-3 px-4 text-right">
                           <Link
                             to={`/cmo/grievances/${g._id}`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-xs font-semibold"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
                           >
                             <Eye className="w-3.5 h-3.5" /> Open
                           </Link>

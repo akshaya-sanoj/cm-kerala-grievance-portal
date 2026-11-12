@@ -67,7 +67,7 @@ export function HowItWorksPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       <div className="space-y-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-civic-700">
+        <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
           Mandatory Grievance Lifecycle
         </p>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">How It Works</h1>
@@ -86,7 +86,7 @@ export function HowItWorksPage() {
               key={step.title}
               className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row gap-4 items-start"
             >
-              <div className="w-11 h-11 rounded-xl bg-civic-50 text-civic-700 border border-civic-200 flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center shrink-0">
                 <Icon className="w-5 h-5" />
               </div>
               <div className="flex-1">
@@ -103,14 +103,14 @@ export function HowItWorksPage() {
         })}
       </div>
 
-      <div className="bg-civic-900 text-white rounded-2xl p-6 sm:p-8 flex flex-wrap items-center justify-between gap-4">
+      <div className="civic-gradient text-white rounded-2xl p-6 sm:p-8 flex flex-wrap items-center justify-between gap-4 shadow-lg">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold uppercase">
+          <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase">
             <CheckCircle2 className="w-4 h-4" />
             Ready to test the workflow?
           </div>
           <h3 className="text-xl font-bold">Try Citizen Submission or CMO Review</h3>
-          <p className="text-sm text-emerald-100">
+          <p className="text-sm text-slate-300">
             Use the quick demo accounts on the Sign In page to walk through all three roles.
           </p>
         </div>

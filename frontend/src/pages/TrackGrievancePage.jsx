@@ -71,7 +71,7 @@ export function TrackGrievancePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-civic-700">
+        <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
           Public Status Verification
         </p>
         <h1 className="text-3xl font-extrabold text-slate-900">Track Grievance Status</h1>
@@ -88,12 +88,12 @@ export function TrackGrievancePage() {
             value={refId}
             onChange={(e) => setRefId(e.target.value)}
             placeholder="Enter Reference ID (e.g., KL-CMO-2026-100101)"
-            className="flex-1 px-4 py-3 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-civic-600 outline-none"
+            className="flex-1 px-4 py-3 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
           />
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-3 rounded-xl bg-civic-700 hover:bg-civic-800 disabled:opacity-60 text-white font-semibold text-sm inline-flex items-center justify-center gap-2 transition"
+            className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold text-sm inline-flex items-center justify-center gap-2 transition"
           >
             <Search className="w-4 h-4" />
             {loading ? 'Searching...' : 'Track Status'}
@@ -117,7 +117,7 @@ export function TrackGrievancePage() {
                 setSearchParams({ ref: sampleId });
                 lookupGrievance(sampleId);
               }}
-              className="font-mono px-2.5 py-1 rounded bg-slate-100 hover:bg-civic-50 text-slate-700 hover:text-civic-800 border border-slate-200"
+              className="font-mono px-2.5 py-1 rounded bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200"
             >
               {sampleId}
             </button>
@@ -136,7 +136,7 @@ export function TrackGrievancePage() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-mono text-xs font-bold text-civic-700">
+                <p className="font-mono text-xs font-bold text-indigo-600">
                   {grievance.referenceId}
                 </p>
                 <h2 className="text-xl font-bold text-slate-900 mt-1">{grievance.subject}</h2>
