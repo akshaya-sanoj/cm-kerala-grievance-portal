@@ -565,4 +565,76 @@ describe('API Routes, Security, RBAC & Grievance Workflow', () => {
       .send({ rating: 5, isSatisfied: true, comment: 'Prompt repair!' });
     expect(feedbackRes.status).toBe(201);
   });
+
+  it('supports CMO overdue auto-escalation sweep and role-scoped recent activity feed', async () => {
+    const overdueItem = {
+      _id: ids.grievance,
+      status: 'Submitted',
+      priority: 'Medium',
+      workflowStage: 'Submitted to CMO',
+      isEscalated: false,
+      save: vi.fn().mockResolvedValue(true)
+    };
+    vi.spyOn(Grievance, 'find').mockImplementation((filter) => {
+      // Used by escalateAllOverdue (no .select) and getRecentActivity (uses .select)
+      const q = {
+        select: () => ({
+          sort: () => ({
+            limit: () => ({
+              lean: async () => [
+                {
+                  _id: ids.grievance,
+                  referenceId: 'KL-CMO-2026-100101',
+                  subject: 'Broken road'
+                }
+              ]
+            })
+          })
+        }),
+        then: (resolve, reject) =>
+          Promise.resolve(filter?.isEscalated === false ? [overdueItem] : []).then(
+            resolve,
+            reject
+          )
+      };
+      return q;
+    });
+    vi.spyOn(GrievanceHistory, 'create').mockResolvedValue({});
+    const historyFindSpy = vi.spyOn(GrievanceHistory, 'find').mockReturnValue({
+      sort: () => ({
+        limit: () => ({
+          lean: async () => [
+            {
+              _id: new mongoose.Types.ObjectId(),
+              grievanceId: ids.grievance,
+              newStatus: 'Under Review',
+              workflowStage: 'Forwarded to Department',
+              actionType: 'ASSIGNED',
+              remarks: 'Assigned to PWD',
+              changedByName: 'CMO',
+              changedByRole: USER_ROLES.CMO_ADMIN,
+              createdAt: new Date()
+            }
+          ]
+        })
+      })
+    });
+
+    const escalateRes = await request(app)
+      .post('/api/cmo/escalate-overdue')
+      .set('Authorization', `Bearer ${cmoToken}`);
+    expect(escalateRes.status).toBe(200);
+    expect(escalateRes.body.escalatedCount).toBe(1);
+    expect(overdueItem.isEscalated).toBe(true);
+    expect(overdueItem.priority).toBe('High');
+
+    const activityRes = await request(app)
+      .get('/api/auth/activity')
+      .set('Authorization', `Bearer ${citizenToken}`);
+    expect(activityRes.status).toBe(200);
+    expect(activityRes.body.activity).toHaveLength(1);
+    expect(historyFindSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ isInternal: false })
+    );
+  });
 });

@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { AlertCircle, Building2, LogOut, Menu, Shield, UserCheck, X } from 'lucide-react';
+import { Bell, Building2, LogOut, Menu, Shield, UserCheck, X } from 'lucide-react';
+import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { getDashboardPathForRole, getRoleLabel } from '../utils/formatters.js';
+import { formatDateTime, getDashboardPathForRole, getRoleLabel } from '../utils/formatters.js';
+import { StatusBadge } from './StatusBadge.jsx';
 
 export function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [activity, setActivity] = useState([]);
 
   const navLinks = [
     { to: '/', label: 'Home' },
@@ -19,46 +23,74 @@ export function Layout({ children }) {
     { to: '/faq', label: 'FAQ' }
   ];
 
+  useEffect(() => {
+    if (!user) {
+      setActivity([]);
+      setBellOpen(false);
+      return;
+    }
+    api
+      .get('/auth/activity')
+      .then((res) => setActivity(res.data?.activity || []))
+      .catch(() => {});
+  }, [user]);
+
   function handleLogout() {
     logout();
     setMobileOpen(false);
+    setBellOpen(false);
     navigate('/');
+  }
+
+  function getDetailRoute(grievanceId) {
+    if (!user) return '/track';
+    if (user.role === 'cmo_admin') return `/cmo/grievances/${grievanceId}`;
+    if (user.role === 'department_officer') return `/officer/grievances/${grievanceId}`;
+    return `/citizen/grievances/${grievanceId}`;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* Prototype Compliance Banner */}
-      <div className="bg-amber-950 text-amber-100 text-xs py-1.5 px-4 text-center border-b border-amber-800">
-        <span className="inline-flex items-center gap-1.5">
-          <AlertCircle className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+      {/* Sleek Prototype Compliance Strip */}
+      <div className="no-print bg-slate-900 text-slate-300 text-[11px] py-1.5 px-4 text-center border-b border-slate-800">
+        <span className="inline-flex items-center gap-2 flex-wrap justify-center">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-amber-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            Recruitment Prototype
+          </span>
+          <span className="text-slate-500">•</span>
           <span>
-            <strong>Recruitment Prototype Notice:</strong> Technical Assessment Demo for WhiteMatrix
-            Software Solutions. Not an official Government of Kerala or CMO website. Uses fictional
-            sample data only.
+            WhiteMatrix Technical Assessment — Not an official Government of Kerala / CMO website.
+            Fictional sample data only.
           </span>
         </span>
       </div>
 
       {/* Main Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+      <header className="no-print bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3 shrink-0">
-              <div className="w-10 h-10 rounded-xl civic-gradient flex items-center justify-center text-white shadow">
+              <div className="w-10 h-10 rounded-xl civic-gradient flex items-center justify-center text-white shadow-sm">
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm sm:text-base font-extrabold text-civic-900 leading-tight">
-                  CM Kerala Grievance Portal
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm sm:text-base font-extrabold text-civic-950 leading-tight">
+                    CM Kerala Grievance Portal
+                  </p>
+                  <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-civic-800 border border-emerald-200">
+                    Prototype
+                  </span>
+                </div>
                 <p className="text-[11px] font-medium text-slate-500">
-                  Public Redressal System • Prototype
+                  Public Redressal &amp; AI Triage System
                 </p>
               </div>
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-0.5">
               {navLinks.map((item) => (
                 <NavLink
                   key={item.to}
@@ -78,12 +110,73 @@ export function Layout({ children }) {
             </nav>
 
             {/* Auth Controls */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2 relative">
               {user ? (
                 <>
+                  {/* Recent Activity Bell */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setBellOpen((prev) => !prev)}
+                      title="Recent Grievance Activity"
+                      className="relative p-2 rounded-lg text-slate-600 hover:text-civic-800 hover:bg-slate-100 transition"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {activity.length > 0 && (
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-600" />
+                      )}
+                    </button>
+
+                    {bellOpen && (
+                      <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+                        <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900">
+                            Recent Workflow Activity
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setBellOpen(false)}
+                            className="text-slate-400 hover:text-slate-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                          {activity.length === 0 ? (
+                            <p className="p-4 text-xs text-slate-500 text-center">
+                              No recent activity yet.
+                            </p>
+                          ) : (
+                            activity.slice(0, 6).map((item) => (
+                              <Link
+                                key={item._id}
+                                to={getDetailRoute(item.grievanceId)}
+                                onClick={() => setBellOpen(false)}
+                                className="block px-4 py-2.5 hover:bg-slate-50 transition"
+                              >
+                                <div className="flex items-center justify-between gap-2 mb-0.5">
+                                  <span className="font-mono text-[11px] font-bold text-civic-800">
+                                    {item.referenceId}
+                                  </span>
+                                  <StatusBadge status={item.newStatus} />
+                                </div>
+                                <p className="text-xs text-slate-700 line-clamp-1">
+                                  {item.remarks}
+                                </p>
+                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                  {formatDateTime(item.createdAt)}
+                                </p>
+                              </Link>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <Link
                     to={getDashboardPathForRole(user.role)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-sm font-semibold transition"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-sm font-semibold shadow-sm transition"
                   >
                     <UserCheck className="w-4 h-4" />
                     <span>Dashboard</span>
@@ -195,7 +288,7 @@ export function Layout({ children }) {
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 mt-12">
+      <footer className="no-print bg-slate-900 text-slate-300 border-t border-slate-800 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2.5 text-white font-bold text-base mb-2">
@@ -232,13 +325,13 @@ export function Layout({ children }) {
               </li>
               <li>
                 <Link to="/contact" className="hover:text-emerald-300">
-                  Contact & Helpdesk
+                  Contact &amp; Helpdesk
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white mb-3">Disclaimer & Demo Info</h3>
+            <h3 className="text-sm font-semibold text-white mb-3">Disclaimer &amp; Demo Info</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Built exclusively as a technical assessment prototype for WhiteMatrix Software
               Solutions. Does not represent or hold authorization from the Government of Kerala or

@@ -1,8 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Building2, Calendar, FileCheck2, MapPin, Search, Star } from 'lucide-react';
+import {
+  AlertTriangle,
+  Building2,
+  Calendar,
+  Check,
+  FileCheck2,
+  Link2,
+  MapPin,
+  Printer,
+  Search,
+  Star
+} from 'lucide-react';
 import { api, getApiErrorMessage } from '../api/client.js';
 import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
+import { StatusStepper } from '../components/StatusStepper.jsx';
 import { Timeline } from '../components/Timeline.jsx';
 import { formatDate } from '../utils/formatters.js';
 
@@ -13,6 +25,7 @@ export function TrackGrievancePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [grievance, setGrievance] = useState(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   async function lookupGrievance(targetRef) {
     const cleaned = targetRef.trim().toUpperCase();
@@ -45,6 +58,16 @@ export function TrackGrievancePage() {
     lookupGrievance(cleaned);
   }
 
+  function handleCopyLink() {
+    if (!grievance?.referenceId) return;
+    const shareUrl = `${window.location.origin}/track?ref=${encodeURIComponent(
+      grievance.referenceId
+    )}`;
+    navigator.clipboard?.writeText(shareUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div className="space-y-2">
@@ -58,7 +81,7 @@ export function TrackGrievancePage() {
         </p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="no-print bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -110,7 +133,7 @@ export function TrackGrievancePage() {
 
       {grievance && (
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-mono text-xs font-bold text-civic-700">
@@ -129,7 +152,9 @@ export function TrackGrievancePage() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4 pt-3 border-t border-slate-100 text-sm">
+            <StatusStepper status={grievance.status} />
+
+            <div className="grid sm:grid-cols-3 gap-4 pt-2 text-sm">
               <div className="flex items-center gap-2 text-slate-600">
                 <MapPin className="w-4 h-4 text-slate-400" />
                 <span>
@@ -181,6 +206,31 @@ export function TrackGrievancePage() {
                 </span>
               </div>
             )}
+
+            <div className="no-print flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700"
+              >
+                {copiedLink ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-600" /> Tracking Link Copied
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-3.5 h-3.5" /> Copy Tracking Link
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700"
+              >
+                <Printer className="w-3.5 h-3.5" /> Print Status Summary
+              </button>
+            </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">

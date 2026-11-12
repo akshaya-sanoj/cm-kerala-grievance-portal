@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Copy, FilePlus2, Paperclip, Sparkles } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, Copy, FilePlus2, Paperclip, Printer, Sparkles } from 'lucide-react';
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { AiAssistantCard } from '../../components/AiAssistantCard.jsx';
 
@@ -38,10 +38,15 @@ const FALLBACK_METADATA = {
 
 export function SubmitGrievancePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const presetCategory = searchParams.get('category') || '';
+  const initialCategory = FALLBACK_METADATA.categories.includes(presetCategory)
+    ? presetCategory
+    : '';
   const [metadata, setMetadata] = useState(FALLBACK_METADATA);
   const [form, setForm] = useState({
     district: '',
-    category: '',
+    category: initialCategory,
     subject: '',
     description: '',
     priority: 'Medium'
@@ -165,13 +170,20 @@ export function SubmitGrievancePage() {
             </button>
           </div>
 
-          <div className="pt-4 flex flex-wrap justify-center gap-3">
+          <div className="no-print pt-4 flex flex-wrap justify-center gap-3">
             <Link
               to={`/citizen/grievances/${submittedResult.grievance._id}`}
               className="px-5 py-2.5 rounded-xl bg-civic-700 hover:bg-civic-800 text-white text-sm font-semibold"
             >
               View Grievance Record
             </Link>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold"
+            >
+              <Printer className="w-4 h-4" /> Print Receipt
+            </button>
             <button
               type="button"
               onClick={() => navigate('/citizen/dashboard')}

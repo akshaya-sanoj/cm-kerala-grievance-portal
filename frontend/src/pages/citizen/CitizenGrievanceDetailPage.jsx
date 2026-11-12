@@ -3,17 +3,18 @@ import { Link, useParams } from 'react-router-dom';
 import {
   AlertTriangle,
   ArrowLeft,
-  Download,
   FileCheck2,
-  Paperclip,
+  Printer,
   RefreshCw,
   Star
 } from 'lucide-react';
-import { api, downloadAttachmentFile, getApiErrorMessage } from '../../api/client.js';
+import { api, getApiErrorMessage } from '../../api/client.js';
 import { AiAssistantCard } from '../../components/AiAssistantCard.jsx';
+import { AttachmentList } from '../../components/AttachmentList.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
+import { StatusStepper } from '../../components/StatusStepper.jsx';
 import { Timeline } from '../../components/Timeline.jsx';
-import { formatDate, formatFileSize } from '../../utils/formatters.js';
+import { formatDate } from '../../utils/formatters.js';
 
 export function CitizenGrievanceDetailPage() {
   const { id } = useParams();
@@ -98,12 +99,21 @@ export function CitizenGrievanceDetailPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-      <Link
-        to="/citizen/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-civic-700 hover:text-civic-900"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Citizen Dashboard
-      </Link>
+      <div className="no-print flex flex-wrap items-center justify-between gap-2">
+        <Link
+          to="/citizen/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-civic-700 hover:text-civic-900"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Citizen Dashboard
+        </Link>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
+        >
+          <Printer className="w-3.5 h-3.5" /> Print Record
+        </button>
+      </div>
 
       {actionMsg && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm">
@@ -132,6 +142,8 @@ export function CitizenGrievanceDetailPage() {
             )}
           </div>
         </div>
+
+        <StatusStepper status={grievance.status} />
 
         <div className="grid sm:grid-cols-4 gap-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3.5">
           <div>
@@ -174,28 +186,7 @@ export function CitizenGrievanceDetailPage() {
           </div>
         )}
 
-        {grievance.attachments?.length > 0 && (
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">
-              Attachments ({grievance.attachments.length})
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {grievance.attachments.map((att) => (
-                <button
-                  key={att._id}
-                  type="button"
-                  onClick={() => downloadAttachmentFile(att._id, att.originalName)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:border-civic-400 bg-slate-50 text-xs font-medium text-slate-800"
-                >
-                  <Paperclip className="w-3.5 h-3.5 text-civic-700" />
-                  <span>{att.originalName}</span>
-                  <span className="text-slate-400">({formatFileSize(att.sizeBytes)})</span>
-                  <Download className="w-3.5 h-3.5 text-slate-500" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <AttachmentList attachments={grievance.attachments} />
       </div>
 
       {grievance.aiAnalysis?.summary && <AiAssistantCard analysis={grievance.aiAnalysis} />}

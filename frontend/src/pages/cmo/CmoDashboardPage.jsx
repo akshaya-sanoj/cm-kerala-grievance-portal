@@ -5,17 +5,22 @@ import {
   BarChart3,
   CheckCircle2,
   Clock,
+  Download,
   Eye,
   FileCheck2,
   FolderOpen,
   Mail,
-  Search
+  Search,
+  Zap
 } from 'lucide-react';
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -24,6 +29,19 @@ import {
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { formatDate } from '../../utils/formatters.js';
+
+const STATUS_COLORS = {
+  Submitted: '#64748b',
+  'Under Review': '#d97706',
+  'In Progress': '#0284c7',
+  Resolved: '#059669',
+  Reopened: '#e11d48'
+};
+
+function escapeCsvCell(value) {
+  const str = String(value ?? '').replace(/"/g, '""');
+  return `"${str}"`;
+}
 
 export function CmoDashboardPage() {
   const [activeTab, setActiveTab] = useState('grievances');
@@ -50,6 +68,8 @@ export function CmoDashboardPage() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
   async function loadInitialData() {
@@ -126,6 +146,66 @@ export function CmoDashboardPage() {
     }
   }
 
+  async function handleAutoEscalateOverdue() {
+    setActionBusy(true);
+    setNotice('');
+    setError('');
+    try {
+      const res = await api.post('/cmo/escalate-overdue');
+      setNotice(res.data.message);
+      await Promise.all([loadInitialData(), loadGrievances(filters)]);
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+  function handleExportCsv() {
+    if (!grievances.length) return;
+    const headers = [
+      'Reference ID',
+      'Subject',
+      'Citizen',
+      'District',
+      'Category',
+      'Department',
+      'Priority',
+      'Status',
+      'Overdue',
+      'Escalated',
+      'Submitted Date',
+      'SLA Due Date'
+    ];
+    const rows = grievances.map((g) => [
+      g.referenceId,
+      g.subject,
+      g.citizenId?.name || '',
+      g.district,
+      g.category,
+      g.assignedDepartmentId?.code || 'Unassigned',
+      g.priority,
+      g.status,
+      g.isOverdue ? 'Yes' : 'No',
+      g.isEscalated ? 'Yes' : 'No',
+      formatDate(g.createdAt),
+      formatDate(g.dueDate)
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map(escapeCsvCell).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'cm-kerala-grievances.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
   const overview = stats?.overview || {
     total: 0,
     pending: 0,
@@ -133,8 +213,15 @@ export function CmoDashboardPage() {
     overdue: 0,
     escalated: 0,
     atrPendingReview: 0,
-    contactEnquiries: 0
+    contactEnquiries: 0,
+    resolutionRate: 0,
+    avgResolutionDays: 0
   };
+
+  const statusChartData = Object.entries(stats?.byStatus || {}).map(([name, value]) => ({
+    name,
+    value
+  }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -174,7 +261,7 @@ export function CmoDashboardPage() {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
         <KpiCard
           label="Total Grievances"
           value={overview.total}
@@ -189,6 +276,7 @@ export function CmoDashboardPage() {
         <KpiCard
           label="Resolved"
           value={overview.resolved}
+          sub={`${overview.resolutionRate}% closure rate`}
           valueClass="text-emerald-700"
           icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
         />
@@ -199,13 +287,25 @@ export function CmoDashboardPage() {
           icon={<AlertTriangle className="w-4 h-4 text-rose-600" />}
         />
         <KpiCard
-          label="ATR Ready for Review"
+          label="ATR Ready"
           value={overview.atrPendingReview}
           valueClass="text-sky-700"
           icon={<FileCheck2 className="w-4 h-4 text-sky-600" />}
         />
+        <KpiCard
+          label="Avg Resolution"
+          value={`${overview.avgResolutionDays}d`}
+          sub={`${overview.escalated} active escalated`}
+          valueClass="text-slate-800"
+          icon={<Clock className="w-4 h-4 text-slate-500" />}
+        />
       </div>
 
+      {notice && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm">
+          {notice}
+        </div>
+      )}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">
           {error}
@@ -303,6 +403,24 @@ export function CmoDashboardPage() {
                   />
                   ATR Pending CMO Review
                 </label>
+
+                <button
+                  type="button"
+                  disabled={actionBusy || overview.overdue === 0}
+                  onClick={handleAutoEscalateOverdue}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 disabled:opacity-50 text-rose-800 border border-rose-200 font-semibold transition"
+                >
+                  <Zap className="w-3.5 h-3.5" /> Auto-Escalate Overdue
+                </button>
+
+                <button
+                  type="button"
+                  disabled={grievances.length === 0}
+                  onClick={handleExportCsv}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-800 border border-slate-200 font-semibold transition"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export CSV
+                </button>
               </div>
 
               <form
@@ -342,7 +460,7 @@ export function CmoDashboardPage() {
                   <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
                     <tr>
                       <th className="py-3 px-4">Ref ID</th>
-                      <th className="py-3 px-4">Citizen & Subject</th>
+                      <th className="py-3 px-4">Citizen &amp; Subject</th>
                       <th className="py-3 px-4">District / Category</th>
                       <th className="py-3 px-4">Assigned Dept</th>
                       <th className="py-3 px-4">Priority</th>
@@ -419,12 +537,41 @@ export function CmoDashboardPage() {
       {/* TAB 2: DISTRICT & DEPARTMENT ANALYTICS */}
       {activeTab === 'analytics' && stats && (
         <div className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-base font-bold text-slate-900 mb-4">
+              <h2 className="text-base font-bold text-slate-900 mb-3">Status Distribution</h2>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={78}
+                      paddingAngle={3}
+                    >
+                      {statusChartData.map((entry) => (
+                        <Cell
+                          key={entry.name}
+                          fill={STATUS_COLORS[entry.name] || '#94a3b8'}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-base font-bold text-slate-900 mb-3">
                 District-wise Grievances (Pending vs Resolved)
               </h2>
-              <div className="h-72">
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.byDistrict}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -438,12 +585,14 @@ export function CmoDashboardPage() {
                 </ResponsiveContainer>
               </div>
             </div>
+          </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-base font-bold text-slate-900 mb-4">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-base font-bold text-slate-900 mb-3">
                 Department-wise Workload
               </h2>
-              <div className="h-72">
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.byDepartment}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -456,6 +605,46 @@ export function CmoDashboardPage() {
                     <Bar dataKey="overdue" name="Overdue" fill="#e11d48" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+              <h2 className="text-base font-bold text-slate-900">Priority &amp; SLA Snapshot</h2>
+              <div className="space-y-3 text-sm">
+                {['High', 'Medium', 'Low'].map((p) => {
+                  const count = stats.byPriority?.[p] || 0;
+                  const pct = overview.total ? Math.round((count / overview.total) * 100) : 0;
+                  return (
+                    <div key={p}>
+                      <div className="flex justify-between text-xs font-semibold mb-1">
+                        <span>{p} Priority</span>
+                        <span>
+                          {count} ({pct}%)
+                        </span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            p === 'High'
+                              ? 'bg-rose-600'
+                              : p === 'Medium'
+                              ? 'bg-amber-500'
+                              : 'bg-slate-400'
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1">
+                <p>
+                  <strong>Closure Rate:</strong> {overview.resolutionRate}%
+                </p>
+                <p>
+                  <strong>Avg Time to Resolve:</strong> {overview.avgResolutionDays} days
+                </p>
               </div>
             </div>
           </div>
@@ -584,7 +773,7 @@ function TabBtn({ active, onClick, label, icon }) {
   );
 }
 
-function KpiCard({ label, value, icon, valueClass = 'text-slate-900' }) {
+function KpiCard({ label, value, sub, icon, valueClass = 'text-slate-900' }) {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
       <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1.5">
@@ -592,6 +781,7 @@ function KpiCard({ label, value, icon, valueClass = 'text-slate-900' }) {
         {icon}
       </div>
       <p className={`text-2xl sm:text-3xl font-extrabold ${valueClass}`}>{value}</p>
+      {sub && <p className="text-[11px] text-slate-500 mt-1">{sub}</p>}
     </div>
   );
 }

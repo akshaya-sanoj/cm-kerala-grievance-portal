@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   addCmoRemark,
   assignGrievance,
+  escalateAllOverdue,
   escalateGrievance,
   getCmoGrievanceDetail,
   getCmoStats,
@@ -20,6 +21,7 @@ const router = Router();
 router.use(authenticate, authorizeRoles(USER_ROLES.CMO_ADMIN));
 
 router.get('/stats', getCmoStats);
+router.post('/escalate-overdue', escalateAllOverdue);
 router.get('/officers', listDepartmentOfficers);
 router.get('/enquiries', listContactEnquiries);
 router.patch('/enquiries/:id', updateContactEnquiryStatus);

@@ -117,7 +117,9 @@ export async function getCmoStats(_req, res, next) {
     const now = new Date();
     const [allGrievances, departments, enquiryCount] = await Promise.all([
       Grievance.find({})
-        .select('district category priority status assignedDepartmentId dueDate isEscalated atrSubmitted')
+        .select(
+          'district category priority status assignedDepartmentId dueDate isEscalated atrSubmitted createdAt resolvedAt'
+        )
         .lean(),
       Department.find({ isActive: true }).select('name code').sort({ name: 1 }).lean(),
       ContactEnquiry.countDocuments({})
@@ -150,6 +152,8 @@ export async function getCmoStats(_req, res, next) {
     let overdue = 0;
     let escalated = 0;
     let atrPendingReview = 0;
+    let resolutionDaysTotal = 0;
+    let resolutionDaysCount = 0;
 
     for (const g of allGrievances) {
       statusCounts[g.status] = (statusCounts[g.status] || 0) + 1;
@@ -159,6 +163,16 @@ export async function getCmoStats(_req, res, next) {
       if (isOverdue) overdue += 1;
       if (g.isEscalated) escalated += 1;
       if (g.atrSubmitted && g.status !== 'Resolved') atrPendingReview += 1;
+
+      if (g.status === 'Resolved' && g.resolvedAt && g.createdAt) {
+        const diffDays =
+          (new Date(g.resolvedAt).getTime() - new Date(g.createdAt).getTime()) /
+          (1000 * 60 * 60 * 24);
+        if (diffDays >= 0) {
+          resolutionDaysTotal += diffDays;
+          resolutionDaysCount += 1;
+        }
+      }
 
       const dEntry = districtMap.get(g.district) || {
         district: g.district,
@@ -187,6 +201,11 @@ export async function getCmoStats(_req, res, next) {
     const total = allGrievances.length;
     const resolved = statusCounts.Resolved;
     const pending = total - resolved;
+    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+    const avgResolutionDays =
+      resolutionDaysCount > 0
+        ? Number((resolutionDaysTotal / resolutionDaysCount).toFixed(1))
+        : 0;
 
     return res.json({
       success: true,
@@ -198,7 +217,9 @@ export async function getCmoStats(_req, res, next) {
           overdue,
           escalated,
           atrPendingReview,
-          contactEnquiries: enquiryCount
+          contactEnquiries: enquiryCount,
+          resolutionRate,
+          avgResolutionDays
         },
         byStatus: statusCounts,
         byPriority: priorityCounts,
@@ -580,6 +601,58 @@ export async function updateContactEnquiryStatus(req, res, next) {
       return res.status(404).json({ success: false, message: 'Contact enquiry not found.' });
     }
     return res.json({ success: true, enquiry });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function escalateAllOverdue(req, res, next) {
+  try {
+    const now = new Date();
+    const overdueList = await Grievance.find({
+      status: { $ne: 'Resolved' },
+      dueDate: { $lt: now },
+      isEscalated: false
+    });
+
+    if (overdueList.length === 0) {
+      return res.json({
+        success: true,
+        escalatedCount: 0,
+        message: 'No unescalated overdue grievances found.'
+      });
+    }
+
+    for (const g of overdueList) {
+      const previousStatus = g.status;
+      g.isEscalated = true;
+      g.priority = 'High';
+      g.escalationReason = 'Auto-escalated by CMO SLA sweep due to overdue target date.';
+      g.escalatedAt = now;
+      g.escalatedBy = req.user._id;
+      if (g.status === 'Submitted') {
+        g.status = 'Under Review';
+        g.workflowStage = 'Escalated by CMO';
+      }
+      await g.save();
+
+      await recordHistory({
+        grievanceId: g._id,
+        previousStatus,
+        newStatus: g.status,
+        workflowStage: g.workflowStage,
+        actionType: 'ESCALATED',
+        remarks: 'Auto-escalated by CMO SLA overdue sweep (priority set to High).',
+        isInternal: false,
+        user: req.user
+      });
+    }
+
+    return res.json({
+      success: true,
+      escalatedCount: overdueList.length,
+      message: `Escalated ${overdueList.length} overdue grievance(s) to High priority.`
+    });
   } catch (error) {
     return next(error);
   }

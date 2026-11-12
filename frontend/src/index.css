@@ -9,5 +9,21 @@
 }
 
 .civic-gradient {
-  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #0f766e 100%);
+  background: radial-gradient(circle at 85% 15%, rgba(251, 191, 36, 0.14), transparent 45%),
+    linear-gradient(135deg, #022c22 0%, #064e3b 45%, #0f766e 100%);
+}
+
+.hero-grid {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+  }
 }

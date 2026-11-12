@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { signAuthToken } from '../middleware/auth.js';
+import { Grievance } from '../models/Grievance.js';
+import { GrievanceHistory } from '../models/GrievanceHistory.js';
 import { User } from '../models/User.js';
 import { KERALA_DISTRICTS, USER_ROLES } from '../utils/constants.js';
 
@@ -111,4 +113,65 @@ export async function getCurrentUser(req, res) {
     success: true,
     user: formatUserResponse(req.user)
   });
+}
+
+export async function getRecentActivity(req, res, next) {
+  try {
+    const { role, _id, departmentId } = req.user;
+    let grievanceFilter = {};
+
+    if (role === USER_ROLES.CITIZEN) {
+      grievanceFilter = { citizenId: _id };
+    } else if (role === USER_ROLES.DEPARTMENT_OFFICER) {
+      const deptId = departmentId?._id || departmentId;
+      grievanceFilter = deptId ? { assignedDepartmentId: deptId } : { _id: null };
+    }
+
+    const relevantGrievances = await Grievance.find(grievanceFilter)
+      .select('_id referenceId subject')
+      .sort({ updatedAt: -1 })
+      .limit(50)
+      .lean();
+
+    const grievanceMap = new Map(
+      relevantGrievances.map((g) => [g._id.toString(), g])
+    );
+
+    if (relevantGrievances.length === 0) {
+      return res.json({ success: true, activity: [] });
+    }
+
+    const historyQuery = {
+      grievanceId: { $in: relevantGrievances.map((g) => g._id) }
+    };
+    if (role === USER_ROLES.CITIZEN) {
+      historyQuery.isInternal = false;
+    }
+
+    const items = await GrievanceHistory.find(historyQuery)
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    const activity = items.map((item) => {
+      const g = grievanceMap.get(item.grievanceId.toString());
+      return {
+        _id: item._id,
+        grievanceId: item.grievanceId,
+        referenceId: g?.referenceId || '',
+        subject: g?.subject || '',
+        newStatus: item.newStatus,
+        workflowStage: item.workflowStage,
+        actionType: item.actionType,
+        remarks: item.remarks,
+        changedByName: item.changedByName,
+        changedByRole: item.changedByRole,
+        createdAt: item.createdAt
+      };
+    });
+
+    return res.json({ success: true, activity });
+  } catch (error) {
+    return next(error);
+  }
 }

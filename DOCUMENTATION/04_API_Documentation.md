@@ -55,6 +55,9 @@ Authenticates any role (`citizen`, `cmo_admin`, `department_officer`).
 ### `GET /api/auth/me` *(Protected)*
 Returns the currently authenticated user profile.
 
+### `GET /api/auth/activity` *(Protected)*
+Returns the latest 10 workflow history events scoped to the signed-in user's role (`citizen` excludes internal CMO notes).
+
 ---
 
 ## 3. AI Grievance Assistant Endpoint (`/api/ai`)
@@ -111,7 +114,8 @@ All endpoints require `Authorization: Bearer <token>` with `role === 'cmo_admin'
 
 | Method & Path | Purpose |
 | :--- | :--- |
-| `GET /api/cmo/stats` | Returns overview KPIs (`total`, `pending`, `resolved`, `overdue`, `escalated`, `atrPendingReview`) + `byDistrict`, `byDepartment`, `byStatus`, `byPriority`. |
+| `GET /api/cmo/stats` | Returns overview KPIs (`total`, `pending`, `resolved`, `overdue`, `escalated`, `atrPendingReview`, `resolutionRate`, `avgResolutionDays`) + `byDistrict`, `byDepartment`, `byStatus`, `byPriority`. |
+| `POST /api/cmo/escalate-overdue` | Auto-escalates all unescalated overdue non-resolved grievances to `High` priority and logs `ESCALATED` history entries. |
 | `GET /api/cmo/grievances` | Filter grievances (`district`, `category`, `priority`, `status`, `departmentId`, `overdueOnly`, `atrPendingOnly`, `search`, `page`, `limit`). |
 | `GET /api/cmo/grievances/:id` | Full grievance record including internal remarks and assignments. |
 | `GET /api/cmo/officers` | Lists active department officers for assignment dropdowns. |

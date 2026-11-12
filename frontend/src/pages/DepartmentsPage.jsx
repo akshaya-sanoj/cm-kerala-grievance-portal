@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Building2, Clock, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Building2, Clock, Mail } from 'lucide-react';
 import { api } from '../api/client.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export function DepartmentsPage() {
+  const { user } = useAuth();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,50 +49,66 @@ export function DepartmentsPage() {
 
       {!loading && !error && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {departments.map((dept) => (
-            <div
-              key={dept._id}
-              className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-civic-300 transition"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-civic-50 text-civic-800 border border-civic-200">
-                    <Building2 className="w-3.5 h-3.5" />
-                    {dept.code}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
-                    <Clock className="w-3.5 h-3.5" />
-                    SLA: {dept.slaDays} days
-                  </span>
-                </div>
-                <h2 className="text-lg font-bold text-slate-900 mb-2">{dept.name}</h2>
-                <p className="text-sm text-slate-600 leading-relaxed mb-4">{dept.description}</p>
-              </div>
-              <div className="pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-500">
-                <p>
-                  <strong className="text-slate-700">Nodal Head:</strong> {dept.headDesignation}
-                </p>
-                {dept.categories?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {dept.categories.map((cat) => (
-                      <span
-                        key={cat}
-                        className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium"
-                      >
-                        {cat}
-                      </span>
-                    ))}
+          {departments.map((dept) => {
+            const primaryCat = dept.categories?.[0] || 'Other';
+            const targetHref =
+              user?.role === 'citizen'
+                ? `/citizen/submit?category=${encodeURIComponent(primaryCat)}`
+                : '/login';
+
+            return (
+              <div
+                key={dept._id}
+                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-civic-300 hover:shadow-md transition"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-civic-50 text-civic-800 border border-civic-200">
+                      <Building2 className="w-3.5 h-3.5" />
+                      {dept.code}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
+                      <Clock className="w-3.5 h-3.5" />
+                      SLA: {dept.slaDays} days
+                    </span>
                   </div>
-                )}
-                {dept.contactEmail && (
-                  <p className="flex items-center gap-1.5 text-slate-500 truncate">
-                    <Mail className="w-3.5 h-3.5 shrink-0" />
-                    {dept.contactEmail}
+                  <h2 className="text-lg font-bold text-slate-900 mb-2">{dept.name}</h2>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-4">{dept.description}</p>
+                </div>
+                <div className="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
+                  <p>
+                    <strong className="text-slate-700">Nodal Head:</strong> {dept.headDesignation}
                   </p>
-                )}
+                  {dept.categories?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {dept.categories.map((cat) => (
+                        <span
+                          key={cat}
+                          className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {dept.contactEmail && (
+                    <p className="flex items-center gap-1.5 text-slate-500 truncate">
+                      <Mail className="w-3.5 h-3.5 shrink-0" />
+                      {dept.contactEmail}
+                    </p>
+                  )}
+                  <div className="pt-1">
+                    <Link
+                      to={targetHref}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-civic-700 hover:text-civic-900"
+                    >
+                      Submit grievance for {dept.code} <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
