@@ -76,14 +76,14 @@ export function Layout({ children }) {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm sm:text-base font-extrabold text-civic-950 leading-tight">
+                  <p className="text-sm sm:text-base font-extrabold text-civic-950 leading-tight whitespace-nowrap">
                     CM Kerala Grievance Portal
                   </p>
-                  <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-civic-800 border border-emerald-200">
+                  <span className="hidden xl:inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-civic-800 border border-emerald-200">
                     Prototype
                   </span>
                 </div>
-                <p className="text-[11px] font-medium text-slate-500">
+                <p className="text-[11px] font-medium text-slate-500 whitespace-nowrap">
                   Public Redressal &amp; AI Triage System
                 </p>
               </div>
@@ -97,7 +97,7 @@ export function Layout({ children }) {
                   to={item.to}
                   end={item.to === '/'}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-lg text-sm font-medium transition ${
+                    `px-2.5 xl:px-3 py-1.5 rounded-lg text-[13px] font-medium whitespace-nowrap transition ${
                       isActive
                         ? 'bg-civic-50 text-civic-800 font-semibold'
                         : 'text-slate-600 hover:text-civic-800 hover:bg-slate-100'
@@ -110,7 +110,7 @@ export function Layout({ children }) {
             </nav>
 
             {/* Auth Controls */}
-            <div className="hidden lg:flex items-center gap-2 relative">
+            <div className="hidden lg:flex items-center gap-2 relative shrink-0">
               {user ? (
                 <>
                   {/* Recent Activity Bell */}
@@ -200,15 +200,15 @@ export function Layout({ children }) {
                 <>
                   <Link
                     to="/login"
-                    className="px-3.5 py-2 rounded-lg text-sm font-semibold text-civic-800 hover:bg-civic-50 transition"
+                    className="px-3 py-2 rounded-lg text-[13px] font-semibold text-civic-800 hover:bg-civic-50 whitespace-nowrap transition"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    className="px-4 py-2 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-sm font-semibold shadow-sm transition"
+                    className="px-3.5 py-2 rounded-lg bg-civic-700 hover:bg-civic-800 text-white text-[13px] font-semibold whitespace-nowrap shadow-sm transition"
                   >
-                    Citizen Register
+                    Register
                   </Link>
                 </>
               )}
