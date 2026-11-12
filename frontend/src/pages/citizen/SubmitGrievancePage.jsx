@@ -40,12 +40,16 @@ export function SubmitGrievancePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const presetCategory = searchParams.get('category') || '';
+  const presetDistrict = searchParams.get('district') || '';
   const initialCategory = FALLBACK_METADATA.categories.includes(presetCategory)
     ? presetCategory
     : '';
+  const initialDistrict = FALLBACK_METADATA.districts.includes(presetDistrict)
+    ? presetDistrict
+    : '';
   const [metadata, setMetadata] = useState(FALLBACK_METADATA);
   const [form, setForm] = useState({
-    district: '',
+    district: initialDistrict,
     category: initialCategory,
     subject: '',
     description: '',

@@ -44,16 +44,16 @@ export function OfficerDashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-civic-700 flex items-center gap-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5" />
             {user?.department?.name || 'Department Officer Portal'}
           </p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
             Department Officer Dashboard
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-300 mt-1">
             Review grievances forwarded by the CMO, log investigation remarks, and submit
             Action-Taken Reports.
           </p>

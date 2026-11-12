@@ -225,15 +225,15 @@ export function CmoDashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-civic-700">
-            Central Administrative Module
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
+            Central Administrative Command
           </p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
             Chief Minister&apos;s Office (CMO) Dashboard
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-300 mt-1">
             Review citizen grievances, verify AI insights, assign departments, escalate delays, and
             approve action-taken reports.
           </p>
@@ -761,10 +761,10 @@ function TabBtn({ active, onClick, label, icon }) {
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition ${
+      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition ${
         active
-          ? 'bg-civic-700 text-white border-civic-700 shadow-sm'
-          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+          ? 'bg-amber-400 text-slate-950 border-amber-400 shadow'
+          : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
       }`}
     >
       {icon}

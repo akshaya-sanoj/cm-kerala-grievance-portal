@@ -123,15 +123,15 @@ export function LoginPage() {
       </div>
 
       {/* Evaluator Demo Accounts Panel */}
-      <div className="lg:col-span-6 bg-emerald-50/70 border border-emerald-200 rounded-2xl p-6 space-y-4">
-        <div className="flex items-center gap-2 text-civic-900">
-          <KeyRound className="w-5 h-5 text-civic-700" />
+      <div className="lg:col-span-6 civic-gradient text-white rounded-2xl p-6 space-y-4 shadow-lg">
+        <div className="flex items-center gap-2 text-amber-300">
+          <KeyRound className="w-5 h-5" />
           <h2 className="text-lg font-bold">Evaluator Demo Credentials (Test Accounts)</h2>
         </div>
-        <p className="text-xs text-slate-700 leading-relaxed">
+        <p className="text-xs text-slate-300 leading-relaxed">
           Click any fictional test account below to auto-fill credentials and inspect each role-based
           dashboard. Password for all seeded accounts:{' '}
-          <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-emerald-200">
+          <code className="font-mono bg-white/10 text-amber-200 px-1.5 py-0.5 rounded border border-white/20">
             DemoPass@2026
           </code>
         </p>
@@ -142,17 +142,17 @@ export function LoginPage() {
               key={acc.email}
               type="button"
               onClick={() => applyDemo(acc)}
-              className="w-full text-left bg-white hover:bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 transition flex items-center justify-between gap-3"
+              className="w-full text-left bg-white hover:bg-indigo-50 border border-white/20 rounded-xl p-3.5 transition flex items-center justify-between gap-3"
             >
               <div>
                 <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-civic-700" />
+                  <ShieldCheck className="w-4 h-4 text-indigo-600" />
                   {acc.label}
                 </p>
                 <p className="font-mono text-xs text-slate-600 mt-0.5">{acc.email}</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">{acc.roleHint}</p>
               </div>
-              <span className="text-xs font-semibold text-civic-700 shrink-0">Auto-fill →</span>
+              <span className="text-xs font-bold text-indigo-700 shrink-0">Auto-fill →</span>
             </button>
           ))}
         </div>

@@ -8,10 +8,10 @@ export function Timeline({ history = [] }) {
   }
 
   return (
-    <ol className="relative border-l-2 border-emerald-200 ml-3 space-y-5">
+    <ol className="relative border-l-2 border-indigo-200 ml-3 space-y-5">
       {history.map((item) => (
         <li key={item._id} className="ml-6">
-          <span className="absolute -left-2.5 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-700 ring-4 ring-white">
+          <span className="absolute -left-2.5 flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 ring-4 ring-white">
             <ShieldCheck className="w-3 h-3 text-white" />
           </span>
           <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-sm">

@@ -50,22 +50,22 @@ export function CitizenDashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-civic-700">
-            Citizen Portal
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
+            Citizen Command Portal
           </p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
             Welcome, {user?.name}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-300 mt-1">
             Track submitted complaints, inspect department remarks, and submit post-resolution
             feedback.
           </p>
         </div>
         <Link
           to="/citizen/submit"
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-civic-700 hover:bg-civic-800 text-white font-semibold text-sm shadow-sm transition"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow-lg transition"
         >
           <FilePlus2 className="w-4 h-4" />
           Submit New Grievance

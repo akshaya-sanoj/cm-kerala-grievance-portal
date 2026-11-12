@@ -9,14 +9,22 @@
 }
 
 .civic-gradient {
-  background: radial-gradient(circle at 85% 15%, rgba(251, 191, 36, 0.14), transparent 45%),
-    linear-gradient(135deg, #022c22 0%, #064e3b 45%, #0f766e 100%);
+  background: radial-gradient(circle at 82% 18%, rgba(245, 158, 11, 0.18), transparent 42%),
+    radial-gradient(circle at 12% 85%, rgba(79, 70, 229, 0.25), transparent 45%),
+    linear-gradient(135deg, #090d1a 0%, #131c38 50%, #1e293b 100%);
 }
 
 .hero-grid {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.hover-lift {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
 }
 
 @media print {
