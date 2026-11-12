@@ -13,6 +13,8 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { api, getApiErrorMessage } from '../api/client.js';
+import { AnimatedNumber } from '../components/AnimatedNumber.jsx';
+import { DepartmentBadge } from '../components/DepartmentBadge.jsx';
 import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -199,8 +201,9 @@ export function HomePage() {
           </div>
 
           {/* Single Clean Quick-Track Card */}
-          <div className="lg:col-span-5">
-            <div className="bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/10">
+          <div className="lg:col-span-5 relative">
+            <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-500/25 via-amber-400/20 to-sky-400/20 rounded-[28px] blur-xl pointer-events-none" />
+            <div className="relative bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/20 animate-fade-up">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h2 className="text-lg font-bold text-slate-900">Track Grievance Status</h2>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -517,9 +520,7 @@ export function HomePage() {
                 className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 hover:bg-white hover:shadow-lg hover:border-indigo-300 hover-lift"
               >
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200">
-                    {dept.code}
-                  </span>
+                  <DepartmentBadge code={dept.code} />
                   <span className="text-xs text-slate-500 font-medium">
                     SLA: {dept.slaDays} days
                   </span>
@@ -537,12 +538,16 @@ export function HomePage() {
 
 function StatCard({ icon, label, value, sub }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md hover-lift">
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md hover-lift animate-fade-up">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-semibold text-slate-500">{label}</span>
-        {icon}
+        <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-center">
+          {icon}
+        </div>
       </div>
-      <p className="text-3xl font-extrabold text-slate-900">{value}</p>
+      <p className="text-3xl font-extrabold text-slate-900">
+        <AnimatedNumber value={value} />
+      </p>
       <p className="text-xs text-slate-500 mt-1">{sub}</p>
     </div>
   );

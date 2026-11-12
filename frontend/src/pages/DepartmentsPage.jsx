@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, Clock, Mail, Search } from 'lucide-react';
+import { ArrowRight, Clock, Mail, Search } from 'lucide-react';
 import { api } from '../api/client.js';
+import { DepartmentBadge } from '../components/DepartmentBadge.jsx';
 import { KeralaDistrictExplorer } from '../components/KeralaDistrictExplorer.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -121,10 +122,7 @@ export function DepartmentsPage() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200">
-                      <Building2 className="w-3.5 h-3.5" />
-                      {dept.code}
-                    </span>
+                    <DepartmentBadge code={dept.code} />
                     <span
                       className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
                         dept.slaDays <= 3
