@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Building2, Clock, Mail, Search } from 'lucide-react';
 import { api } from '../api/client.js';
+import { KeralaDistrictExplorer } from '../components/KeralaDistrictExplorer.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export function DepartmentsPage() {
@@ -179,6 +180,8 @@ export function DepartmentsPage() {
           )}
         </div>
       )}
+
+      <KeralaDistrictExplorer />
     </div>
   );
 }

@@ -7,7 +7,6 @@ import {
   Clock,
   Download,
   Eye,
-  FileCheck2,
   FolderOpen,
   Mail,
   Search,
@@ -261,43 +260,33 @@ export function CmoDashboardPage() {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <KpiCard
           label="Total Grievances"
           value={overview.total}
+          sub={`${overview.atrPendingReview} ATR ready for review`}
           icon={<FolderOpen className="w-4 h-4 text-civic-700" />}
         />
         <KpiCard
           label="Pending Action"
           value={overview.pending}
+          sub={`${overview.escalated} escalated cases`}
           valueClass="text-amber-700"
           icon={<Clock className="w-4 h-4 text-amber-600" />}
         />
         <KpiCard
           label="Resolved"
           value={overview.resolved}
-          sub={`${overview.resolutionRate}% closure rate`}
+          sub={`${overview.resolutionRate}% closure • ${overview.avgResolutionDays}d avg`}
           valueClass="text-emerald-700"
           icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
         />
         <KpiCard
           label="Overdue (SLA)"
           value={overview.overdue}
+          sub="Past target priority SLA"
           valueClass="text-rose-700"
           icon={<AlertTriangle className="w-4 h-4 text-rose-600" />}
-        />
-        <KpiCard
-          label="ATR Ready"
-          value={overview.atrPendingReview}
-          valueClass="text-sky-700"
-          icon={<FileCheck2 className="w-4 h-4 text-sky-600" />}
-        />
-        <KpiCard
-          label="Avg Resolution"
-          value={`${overview.avgResolutionDays}d`}
-          sub={`${overview.escalated} active escalated`}
-          valueClass="text-slate-800"
-          icon={<Clock className="w-4 h-4 text-slate-500" />}
         />
       </div>
 
