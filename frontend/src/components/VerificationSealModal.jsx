@@ -1,44 +1,46 @@
-import { CheckCircle2, Download, Printer, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
+import { Check, CheckCircle2, Download, Link2, Printer, ShieldCheck, X } from 'lucide-react';
 import { formatDate } from '../utils/formatters.js';
 import { SlaCountdownBadge } from './SlaCountdownBadge.jsx';
 
-function buildMatrixCells(seed) {
-  const size = 9;
-  const cells = [];
-  let hash = 2166136261;
-  for (let i = 0; i < seed.length; i += 1) {
-    hash ^= seed.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  for (let r = 0; r < size; r += 1) {
-    for (let c = 0; c < size; c += 1) {
-      const inFinder =
-        (r < 3 && c < 3) || (r < 3 && c >= size - 3) || (r >= size - 3 && c < 3);
-      if (inFinder) {
-        const outer =
-          r === 0 ||
-          r === 2 ||
-          r === size - 1 ||
-          r === size - 3 ||
-          c === 0 ||
-          c === 2 ||
-          c === size - 1 ||
-          c === size - 3;
-        const center =
-          (r === 1 && c === 1) || (r === 1 && c === size - 2) || (r === size - 2 && c === 1);
-        cells.push(outer || center);
-      } else {
-        const bit = ((hash >>> ((r * size + c) % 24)) ^ (r * 7 + c * 13)) & 1;
-        cells.push(Boolean(bit));
-      }
-    }
-  }
-  return { size, cells };
-}
-
 export function VerificationSealModal({ grievance, onClose }) {
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const trackingUrl = grievance?.referenceId
+    ? `${window.location.origin}/track?ref=${encodeURIComponent(grievance.referenceId)}`
+    : '';
+
+  useEffect(() => {
+    if (!trackingUrl) {
+      setQrDataUrl('');
+      return undefined;
+    }
+
+    let cancelled = false;
+    QRCode.toDataURL(trackingUrl, {
+      width: 240,
+      margin: 2,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#0f172a',
+        light: '#ffffff'
+      }
+    })
+      .then((url) => {
+        if (!cancelled) setQrDataUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setQrDataUrl('');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trackingUrl]);
+
   if (!grievance) return null;
-  const { size, cells } = buildMatrixCells(grievance.referenceId || 'KL-CMO-2026');
 
   function handleDownloadReceipt() {
     const lines = [
@@ -55,9 +57,7 @@ export function VerificationSealModal({ grievance, onClose }) {
       `Target SLA Date  : ${formatDate(grievance.dueDate)}`,
       '',
       `Action Report    : ${grievance.actionTakenReport || 'In progress'}`,
-      `Tracking Link    : ${window.location.origin}/track?ref=${encodeURIComponent(
-        grievance.referenceId
-      )}`,
+      `Tracking Link    : ${trackingUrl}`,
       '',
       'Notice: WhiteMatrix Technical Assessment Prototype — Fictional Demo Record.'
     ];
@@ -68,6 +68,21 @@ export function VerificationSealModal({ grievance, onClose }) {
     link.download = `${grievance.referenceId}-receipt.txt`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleDownloadQrPng() {
+    if (!qrDataUrl) return;
+    const link = document.createElement('a');
+    link.href = qrDataUrl;
+    link.download = `${grievance.referenceId}-qr.png`;
+    link.click();
+  }
+
+  function handleCopyUrl() {
+    if (!trackingUrl) return;
+    navigator.clipboard?.writeText(trackingUrl);
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2000);
   }
 
   return (
@@ -95,6 +110,7 @@ export function VerificationSealModal({ grievance, onClose }) {
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition"
+            aria-label="Close verification card"
           >
             <X className="w-4 h-4" />
           </button>
@@ -102,32 +118,23 @@ export function VerificationSealModal({ grievance, onClose }) {
 
         <div className="p-6 space-y-5">
           <div className="flex items-center gap-5 bg-slate-50 border border-slate-200 rounded-2xl p-4">
-            <div className="bg-white p-2.5 rounded-xl border border-slate-200 shrink-0 shadow-sm">
-              <svg
-                viewBox={`0 0 ${size} ${size}`}
-                className="w-20 h-20"
-                aria-label="Reference verification matrix"
-              >
-                {cells.map((filled, idx) => {
-                  const r = Math.floor(idx / size);
-                  const c = idx % size;
-                  return filled ? (
-                    <rect
-                      key={`${r}-${c}`}
-                      x={c}
-                      y={r}
-                      width="0.88"
-                      height="0.88"
-                      rx="0.16"
-                      fill="#0f172a"
-                    />
-                  ) : null;
-                })}
-              </svg>
+            <div className="bg-white p-2 rounded-xl border border-slate-200 shrink-0 shadow-sm text-center">
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt={`QR verification code for ${grievance.referenceId}`}
+                  className="w-24 h-24 rounded-lg"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-lg bg-slate-100 animate-pulse" />
+              )}
+              <span className="text-[9px] font-semibold text-slate-500 block mt-1">
+                Scan to Verify
+              </span>
             </div>
             <div className="space-y-1.5 min-w-0">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-                <CheckCircle2 className="w-4 h-4" /> Verified Portal Record
+                <CheckCircle2 className="w-4 h-4" /> Scannable Verification QR
               </div>
               <p className="text-sm font-bold text-slate-900 line-clamp-2">{grievance.subject}</p>
               <SlaCountdownBadge dueDate={grievance.dueDate} status={grievance.status} />
@@ -151,13 +158,36 @@ export function VerificationSealModal({ grievance, onClose }) {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2.5 pt-2 border-t border-slate-100">
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
             <button
               type="button"
               onClick={handleDownloadReceipt}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-bold transition"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-bold transition"
             >
-              <Download className="w-4 h-4" /> Download Receipt (.txt)
+              <Download className="w-4 h-4" /> Receipt (.txt)
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadQrPng}
+              disabled={!qrDataUrl}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 text-indigo-700 border border-indigo-200 text-xs font-bold transition"
+            >
+              <Download className="w-4 h-4" /> Save QR
+            </button>
+            <button
+              type="button"
+              onClick={handleCopyUrl}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
+            >
+              {copiedUrl ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-600" /> Copied
+                </>
+              ) : (
+                <>
+                  <Link2 className="w-4 h-4" /> Copy Link
+                </>
+              )}
             </button>
             <button
               type="button"
@@ -165,7 +195,7 @@ export function VerificationSealModal({ grievance, onClose }) {
                 onClose();
                 setTimeout(() => window.print(), 120);
               }}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
             >
               <Printer className="w-4 h-4" /> Print PDF
             </button>
