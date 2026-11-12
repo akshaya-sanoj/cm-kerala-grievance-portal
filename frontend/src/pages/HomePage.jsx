@@ -28,32 +28,47 @@ const WORKFLOW_STEPS = [
   {
     step: '01',
     short: 'Submit',
+    shortMl: 'സമർപ്പണം',
     title: 'Citizen Submits Grievance',
-    desc: 'Select Kerala district, category, upload supporting photo/PDF, and preview Gemini AI triage suggestions.'
+    titleMl: 'പൗരൻ പരാതി സമർപ്പിക്കുന്നു',
+    desc: 'Select Kerala district, category, upload supporting photo/PDF, and preview Gemini AI triage suggestions.',
+    descMl: 'ജില്ല, വിഭാഗം, ഫോട്ടോ/PDF രേഖകൾ എന്നിവ നൽകി Gemini AI നിർദ്ദേശങ്ങൾ പരിശോധിക്കുക.'
   },
   {
     step: '02',
     short: 'Ref ID & AI',
+    shortMl: 'Ref ID & AI',
     title: 'Unique Reference ID & AI Triage',
-    desc: 'System issues an instant tracking code (e.g., KL-CMO-2026-100101), runs Gemini triage, and computes SLA dates.'
+    titleMl: 'തനതായ Reference ID & AI സഹായം',
+    desc: 'System issues an instant tracking code (e.g., KL-CMO-2026-100101), runs Gemini triage, and computes SLA dates.',
+    descMl: 'ഉടൻ തന്നെ ട്രാക്കിംഗ് കോഡും (KL-CMO-2026-100101) SLA സമയപരിധിയും ലഭിക്കുന്നു.'
   },
   {
     step: '03',
     short: 'CMO Route',
+    shortMl: 'CMO കൈമാറ്റം',
     title: 'CMO Reviews & Forwards',
-    desc: 'CMO verifies AI summary & potential duplicate flags, adds remarks, and routes to the relevant department.'
+    titleMl: 'CMO പരിശോധിച്ച് കൈമാറുന്നു',
+    desc: 'CMO verifies AI summary & potential duplicate flags, adds remarks, and routes to the relevant department.',
+    descMl: 'CMO കുറിപ്പുകൾ ചേർത്ത് ബന്ധപ്പെട്ട സർക്കാർ വകുപ്പിലേക്ക് പരാതി അയയ്ക്കുന്നു.'
   },
   {
     step: '04',
     short: 'Field ATR',
+    shortMl: 'വകുപ്പ് ATR',
     title: 'Department Investigates & Submits ATR',
-    desc: 'Assigned officer logs field updates and uploads an Action-Taken Report (ATR) back to the CMO.'
+    titleMl: 'വകുപ്പ് അന്വേഷിച്ച് ATR നൽകുന്നു',
+    desc: 'Assigned officer logs field updates and uploads an Action-Taken Report (ATR) back to the CMO.',
+    descMl: 'ഉദ്യോഗസ്ഥൻ ഫീൽഡ് പരിശോധന നടത്തി Action-Taken Report (ATR) സമർപ്പിക്കുന്നു.'
   },
   {
     step: '05',
     short: 'Verified',
+    shortMl: 'തീർപ്പാക്കൽ',
     title: 'Verify, Rate or Reopen',
-    desc: 'CMO approves closure; citizen rates service or reopens the grievance if unresolved on ground.'
+    titleMl: 'പരിശോധന, റേറ്റിംഗ് / വീണ്ടും തുറക്കൽ',
+    desc: 'CMO approves closure; citizen rates service or reopens the grievance if unresolved on ground.',
+    descMl: 'CMO തീർപ്പാക്കിയാൽ പൗരന് സേവനം വിലയിരുത്താനോ ആവശ്യമെങ്കിൽ വീണ്ടും തുറക്കാനോ സാധിക്കും.'
   }
 ];
 
@@ -61,18 +76,21 @@ const AI_PRESETS = [
   {
     id: 'road',
     label: 'Road Cave-in',
+    labelMl: 'റോഡ് തകർച്ച',
     district: 'Ernakulam',
     text: 'Severe culvert collapse and deep potholes near Kakkanad Infopark junction causing commuter accidents for two weeks.'
   },
   {
     id: 'power',
     label: 'Transformer Sparking',
+    labelMl: 'ട്രാൻസ്‌ഫോമർ തകരാർ',
     district: 'Thrissur',
     text: 'Leaning 11kV electric pole and sparking fuse box right beside Ollur school bus stop creating electrocution danger.'
   },
   {
     id: 'water',
     label: 'Tap Water Contamination',
+    labelMl: 'കുടിവെള്ള മലിനീകരണം',
     district: 'Thiruvananthapuram',
     text: 'Muddy tap water with foul odor in Kazhakkoottam Ward 4 after nearby road excavation ruptured a pipe.'
   }
@@ -86,7 +104,7 @@ const PLACEHOLDER_REFS = [
 
 export function HomePage() {
   const { user } = useAuth();
-  const { t } = usePreferences();
+  const { t, tr, tDistrict, tCategory, tStatus } = usePreferences();
   const navigate = useNavigate();
   const [refInput, setRefInput] = useState('');
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -313,7 +331,7 @@ export function HomePage() {
             <div className="pt-2">
               <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-2 flex items-center gap-1.5">
                 <Radio className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                Real-Time Redressal Pipeline
+                {tr('Real-Time Redressal Pipeline', 'തത്സമയ പരാതി പരിഹാര ഘട്ടങ്ങൾ')}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                 {WORKFLOW_STEPS.map((st, idx) => {
@@ -339,7 +357,9 @@ export function HomePage() {
                       >
                         {st.step}
                       </span>
-                      <span className="text-[11px] font-semibold truncate block">{st.short}</span>
+                      <span className="text-[11px] font-semibold truncate block">
+                        {tr(st.short, st.shortMl)}
+                      </span>
                     </button>
                   );
                 })}
@@ -358,7 +378,7 @@ export function HomePage() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                   </span>
-                  Live Lookup
+                  {tr('Live Lookup', 'തത്സമയ പരിശോധന')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mb-5">{t.quickTrackSub}</p>
@@ -379,7 +399,9 @@ export function HomePage() {
                 </button>
               </form>
               <div className="mt-5 pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-500 mb-2">Sample Demo Reference IDs:</p>
+                <p className="text-xs text-slate-500 mb-2">
+                  {tr('Sample Demo Reference IDs:', 'സാമ്പിൾ ഡെമോ Reference ID-കൾ:')}
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {['KL-CMO-2026-100101', 'KL-CMO-2026-100103', 'KL-CMO-2026-100105'].map((id) => (
                     <button
@@ -403,36 +425,36 @@ export function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           <StatCard
             icon={<TrendingUp className="w-5 h-5 text-indigo-600" />}
-            label="Total Grievances"
+            label={tr('Total Grievances', 'ആകെ പരാതികൾ')}
             value={stats.totalGrievances}
-            sub="Synced live from MongoDB"
+            sub={tr('Synced live from MongoDB', 'തത്സമയ ഡാറ്റാബേസ് കണക്ക്')}
             barColor="bg-indigo-600"
             barPct={100}
             delayMs={0}
           />
           <StatCard
             icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
-            label="Resolved"
+            label={tr('Resolved', 'പരിഹരിച്ചവ')}
             value={stats.resolvedGrievances}
-            sub={`${resolutionRate}% closure rate`}
+            sub={`${resolutionRate}% ${tr('closure rate', 'പരിഹാര നിരക്ക്')}`}
             barColor="bg-emerald-500"
             barPct={Math.max(18, resolutionRate)}
             delayMs={90}
           />
           <StatCard
             icon={<Clock className="w-5 h-5 text-amber-600" />}
-            label="Active / In Progress"
+            label={tr('Active / In Progress', 'നടപടിയിലുള്ളവ')}
             value={stats.inProgressGrievances + (stats.submittedGrievances || 0)}
-            sub="Monitored under SLA"
+            sub={tr('Monitored under SLA', 'SLA നിരീക്ഷണത്തിൽ')}
             barColor="bg-amber-500"
             barPct={68}
             delayMs={180}
           />
           <StatCard
             icon={<Building2 className="w-5 h-5 text-sky-600" />}
-            label="Departments"
+            label={tr('Departments', 'സർക്കാർ വകുപ്പുകൾ')}
             value={stats.activeDepartments}
-            sub={`Avg rating ${stats.averageRating}/5`}
+            sub={`${tr('Avg rating', 'ശരാശരി റേറ്റിംഗ്')} ${stats.averageRating}/5`}
             barColor="bg-sky-500"
             barPct={92}
             delayMs={270}
@@ -448,7 +470,7 @@ export function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-900 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-900" />
             </span>
-            Live Ticker
+            {tr('Live Ticker', 'ലൈവ് അപ്ഡേറ്റുകൾ')}
           </div>
           <div className="overflow-hidden flex-1 min-w-0 py-2">
             <div className="animate-marquee flex items-center gap-6 px-4">
@@ -460,10 +482,10 @@ export function HomePage() {
                 >
                   <span className="font-mono font-bold text-amber-300">{item.referenceId}</span>
                   <span className="text-slate-500">•</span>
-                  <span className="font-semibold text-white">{item.district}</span>
+                  <span className="font-semibold text-white">{tDistrict(item.district)}</span>
                   <span className="text-slate-400 max-w-[220px] truncate">{item.subject}</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-indigo-200 border border-white/10">
-                    {item.status}
+                    {tStatus(item.status)}
                   </span>
                 </Link>
               ))}
@@ -494,11 +516,12 @@ export function HomePage() {
                 >
                   {autoPlaySteps ? (
                     <>
-                      <Pause className="w-3.5 h-3.5 text-indigo-600" /> Auto-Playing
+                      <Pause className="w-3.5 h-3.5 text-indigo-600" /> {tr('Auto-Playing', 'ഓട്ടോ-പ്ലേ')}
                     </>
                   ) : (
                     <>
-                      <Play className="w-3.5 h-3.5 text-indigo-600" /> Resume Auto-Play
+                      <Play className="w-3.5 h-3.5 text-indigo-600" />{' '}
+                      {tr('Resume Auto-Play', 'വീണ്ടും പ്ലേ ചെയ്യുക')}
                     </>
                   )}
                 </button>
@@ -540,7 +563,7 @@ export function HomePage() {
                           >
                             {item.step}
                           </span>
-                          <span className="font-bold text-sm">{item.title}</span>
+                          <span className="font-bold text-sm">{tr(item.title, item.titleMl)}</span>
                         </div>
                         {isActive && (
                           <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
@@ -548,7 +571,7 @@ export function HomePage() {
                       </div>
                       {isActive && (
                         <p className="animate-slide-down text-xs text-slate-300 mt-2 pl-10 leading-relaxed">
-                          {item.desc}
+                          {tr(item.desc, item.descMl)}
                         </p>
                       )}
                     </button>
@@ -575,8 +598,8 @@ export function HomePage() {
                     }`}
                   >
                     {aiPreview.isFallback
-                      ? `Fallback (${aiPreview.model})`
-                      : `Live Gemini (${aiPreview.model})`}
+                      ? `${tr('Fallback', 'ഫോൾബാക്ക്')} (${aiPreview.model})`
+                      : `${tr('Live Gemini', 'ലൈവ് Gemini')} (${aiPreview.model})`}
                   </span>
                 )}
               </div>
@@ -593,7 +616,7 @@ export function HomePage() {
                     }}
                     className="px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-800 border-slate-200 transition active:scale-[0.97]"
                   >
-                    {p.label}
+                    {tr(p.label, p.labelMl)}
                   </button>
                 ))}
               </div>
@@ -602,7 +625,10 @@ export function HomePage() {
                 rows={3}
                 value={aiText}
                 onChange={(e) => setAiText(e.target.value)}
-                placeholder="Type any Kerala civic complaint to test live Gemini AI classification..."
+                placeholder={tr(
+                  'Type any Kerala civic complaint to test live Gemini AI classification...',
+                  'Gemini AI പരിശോധനയ്ക്കായി ഏതെങ്കിലും പരാതി വിവരണം ഇവിടെ ടൈപ്പ് ചെയ്യുക...'
+                )}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
               />
 
@@ -615,7 +641,7 @@ export function HomePage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span className="text-xs text-slate-500 inline-flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                  District: <strong>{aiDistrict}</strong>
+                  {tr('District:', 'ജില്ല:')} <strong>{tDistrict(aiDistrict)}</strong>
                 </span>
                 <button
                   type="button"
@@ -624,7 +650,9 @@ export function HomePage() {
                   className="btn-shimmer inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60 text-amber-300 text-xs font-bold transition"
                 >
                   <Sparkles className={`w-3.5 h-3.5 ${aiLoading ? 'animate-spin' : ''}`} />
-                  {aiLoading ? 'Analyzing with Gemini...' : 'Run Live AI Preview'}
+                  {aiLoading
+                    ? tr('Analyzing with Gemini...', 'Gemini AI വിശകലനം ചെയ്യുന്നു...')
+                    : tr('Run Live AI Preview', 'തത്സമയ AI പരിശോധന നടത്തുക')}
                 </button>
               </div>
 
@@ -633,7 +661,7 @@ export function HomePage() {
                   <div className="grid sm:grid-cols-3 gap-2.5 text-xs">
                     <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3">
                       <span className="text-[10px] font-bold uppercase text-indigo-700 block">
-                        Department
+                        {tr('Department', 'വകുപ്പ്')}
                       </span>
                       <span className="font-bold text-slate-900">
                         {aiPreview.suggestedDepartmentName}
@@ -641,13 +669,15 @@ export function HomePage() {
                     </div>
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <span className="text-[10px] font-bold uppercase text-slate-500 block">
-                        Category
+                        {tr('Category', 'വിഭാഗം')}
                       </span>
-                      <span className="font-bold text-slate-900">{aiPreview.suggestedCategory}</span>
+                      <span className="font-bold text-slate-900">
+                        {tCategory(aiPreview.suggestedCategory)}
+                      </span>
                     </div>
                     <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
                       <span className="text-[10px] font-bold uppercase text-amber-800 block">
-                        Priority
+                        {tr('Priority', 'മുൻഗണന')}
                       </span>
                       <div className="mt-1">
                         <PriorityBadge priority={aiPreview.recommendedPriority} />
@@ -655,7 +685,7 @@ export function HomePage() {
                     </div>
                   </div>
                   <p className="text-xs text-slate-700 bg-slate-50 rounded-xl p-3 border border-slate-200">
-                    <strong>CMO Summary:</strong> {aiPreview.summary}
+                    <strong>{tr('CMO Summary:', 'CMO സംഗ്രഹം:')}</strong> {aiPreview.summary}
                   </p>
                   <div className="flex justify-end">
                     <Link
@@ -668,7 +698,8 @@ export function HomePage() {
                       }
                       className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:text-indigo-900"
                     >
-                      Submit this grievance in portal <ArrowRight className="w-3.5 h-3.5" />
+                      {tr('Submit this grievance in portal', 'ഈ പരാതി പോർട്ടലിൽ സമർപ്പിക്കുക')}{' '}
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>
@@ -681,21 +712,27 @@ export function HomePage() {
             <div className="grid lg:grid-cols-12 gap-6 items-center">
               <div className="lg:col-span-5 min-w-0 space-y-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-                  <Compass className="w-4 h-4" /> Instant Routing &amp; SLA Estimator
+                  <Compass className="w-4 h-4" />{' '}
+                  {tr('Instant Routing & SLA Estimator', 'വകുപ്പും SLA സമയപരിധിയും കണക്കാക്കാം')}
                 </p>
                 <h3 className="text-xl sm:text-2xl font-extrabold">
-                  Check Target Resolution Time Before Submitting
+                  {tr(
+                    'Check Target Resolution Time Before Submitting',
+                    'സമർപ്പിക്കുന്നതിന് മുൻപ് പരിഹാര സമയപരിധി അറിയുക'
+                  )}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300">
-                  Pick your Kerala district and issue category to preview the responsible nodal
-                  department and committed SLA window.
+                  {tr(
+                    'Pick your Kerala district and issue category to preview the responsible nodal department and committed SLA window.',
+                    'ജില്ലയും പരാതി വിഭാഗവും തിരഞ്ഞെടുത്താൽ ഉത്തരവാദപ്പെട്ട വകുപ്പും പ്രതീക്ഷിത പരിഹാര തീയതിയും അറിയാം.'
+                  )}
                 </p>
               </div>
               <div className="lg:col-span-7 min-w-0 bg-white text-slate-900 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
-                      Kerala District
+                      {tr('Kerala District', 'ജില്ല')}
                     </label>
                     <select
                       value={estDistrict}
@@ -707,14 +744,14 @@ export function HomePage() {
                         : ['Thiruvananthapuram', 'Ernakulam', 'Kozhikode']
                       ).map((d) => (
                         <option key={d} value={d}>
-                          {d}
+                          {tDistrict(d)}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
-                      Issue Category
+                      {tr('Issue Category', 'പരാതി വിഭാഗം')}
                     </label>
                     <select
                       value={estCategory}
@@ -726,7 +763,7 @@ export function HomePage() {
                         : ['Public Infrastructure', 'Healthcare', 'Electricity & Power']
                       ).map((c) => (
                         <option key={c} value={c}>
-                          {c}
+                          {tCategory(c)}
                         </option>
                       ))}
                     </select>
@@ -746,7 +783,8 @@ export function HomePage() {
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-600">
-                        SLA: <strong>{matchedDepartment.slaDays} days</strong> • Target Completion:{' '}
+                        SLA: <strong>{matchedDepartment.slaDays} {tr('days', 'ദിവസം')}</strong> •{' '}
+                        {tr('Target Completion:', 'ലക്ഷ്യ തീയതി:')}{' '}
                         <strong className="text-indigo-700">{estimatedDueText}</strong>
                       </p>
                     </div>
@@ -760,7 +798,7 @@ export function HomePage() {
                       }
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition"
                     >
-                      Start Submission <ArrowRight className="w-3.5 h-3.5" />
+                      {tr('Start Submission', 'സമർപ്പിക്കുക')} <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 )}
@@ -778,11 +816,11 @@ export function HomePage() {
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
                   </span>
                   <h3 className="text-sm font-bold text-slate-900">
-                    Live Public Grievance Activity
+                    {tr('Live Public Grievance Activity', 'തത്സമയ പൊതുജന പരാതി വിവരങ്ങൾ')}
                   </h3>
                 </div>
                 <Link to="/track" className="text-xs font-semibold text-indigo-700 hover:underline">
-                  Track any ID →
+                  {tr('Track any ID →', 'ഏത് ID-യും പരിശോധിക്കുക →')}
                 </Link>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -801,7 +839,7 @@ export function HomePage() {
                       <p className="text-xs font-semibold text-slate-900 line-clamp-1">
                         {item.subject}
                       </p>
-                      <p className="text-[11px] text-slate-500 mt-1">{item.district}</p>
+                      <p className="text-[11px] text-slate-500 mt-1">{tDistrict(item.district)}</p>
                     </Link>
                   </Reveal>
                 ))}
@@ -827,7 +865,8 @@ export function HomePage() {
               to="/departments"
               className="text-sm font-semibold text-indigo-700 hover:text-indigo-900 inline-flex items-center gap-1"
             >
-              View all departments &amp; 14 districts <ArrowRight className="w-4 h-4" />
+              {tr('View all departments & 14 districts', 'എല്ലാ വകുപ്പുകളും 14 ജില്ലകളും കാണുക')}{' '}
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -841,7 +880,7 @@ export function HomePage() {
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <DepartmentBadge code={dept.code} />
                         <span className="text-xs text-slate-500 font-semibold">
-                          SLA: {dept.slaDays} days
+                          SLA: {dept.slaDays} {tr('days', 'ദിവസം')}
                         </span>
                       </div>
                       <h3 className="font-bold text-slate-900 mb-2">{dept.name}</h3>
@@ -849,9 +888,9 @@ export function HomePage() {
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500">
-                        <span>SLA Response Speed</span>
+                        <span>{tr('SLA Response Speed', 'SLA പ്രതികരണ വേഗത')}</span>
                         <span className="text-indigo-700">
-                          {dept.slaDays <= 3 ? 'Rapid' : 'Standard'}
+                          {dept.slaDays <= 3 ? tr('Rapid', 'അതിവേഗം') : tr('Standard', 'സാധാരണം')}
                         </span>
                       </div>
                       <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">

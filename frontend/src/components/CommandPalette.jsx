@@ -13,6 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { getDashboardPathForRole } from '../utils/formatters.js';
 
 const SAMPLE_IDS = [
@@ -25,6 +26,7 @@ const SAMPLE_IDS = [
 
 export function CommandPalette({ open, onClose }) {
   const { user } = useAuth();
+  const { tr } = usePreferences();
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const [query, setQuery] = useState('');
@@ -42,43 +44,46 @@ export function CommandPalette({ open, onClose }) {
     const base = [
       {
         id: 'home',
-        label: 'Home & Live AI Sandbox',
-        sub: 'Overview metrics, AI preview & district feed',
+        label: tr('Home & Live AI Sandbox', 'ഹോം & ലൈവ് AI സാൻഡ്‌ബോക്സ്'),
+        sub: tr('Overview metrics, AI preview & district feed', 'പ്രധാന വിവരങ്ങൾ, AI പരിശോധന & ജില്ലാ ഫീഡ്'),
         to: '/',
         icon: Compass
       },
       {
         id: 'track',
-        label: 'Track Grievance Status',
-        sub: 'Public verification by Reference ID',
+        label: tr('Track Grievance Status', 'പരാതി തൽസ്ഥിതി പരിശോധിക്കുക'),
+        sub: tr('Public verification by Reference ID', 'Reference ID ഉപയോഗിച്ച് തത്സമയം പരിശോധിക്കുക'),
         to: '/track',
         icon: Search
       },
       {
         id: 'departments',
-        label: 'Departments & 14 Kerala Districts',
-        sub: 'SLA comparison, map explorer & nodal wings',
+        label: tr('Departments & 14 Kerala Districts', 'വകുപ്പുകളും 14 ജില്ലകളും'),
+        sub: tr('SLA comparison, map explorer & nodal wings', 'SLA സമയപരിധിയും ജില്ലാ വിവരങ്ങളും'),
         to: '/departments',
         icon: Building2
       },
       {
         id: 'submit',
-        label: 'Submit New Grievance',
-        sub: user?.role === 'citizen' ? 'Launch grievance wizard' : 'Sign in or register as citizen',
+        label: tr('Submit New Grievance', 'പുതിയ പരാതി സമർപ്പിക്കുക'),
+        sub:
+          user?.role === 'citizen'
+            ? tr('Launch grievance wizard', 'പരാതി ഫോം തുറക്കുക')
+            : tr('Sign in or register as citizen', 'പൗരനായി ലോഗിൻ അല്ലെങ്കിൽ രജിസ്റ്റർ ചെയ്യുക'),
         to: user?.role === 'citizen' ? '/citizen/submit' : '/register',
         icon: FilePlus2
       },
       {
         id: 'how',
-        label: 'How Redressal Works',
-        sub: '5-stage mandatory CMO & officer lifecycle',
+        label: tr('How Redressal Works', 'പരാതി പരിഹാര രീതി'),
+        sub: tr('5-stage mandatory CMO & officer lifecycle', '5-ഘട്ട CMO നടപടിക്രമം'),
         to: '/how-it-works',
         icon: Sparkles
       },
       {
         id: 'faq',
-        label: 'FAQ & SLA Rules',
-        sub: 'Escalation matrix & prototype guidelines',
+        label: tr('FAQ & SLA Rules', 'ചോദ്യോത്തരങ്ങളും SLA നിയമങ്ങളും'),
+        sub: tr('Escalation matrix & prototype guidelines', 'പതിവ് ചോദ്യങ്ങളും മാർഗ്ഗനിർദ്ദേശങ്ങളും'),
         to: '/faq',
         icon: HelpCircle
       }
@@ -87,16 +92,19 @@ export function CommandPalette({ open, onClose }) {
     if (user) {
       base.unshift({
         id: 'dash',
-        label: `Open My ${user.role === 'cmo_admin' ? 'CMO' : user.role === 'department_officer' ? 'Officer' : 'Citizen'} Dashboard`,
-        sub: `Signed in as ${user.name}`,
+        label: tr(
+          `Open My ${user.role === 'cmo_admin' ? 'CMO' : user.role === 'department_officer' ? 'Officer' : 'Citizen'} Dashboard`,
+          'എന്റെ ഡാഷ്ബോർഡ് തുറക്കുക'
+        ),
+        sub: `${tr('Signed in as', 'ലോഗിൻ ചെയ്തത്:')} ${user.name}`,
         to: getDashboardPathForRole(user.role),
         icon: LayoutDashboard
       });
     } else {
       base.push({
         id: 'login',
-        label: 'Evaluator Demo Login (Citizen / CMO / Officer)',
-        sub: 'One-click auto-fill credentials',
+        label: tr('Evaluator Demo Login (Citizen / CMO / Officer)', 'ഡെമോ ലോഗിൻ (പൗരൻ / CMO / ഉദ്യോഗസ്ഥൻ)'),
+        sub: tr('One-click auto-fill credentials', 'ഒറ്റ ക്ലിക്കിൽ ടെസ്റ്റ് അക്കൗണ്ടുകൾ'),
         to: '/login',
         icon: LogIn
       });
@@ -185,7 +193,10 @@ export function CommandPalette({ open, onClose }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Jump to page or enter Reference ID (e.g. KL-CMO-2026-100101)..."
+            placeholder={tr(
+              'Jump to page or enter Reference ID (e.g. KL-CMO-2026-100101)...',
+              'പേജിലേക്ക് പോകുക അല്ലെങ്കിൽ Reference ID നൽകുക (KL-CMO-2026-100101)...'
+            )}
             className="flex-1 bg-transparent text-sm text-slate-900 placeholder-slate-400 outline-none"
           />
           <button
@@ -242,9 +253,9 @@ export function CommandPalette({ open, onClose }) {
         </div>
 
         <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Use ↑ ↓ arrows &amp; Enter to navigate</span>
+          <span>{tr('Use ↑ ↓ arrows & Enter to navigate', '↑ ↓ ആരോ കീകളും Enter-ഉം ഉപയോഗിക്കുക')}</span>
           <span className="font-mono bg-white border border-slate-200 px-1.5 py-0.5 rounded">
-            Esc to close
+            {tr('Esc to close', 'Esc അമർത്തുക')}
           </span>
         </div>
       </div>

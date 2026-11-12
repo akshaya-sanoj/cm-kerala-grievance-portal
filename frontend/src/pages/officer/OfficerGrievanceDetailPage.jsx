@@ -14,9 +14,11 @@ import { AttachmentList } from '../../components/AttachmentList.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { StatusStepper } from '../../components/StatusStepper.jsx';
 import { Timeline } from '../../components/Timeline.jsx';
+import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
 export function OfficerGrievanceDetailPage() {
+  const { tr, tDistrict, tCategory, tStage } = usePreferences();
   const { id } = useParams();
   const [grievance, setGrievance] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -118,14 +120,15 @@ export function OfficerGrievanceDetailPage() {
           to="/officer/dashboard"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-900"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Officer Queue
+          <ArrowLeft className="w-4 h-4" />{' '}
+          {tr('Back to Officer Queue', 'ഉദ്യോഗസ്ഥ ഡാഷ്ബോർഡിലേക്ക് മടങ്ങുക')}
         </Link>
         <button
           type="button"
           onClick={() => window.print()}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
         >
-          <Printer className="w-3.5 h-3.5" /> Print Record
+          <Printer className="w-3.5 h-3.5" /> {tr('Print Record', 'പ്രിന്റ് എടുക്കുക')}
         </button>
       </div>
 
@@ -146,7 +149,8 @@ export function OfficerGrievanceDetailPage() {
             <p className="font-mono text-xs font-bold text-indigo-600">{grievance.referenceId}</p>
             <h1 className="text-2xl font-extrabold text-slate-900 mt-1">{grievance.subject}</h1>
             <p className="text-xs text-slate-500 mt-1">
-              Citizen: {grievance.citizenId?.name} • {grievance.district} • {grievance.category}
+              {tr('Citizen:', 'പൗരൻ:')} {grievance.citizenId?.name} •{' '}
+              {tDistrict(grievance.district)} • {tCategory(grievance.category)}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -154,7 +158,7 @@ export function OfficerGrievanceDetailPage() {
             <PriorityBadge priority={grievance.priority} />
             {grievance.isEscalated && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
-                <AlertTriangle className="w-3 h-3" /> Escalated
+                <AlertTriangle className="w-3 h-3" /> {tr('Escalated', 'അടിയന്തിരം')}
               </span>
             )}
           </div>
@@ -164,11 +168,12 @@ export function OfficerGrievanceDetailPage() {
 
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs flex flex-wrap justify-between gap-2">
           <span>
-            <strong>Workflow Stage:</strong> {grievance.workflowStage}
+            <strong>{tr('Workflow Stage:', 'നിലവിലെ ഘട്ടം:')}</strong>{' '}
+            {tStage(grievance.workflowStage)}
           </span>
           <span className={grievance.isOverdue ? 'text-rose-700 font-bold' : 'text-slate-700'}>
-            <strong>Target SLA Due:</strong> {formatDate(grievance.dueDate)}{' '}
-            {grievance.isOverdue ? '(Overdue)' : ''}
+            <strong>{tr('Target SLA Due:', 'ലക്ഷ്യ SLA തീയതി:')}</strong> {formatDate(grievance.dueDate)}{' '}
+            {grievance.isOverdue ? `(${tr('Overdue', 'കാലാവധി കഴിഞ്ഞു')})` : ''}
           </span>
         </div>
 
@@ -188,10 +193,16 @@ export function OfficerGrievanceDetailPage() {
           >
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <ClipboardEdit className="w-4 h-4 text-sky-700" />
-              Update Progress & Investigation Remarks
+              {tr(
+                'Update Progress & Investigation Remarks',
+                'അന്വേഷണ പുരോഗതിയും കുറിപ്പുകളും ചേർക്കുക'
+              )}
             </h2>
             <p className="text-xs text-slate-500">
-              Marks status as <strong>In Progress</strong> and logs field inspection remarks.
+              {tr(
+                'Marks status as In Progress and logs field inspection remarks.',
+                'പരാതി "നടപടി പുരോഗതിയിൽ" എന്നാക്കുകയും ഫീൽഡ് പരിശോധനാ വിവരങ്ങൾ രേഖപ്പെടുത്തുകയും ചെയ്യുന്നു.'
+              )}
             </p>
             <textarea
               required
@@ -199,7 +210,10 @@ export function OfficerGrievanceDetailPage() {
               rows={4}
               value={investigationNote}
               onChange={(e) => setInvestigationNote(e.target.value)}
-              placeholder="Enter field visit findings, verification status, or scheduled repair date..."
+              placeholder={tr(
+                'Enter field visit findings, verification status, or scheduled repair date...',
+                'ഫീൽഡ് പരിശോധനയിൽ കണ്ടെത്തിയ കാര്യങ്ങൾ എഴുതുക...'
+              )}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm"
             />
             <button
@@ -207,7 +221,7 @@ export function OfficerGrievanceDetailPage() {
               disabled={busy}
               className="px-4 py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-semibold"
             >
-              Mark In Progress & Save Remarks
+              {tr('Mark In Progress & Save Remarks', 'പുരോഗതി രേഖപ്പെടുത്തി സേവ് ചെയ്യുക')}
             </button>
           </form>
 
@@ -217,11 +231,13 @@ export function OfficerGrievanceDetailPage() {
           >
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <FileCheck2 className="w-4 h-4 text-emerald-700" />
-              Submit Action-Taken Report (ATR) to CMO
+              {tr('Submit Action-Taken Report (ATR) to CMO', 'CMO-യ്ക്ക് Action-Taken റിപ്പോർട്ട് (ATR) അയയ്ക്കുക')}
             </h2>
             <p className="text-xs text-slate-500">
-              Enter final action details and optional completion proof to submit back to the CMO
-              for closure review.
+              {tr(
+                'Enter final action details and optional completion proof to submit back to the CMO for closure review.',
+                'സ്വീകരിച്ച അന്തിമ നടപടികളും തെളിവുകളും CMO-യുടെ പരിശോധനയ്ക്കായി സമർപ്പിക്കുക.'
+              )}
             </p>
             <textarea
               required
@@ -229,17 +245,20 @@ export function OfficerGrievanceDetailPage() {
               rows={4}
               value={atrText}
               onChange={(e) => setAtrText(e.target.value)}
-              placeholder="Describe corrective action completed, work order numbers, and verification notes..."
+              placeholder={tr(
+                'Describe corrective action completed, work order numbers, and verification notes...',
+                'പൂർത്തിയാക്കിയ നടപടികളുടെ വിശദാംശങ്ങൾ നൽകുക...'
+              )}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm"
             />
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Upload ATR Document / Photo (Optional)
+                {tr('Upload ATR Document / Photo (Optional)', 'ATR രേഖ / ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുക')}
               </label>
               <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-slate-300 cursor-pointer text-xs text-slate-600 bg-slate-50">
                 <Paperclip className="w-4 h-4 text-indigo-600 shrink-0" />
                 <span className="truncate">
-                  {atrFile ? atrFile.name : 'Choose PDF, DOC, JPG, or PNG...'}
+                  {atrFile ? atrFile.name : tr('Choose PDF, DOC, JPG, or PNG...', 'ഫയൽ തിരഞ്ഞെടുക്കുക...')}
                 </span>
                 <input
                   type="file"
@@ -254,14 +273,16 @@ export function OfficerGrievanceDetailPage() {
               disabled={busy}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
             >
-              <Send className="w-3.5 h-3.5" /> Submit ATR to CMO
+              <Send className="w-3.5 h-3.5" /> {tr('Submit ATR to CMO', 'CMO-യ്ക്ക് ATR സമർപ്പിക്കുക')}
             </button>
           </form>
         </div>
       )}
 
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900 mb-4">Grievance Audit Timeline</h2>
+        <h2 className="text-lg font-bold text-slate-900 mb-4">
+          {tr('Grievance Audit Timeline', 'പരാതി ഓഡിറ്റ് ചരിത്രം')}
+        </h2>
         <Timeline history={grievance.history} />
       </div>
     </div>

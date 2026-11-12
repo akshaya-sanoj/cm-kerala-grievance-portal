@@ -5,9 +5,11 @@ import { api } from '../api/client.js';
 import { DepartmentBadge } from '../components/DepartmentBadge.jsx';
 import { KeralaDistrictExplorer } from '../components/KeralaDistrictExplorer.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 
 export function DepartmentsPage() {
   const { user } = useAuth();
+  const { tr, tCategory } = usePreferences();
   const [departments, setDepartments] = useState([]);
   const [search, setSearch] = useState('');
   const [slaFilter, setSlaFilter] = useState('all');
@@ -42,18 +44,24 @@ export function DepartmentsPage() {
       <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2 max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
-            Nodal Agencies Directory
+            {tr('Nodal Agencies Directory', 'നോഡൽ ഏജൻസി ഡയറക്ടറി')}
           </p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold">Government Departments</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold">
+            {tr('Government Departments', 'സർക്കാർ വകുപ്പുകൾ')}
+          </h1>
           <p className="text-slate-300 text-sm sm:text-base">
-            Filter participating Kerala departments, compare target SLA timelines, and launch a
-            pre-filled grievance submission directly.
+            {tr(
+              'Filter participating Kerala departments, compare target SLA timelines, and launch a pre-filled grievance submission directly.',
+              'കേരളത്തിലെ സർക്കാർ വകുപ്പുകളും SLA സമയപരിധിയും പരിശോധിച്ച് നേരിട്ട് പരാതി സമർപ്പിക്കാം.'
+            )}
           </p>
         </div>
 
         <div className="bg-white/10 backdrop-blur border border-white/15 rounded-2xl px-4 py-3 text-xs">
-          <span className="text-amber-300 font-bold block">{departments.length} Active Wings</span>
-          <span className="text-slate-200">Connected to CMO Routing</span>
+          <span className="text-amber-300 font-bold block">
+            {departments.length} {tr('Active Wings', 'സജീവ വിഭാഗങ്ങൾ')}
+          </span>
+          <span className="text-slate-200">{tr('Connected to CMO Routing', 'CMO റൂട്ടിംഗുമായി ബന്ധിപ്പിച്ചത്')}</span>
         </div>
       </div>
 
@@ -61,9 +69,9 @@ export function DepartmentsPage() {
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-1.5">
           {[
-            { id: 'all', label: 'All Departments' },
-            { id: 'fast', label: 'Rapid SLA (≤ 3 days)' },
-            { id: 'standard', label: 'Standard SLA (5–10 days)' }
+            { id: 'all', label: tr('All Departments', 'എല്ലാ വകുപ്പുകളും') },
+            { id: 'fast', label: tr('Rapid SLA (≤ 3 days)', 'അതിവേഗ SLA (≤ 3 ദിവസം)') },
+            { id: 'standard', label: tr('Standard SLA (5–10 days)', 'സാധാരണ SLA (5–10 ദിവസം)') }
           ].map((opt) => (
             <button
               key={opt.id}
@@ -86,7 +94,7 @@ export function DepartmentsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search department, code, or issue..."
+            placeholder={tr('Search department, code, or issue...', 'വകുപ്പ്, കോഡ് അല്ലെങ്കിൽ വിഷയം തിരയുക...')}
             className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-600 outline-none"
           />
         </div>
@@ -131,7 +139,7 @@ export function DepartmentsPage() {
                       }`}
                     >
                       <Clock className="w-3 h-3" />
-                      SLA: {dept.slaDays} days
+                      SLA: {dept.slaDays} {tr('days', 'ദിവസം')}
                     </span>
                   </div>
                   <h2 className="text-lg font-bold text-slate-900 mb-2">{dept.name}</h2>
@@ -139,7 +147,8 @@ export function DepartmentsPage() {
                 </div>
                 <div className="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
                   <p>
-                    <strong className="text-slate-700">Nodal Head:</strong> {dept.headDesignation}
+                    <strong className="text-slate-700">{tr('Nodal Head:', 'വകുപ്പ് മേധാവി:')}</strong>{' '}
+                    {dept.headDesignation}
                   </p>
                   {dept.categories?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
@@ -148,7 +157,7 @@ export function DepartmentsPage() {
                           key={cat}
                           className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium"
                         >
-                          {cat}
+                          {tCategory(cat)}
                         </span>
                       ))}
                     </div>
@@ -164,7 +173,8 @@ export function DepartmentsPage() {
                       to={targetHref}
                       className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:text-indigo-900"
                     >
-                      Submit grievance for {dept.code} <ArrowRight className="w-3.5 h-3.5" />
+                      {tr(`Submit grievance for ${dept.code}`, `${dept.code}-ലേക്ക് പരാതി സമർപ്പിക്കുക`)}{' '}
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>

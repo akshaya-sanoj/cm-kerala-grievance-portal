@@ -1,3 +1,5 @@
+import { usePreferences } from '../context/PreferencesContext.jsx';
+
 const STATUS_STYLES = {
   Submitted: 'bg-slate-100 text-slate-700 border-slate-300',
   'Under Review': 'bg-amber-50 text-amber-800 border-amber-300',
@@ -13,23 +15,25 @@ const PRIORITY_STYLES = {
 };
 
 export function StatusBadge({ status }) {
+  const { tStatus } = usePreferences();
   const cls = STATUS_STYLES[status] || 'bg-slate-100 text-slate-700 border-slate-200';
   return (
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cls}`}
     >
-      {status}
+      {tStatus(status)}
     </span>
   );
 }
 
 export function PriorityBadge({ priority }) {
+  const { tPriority } = usePreferences();
   const cls = PRIORITY_STYLES[priority] || 'bg-slate-100 text-slate-700 border-slate-200';
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${cls}`}
     >
-      {priority}
+      {tPriority(priority)}
     </span>
   );
 }

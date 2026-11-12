@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 
-function formatRemaining(dueDate, status, nowMs) {
+function formatRemaining(dueDate, status, nowMs, tr) {
   if (status === 'Resolved') {
     return {
-      label: 'SLA Closed',
+      label: tr('SLA Closed', 'SLA പൂർത്തിയാക്കി'),
       tone: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       icon: 'done',
       pulse: false
@@ -12,7 +13,7 @@ function formatRemaining(dueDate, status, nowMs) {
   }
   if (!dueDate) {
     return {
-      label: 'SLA Pending',
+      label: tr('SLA Pending', 'SLA തീയതി കാത്തിരിക്കുന്നു'),
       tone: 'bg-slate-100 text-slate-600 border-slate-200',
       icon: 'clock',
       pulse: false
@@ -22,7 +23,7 @@ function formatRemaining(dueDate, status, nowMs) {
   const diffMs = new Date(dueDate).getTime() - nowMs;
   if (Number.isNaN(diffMs)) {
     return {
-      label: 'SLA Tracked',
+      label: tr('SLA Tracked', 'SLA നിരീക്ഷണത്തിൽ'),
       tone: 'bg-slate-100 text-slate-600 border-slate-200',
       icon: 'clock',
       pulse: false
@@ -34,7 +35,10 @@ function formatRemaining(dueDate, status, nowMs) {
   const hours = absHours % 24;
 
   if (diffMs < 0) {
-    const text = days > 0 ? `Overdue ${days}d ${hours}h` : `Overdue ${Math.max(1, hours)}h`;
+    const text =
+      days > 0
+        ? tr(`Overdue ${days}d ${hours}h`, `${days}ദി ${hours}മ. വൈകി`)
+        : tr(`Overdue ${Math.max(1, hours)}h`, `${Math.max(1, hours)}മ. വൈകി`);
     return {
       label: text,
       tone: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -45,7 +49,7 @@ function formatRemaining(dueDate, status, nowMs) {
 
   if (absHours <= 24) {
     return {
-      label: `Due in ${Math.max(1, hours)}h`,
+      label: tr(`Due in ${Math.max(1, hours)}h`, `${Math.max(1, hours)}മ. ശേഷിക്കുന്നു`),
       tone: 'bg-amber-50 text-amber-800 border-amber-200',
       icon: 'clock',
       pulse: true
@@ -53,7 +57,7 @@ function formatRemaining(dueDate, status, nowMs) {
   }
 
   return {
-    label: `${days}d ${hours}h left`,
+    label: tr(`${days}d ${hours}h left`, `${days}ദി ${hours}മ. ബാക്കി`),
     tone: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     icon: 'clock',
     pulse: false
@@ -61,6 +65,7 @@ function formatRemaining(dueDate, status, nowMs) {
 }
 
 export function SlaCountdownBadge({ dueDate, status }) {
+  const { tr } = usePreferences();
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
@@ -68,7 +73,7 @@ export function SlaCountdownBadge({ dueDate, status }) {
     return () => clearInterval(timer);
   }, []);
 
-  const info = formatRemaining(dueDate, status, nowMs);
+  const info = formatRemaining(dueDate, status, nowMs, tr);
 
   return (
     <span

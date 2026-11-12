@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, MapPin, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { usePreferences } from '../context/PreferencesContext.jsx';
+
+const REGION_ML = {
+  All: 'എല്ലാം',
+  'South Kerala': 'തെക്കൻ കേരളം',
+  'Central Kerala': 'മധ്യ കേരളം',
+  'North Kerala': 'വടക്കൻ കേരളം'
+};
 
 const KERALA_REGIONS = [
   {
@@ -41,6 +49,7 @@ const ALL_DISTRICTS = KERALA_REGIONS.flatMap((r) =>
 
 export function KeralaDistrictExplorer() {
   const { user } = useAuth();
+  const { tr, tDistrict } = usePreferences();
   const [activeRegion, setActiveRegion] = useState('All');
   const [selectedDistrict, setSelectedDistrict] = useState(ALL_DISTRICTS[6]); // Ernakulam default
 
@@ -59,10 +68,10 @@ export function KeralaDistrictExplorer() {
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-            Interactive State Coverage
+            {tr('Interactive State Coverage', 'സംസ്ഥാനതല കവറേജ്')}
           </p>
           <h2 className="text-2xl font-extrabold text-slate-900 mt-1">
-            Explore All 14 Districts of Kerala
+            {tr('Explore All 14 Districts of Kerala', 'കേരളത്തിലെ 14 ജില്ലകളും പരിശോധിക്കുക')}
           </h2>
         </div>
 
@@ -78,7 +87,7 @@ export function KeralaDistrictExplorer() {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              {region}
+              {tr(region, REGION_ML[region])}
             </button>
           ))}
         </div>
@@ -100,7 +109,7 @@ export function KeralaDistrictExplorer() {
                 }`}
               >
                 <MapPin className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-300' : 'text-indigo-600'}`} />
-                {dist.name}
+                {tDistrict(dist.name)}
               </button>
             );
           })}
@@ -109,17 +118,19 @@ export function KeralaDistrictExplorer() {
         <div className="lg:col-span-4 rounded-2xl civic-gradient text-white p-5 space-y-4 shadow-lg">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
-              {selectedDistrict.region}
+              {tr(selectedDistrict.region, REGION_ML[selectedDistrict.region])}
             </span>
             <Shield className="w-4 h-4 text-indigo-300" />
           </div>
           <div>
-            <h3 className="text-xl font-extrabold">{selectedDistrict.name}</h3>
-            <p className="text-xs text-slate-300 mt-0.5">{selectedDistrict.hq} Desk</p>
+            <h3 className="text-xl font-extrabold">{tDistrict(selectedDistrict.name)}</h3>
+            <p className="text-xs text-slate-300 mt-0.5">
+              {selectedDistrict.hq} {tr('Desk', 'ഡെസ്ക്')}
+            </p>
           </div>
           <div className="bg-white/10 rounded-xl p-3 text-xs text-slate-200 border border-white/10">
             <span className="block text-[10px] uppercase tracking-wider text-amber-300 font-bold mb-1">
-              Key Redressal Focus
+              {tr('Key Redressal Focus', 'പ്രധാന ശ്രദ്ധാ മേഖലകൾ')}
             </span>
             {selectedDistrict.focus}
           </div>
@@ -127,7 +138,7 @@ export function KeralaDistrictExplorer() {
             to={submitUrl}
             className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition"
           >
-            File Grievance for {selectedDistrict.name}
+            {tr(`File Grievance for ${selectedDistrict.name}`, `${tDistrict(selectedDistrict.name)} ജില്ലയിൽ പരാതി നൽകുക`)}
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

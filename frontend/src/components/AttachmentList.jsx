@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Download, Eye, Paperclip, X } from 'lucide-react';
 import { api, downloadAttachmentFile } from '../api/client.js';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { formatFileSize } from '../utils/formatters.js';
 
 export function AttachmentList({ attachments = [] }) {
+  const { tr } = usePreferences();
   const [preview, setPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
@@ -44,7 +46,7 @@ export function AttachmentList({ attachments = [] }) {
   return (
     <div>
       <h2 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">
-        Attachments ({attachments.length})
+        {tr('Attachments', 'അനുബന്ധ രേഖകൾ')} ({attachments.length})
       </h2>
       <div className="flex flex-wrap gap-2">
         {attachments.map((att) => (
@@ -66,7 +68,7 @@ export function AttachmentList({ attachments = [] }) {
                 title="Preview attachment"
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-slate-200 hover:border-indigo-400 text-indigo-600 font-semibold"
               >
-                <Eye className="w-3 h-3" /> Preview
+                <Eye className="w-3 h-3" /> {tr('Preview', 'കാണുക')}
               </button>
             )}
             <button

@@ -1,13 +1,39 @@
 import { Check, RefreshCw } from 'lucide-react';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 
 const PRIMARY_STEPS = [
-  { key: 'Submitted', label: 'Submitted', sub: 'Logged & Ref ID Issued' },
-  { key: 'Under Review', label: 'Under Review', sub: 'CMO Screening / Routed' },
-  { key: 'In Progress', label: 'In Progress', sub: 'Officer Investigating / ATR' },
-  { key: 'Resolved', label: 'Resolved', sub: 'CMO Verified Closure' }
+  {
+    key: 'Submitted',
+    label: 'Submitted',
+    labelMl: 'സമർപ്പിച്ചു',
+    sub: 'Logged & Ref ID Issued',
+    subMl: 'പരാതിയും Ref ID-യും നൽകി'
+  },
+  {
+    key: 'Under Review',
+    label: 'Under Review',
+    labelMl: 'പരിശോധനയിൽ',
+    sub: 'CMO Screening / Routed',
+    subMl: 'CMO പരിശോധന / കൈമാറ്റം'
+  },
+  {
+    key: 'In Progress',
+    label: 'In Progress',
+    labelMl: 'നടപടിയിൽ',
+    sub: 'Officer Investigating / ATR',
+    subMl: 'ഉദ്യോഗസ്ഥ അന്വേഷണം / ATR'
+  },
+  {
+    key: 'Resolved',
+    label: 'Resolved',
+    labelMl: 'പരിഹരിച്ചു',
+    sub: 'CMO Verified Closure',
+    subMl: 'CMO പരിശോധിച്ച് തീർപ്പാക്കി'
+  }
 ];
 
 export function StatusStepper({ status }) {
+  const { tr } = usePreferences();
   const isReopened = status === 'Reopened';
   const activeIndex = isReopened
     ? 1
@@ -21,14 +47,17 @@ export function StatusStepper({ status }) {
     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-          Grievance Lifecycle Progress
+          {tr('Grievance Lifecycle Progress', 'പരാതി പരിഹാര പുരോഗതി')}
         </span>
         {isReopened ? (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">
-            <RefreshCw className="w-3 h-3" /> Reopened by Citizen — Back Under Review
+            <RefreshCw className="w-3 h-3" />{' '}
+            {tr('Reopened by Citizen — Back Under Review', 'പൗരൻ വീണ്ടും തുറന്നു — പരിശോധനയിൽ')}
           </span>
         ) : (
-          <span className="text-[11px] font-bold text-indigo-700">{progressPct}% Complete</span>
+          <span className="text-[11px] font-bold text-indigo-700">
+            {progressPct}% {tr('Complete', 'പൂർത്തിയായി')}
+          </span>
         )}
       </div>
 
@@ -75,9 +104,11 @@ export function StatusStepper({ status }) {
                 >
                   {completed ? <Check className="w-3 h-3" /> : idx + 1}
                 </span>
-                <span className="text-xs font-bold text-slate-900">{step.label}</span>
+                <span className="text-xs font-bold text-slate-900">
+                  {tr(step.label, step.labelMl)}
+                </span>
               </div>
-              <p className="text-[11px] text-slate-500 pl-7">{step.sub}</p>
+              <p className="text-[11px] text-slate-500 pl-7">{tr(step.sub, step.subMl)}</p>
             </div>
           );
         })}

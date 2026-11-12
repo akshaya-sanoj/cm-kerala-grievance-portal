@@ -20,9 +20,11 @@ import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { StatusStepper } from '../components/StatusStepper.jsx';
 import { Timeline } from '../components/Timeline.jsx';
 import { VerificationSealModal } from '../components/VerificationSealModal.jsx';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { formatDate } from '../utils/formatters.js';
 
 export function TrackGrievancePage() {
+  const { tr, tDistrict, tStage } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialRef = searchParams.get('ref') || '';
   const [refId, setRefId] = useState(initialRef);
@@ -85,12 +87,16 @@ export function TrackGrievancePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div className="space-y-2">
         <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-          Public Status Verification
+          {tr('Public Status Verification', 'പൊതു തൽസ്ഥിതി പരിശോധന')}
         </p>
-        <h1 className="text-3xl font-extrabold text-slate-900">Track Grievance Status</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900">
+          {tr('Track Grievance Status', 'പരാതി തൽസ്ഥിതി പരിശോധിക്കുക')}
+        </h1>
         <p className="text-sm text-slate-600">
-          Search by your unique Reference ID to view real-time status, assigned department, and
-          public workflow history.
+          {tr(
+            'Search by your unique Reference ID to view real-time status, assigned department, and public workflow history.',
+            'Reference ID നൽകിയാൽ തത്സമയ അവസ്ഥ, ബന്ധപ്പെട്ട വകുപ്പ്, നടപടി ചരിത്രം എന്നിവ കാണാം.'
+          )}
         </p>
       </div>
 
@@ -100,7 +106,7 @@ export function TrackGrievancePage() {
             type="text"
             value={refId}
             onChange={(e) => setRefId(e.target.value)}
-            placeholder="Enter Reference ID (e.g., KL-CMO-2026-100101)"
+            placeholder={tr('Enter Reference ID (e.g., KL-CMO-2026-100101)', 'Reference ID നൽകുക (ഉദാ: KL-CMO-2026-100101)')}
             className="flex-1 px-4 py-3 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
           />
           <button
@@ -109,12 +115,12 @@ export function TrackGrievancePage() {
             className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold text-sm inline-flex items-center justify-center gap-2 transition"
           >
             <Search className="w-4 h-4" />
-            {loading ? 'Searching...' : 'Track Status'}
+            {loading ? tr('Searching...', 'തിരയുന്നു...') : tr('Track Status', 'പരിശോധിക്കുക')}
           </button>
         </form>
 
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          <span>Demo Reference IDs:</span>
+          <span>{tr('Demo Reference IDs:', 'ഡെമോ Reference ID-കൾ:')}</span>
           {[
             'KL-CMO-2026-100101',
             'KL-CMO-2026-100102',
@@ -167,7 +173,7 @@ export function TrackGrievancePage() {
                 <SlaCountdownBadge dueDate={grievance.dueDate} status={grievance.status} />
                 {grievance.isEscalated && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
-                    <AlertTriangle className="w-3 h-3" /> Escalated
+                    <AlertTriangle className="w-3 h-3" /> {tr('Escalated', 'അടിയന്തിരമാക്കി')}
                   </span>
                 )}
               </div>
@@ -179,32 +185,33 @@ export function TrackGrievancePage() {
               <div className="flex items-center gap-2 text-slate-600">
                 <MapPin className="w-4 h-4 text-slate-400" />
                 <span>
-                  <strong>District:</strong> {grievance.district}
+                  <strong>{tr('District:', 'ജില്ല:')}</strong> {tDistrict(grievance.district)}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Building2 className="w-4 h-4 text-slate-400" />
                 <span>
-                  <strong>Department:</strong>{' '}
-                  {grievance.assignedDepartment?.name || 'Pending CMO Assignment'}
+                  <strong>{tr('Department:', 'വകുപ്പ്:')}</strong>{' '}
+                  {grievance.assignedDepartment?.name || tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Calendar className="w-4 h-4 text-slate-400" />
                 <span>
-                  <strong>Submitted:</strong> {formatDate(grievance.createdAt)}
+                  <strong>{tr('Submitted:', 'സമർപ്പിച്ചത്:')}</strong> {formatDate(grievance.createdAt)}
                 </span>
               </div>
             </div>
 
             <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs text-slate-700 flex flex-wrap items-center justify-between gap-2">
               <span>
-                <strong>Current Stage:</strong> {grievance.workflowStage}
+                <strong>{tr('Current Stage:', 'നിലവിലെ ഘട്ടം:')}</strong>{' '}
+                {tStage(grievance.workflowStage)}
               </span>
               <span>
-                <strong>Target SLA Date:</strong> {formatDate(grievance.dueDate)}{' '}
+                <strong>{tr('Target SLA Date:', 'ലക്ഷ്യ SLA തീയതി:')}</strong> {formatDate(grievance.dueDate)}{' '}
                 {grievance.isOverdue && (
-                  <span className="text-rose-700 font-bold">(Overdue)</span>
+                  <span className="text-rose-700 font-bold">({tr('Overdue', 'കാലാവധി കഴിഞ്ഞു')})</span>
                 )}
               </span>
             </div>
@@ -212,7 +219,8 @@ export function TrackGrievancePage() {
             {grievance.actionTakenReport && (
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <p className="text-xs font-bold text-emerald-900 uppercase tracking-wide mb-1 flex items-center gap-1.5">
-                  <FileCheck2 className="w-4 h-4" /> Official Action-Taken Report
+                  <FileCheck2 className="w-4 h-4" />{' '}
+                  {tr('Official Action-Taken Report', 'ഔദ്യോഗിക നടപടി റിപ്പോർട്ട് (ATR)')}
                 </p>
                 <p className="text-sm text-emerald-950">{grievance.actionTakenReport}</p>
               </div>
@@ -222,8 +230,12 @@ export function TrackGrievancePage() {
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-950 flex items-center gap-2">
                 <Star className="w-4 h-4 text-amber-600 fill-amber-500" />
                 <span>
-                  Citizen rated resolution <strong>{grievance.feedback.rating}/5</strong> (
-                  {grievance.feedback.isSatisfied ? 'Satisfied' : 'Dissatisfied'})
+                  {tr('Citizen rated resolution', 'പൗരന്റെ റേറ്റിംഗ്:')}{' '}
+                  <strong>{grievance.feedback.rating}/5</strong> (
+                  {grievance.feedback.isSatisfied
+                    ? tr('Satisfied', 'തൃപ്തികരം')
+                    : tr('Dissatisfied', 'അതൃപ്തി')}
+                  )
                 </span>
               </div>
             )}
@@ -236,11 +248,13 @@ export function TrackGrievancePage() {
               >
                 {copiedLink ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" /> Tracking Link Copied
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />{' '}
+                    {tr('Tracking Link Copied', 'ട്രാക്കിംഗ് ലിങ്ക് പകർത്തി')}
                   </>
                 ) : (
                   <>
-                    <Link2 className="w-3.5 h-3.5" /> Copy Tracking Link
+                    <Link2 className="w-3.5 h-3.5" />{' '}
+                    {tr('Copy Tracking Link', 'ട്രാക്കിംഗ് ലിങ്ക് പകർത്തുക')}
                   </>
                 )}
               </button>
@@ -249,20 +263,24 @@ export function TrackGrievancePage() {
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700"
               >
-                <Printer className="w-3.5 h-3.5" /> Print Status Summary
+                <Printer className="w-3.5 h-3.5" />{' '}
+                {tr('Print Status Summary', 'തൽസ്ഥിതി പ്രിന്റ് ചെയ്യുക')}
               </button>
               <button
                 type="button"
                 onClick={() => setSealOpen(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-semibold transition"
               >
-                <QrCode className="w-3.5 h-3.5" /> Official Receipt &amp; QR Card
+                <QrCode className="w-3.5 h-3.5" />{' '}
+                {tr('Official Receipt & QR Card', 'ഔദ്യോഗിക രസീത് & QR കാർഡ്')}
               </button>
             </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Public Status History</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">
+              {tr('Public Status History', 'പൊതു നടപടി ചരിത്രം')}
+            </h3>
             <Timeline history={grievance.history} />
           </div>
 

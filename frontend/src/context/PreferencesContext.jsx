@@ -1,4 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  CATEGORY_ML,
+  DISTRICT_ML,
+  PRIORITY_ML,
+  ROLE_ML,
+  STAGE_ML,
+  STATUS_ML
+} from '../utils/i18n.js';
 
 const PreferencesContext = createContext(null);
 
@@ -95,6 +103,7 @@ export function PreferencesProvider({ children }) {
   }, [theme]);
 
   useEffect(() => {
+    document.documentElement.lang = lang;
     try {
       localStorage.setItem('cm_portal_lang', lang);
     } catch {
@@ -102,17 +111,25 @@ export function PreferencesProvider({ children }) {
     }
   }, [lang]);
 
-  const value = useMemo(
-    () => ({
+  const value = useMemo(() => {
+    const isMl = lang === 'ml';
+    return {
       theme,
       isDark: theme === 'dark',
       toggleTheme: () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark')),
       lang,
+      isMl,
       toggleLang: () => setLang((prev) => (prev === 'en' ? 'ml' : 'en')),
-      t: TRANSLATIONS[lang] || TRANSLATIONS.en
-    }),
-    [theme, lang]
-  );
+      t: TRANSLATIONS[lang] || TRANSLATIONS.en,
+      tr: (en, ml) => (isMl && ml ? ml : en),
+      tStatus: (s) => (isMl ? STATUS_ML[s] || s : s),
+      tPriority: (p) => (isMl ? PRIORITY_ML[p] || p : p),
+      tDistrict: (d) => (isMl ? DISTRICT_ML[d] || d : d),
+      tCategory: (c) => (isMl ? CATEGORY_ML[c] || c : c),
+      tStage: (st) => (isMl ? STAGE_ML[st] || st : st),
+      tRole: (r) => (isMl ? ROLE_ML[r] || r : r)
+    };
+  }, [theme, lang]);
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }

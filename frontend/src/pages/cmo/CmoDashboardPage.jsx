@@ -29,6 +29,7 @@ import { api, getApiErrorMessage } from '../../api/client.js';
 import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
 import { SlaCountdownBadge } from '../../components/SlaCountdownBadge.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
+import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
@@ -46,6 +47,7 @@ function escapeCsvCell(value) {
 }
 
 export function CmoDashboardPage() {
+  const { tr, tStatus, tPriority, tDistrict, tCategory } = usePreferences();
   const [activeTab, setActiveTab] = useState('grievances');
   const [stats, setStats] = useState(null);
   const [grievances, setGrievances] = useState([]);
@@ -330,14 +332,16 @@ export function CmoDashboardPage() {
       <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
-            Central Administrative Command
+            {tr('Central Administrative Command', 'കേന്ദ്ര ഭരണ സംവിധാനം')}
           </p>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
-            Chief Minister&apos;s Office (CMO) Dashboard
+            {tr("Chief Minister's Office (CMO) Dashboard", 'മുഖ്യമന്ത്രിയുടെ ഓഫീസ് (CMO) ഡാഷ്ബോർഡ്')}
           </h1>
           <p className="text-sm text-slate-300 mt-1">
-            Review citizen grievances, verify AI insights, assign departments, escalate delays, and
-            approve action-taken reports.
+            {tr(
+              'Review citizen grievances, verify AI insights, assign departments, escalate delays, and approve action-taken reports.',
+              'പരാതികൾ പരിശോധിക്കുക, AI നിർദ്ദേശങ്ങൾ വിലയിരുത്തുക, വകുപ്പുകൾക്ക് കൈമാറുക, ATR അംഗീകരിക്കുക.'
+            )}
           </p>
         </div>
 
@@ -345,18 +349,18 @@ export function CmoDashboardPage() {
           <TabBtn
             active={activeTab === 'grievances'}
             onClick={() => setActiveTab('grievances')}
-            label="Grievances Queue"
+            label={tr('Grievances Queue', 'പരാതി പട്ടിക')}
           />
           <TabBtn
             active={activeTab === 'analytics'}
             onClick={() => setActiveTab('analytics')}
-            label="District & Dept Analytics"
+            label={tr('District & Dept Analytics', 'ജില്ലാ-വകുപ്പ് അനലിറ്റിക്സ്')}
             icon={<BarChart3 className="w-4 h-4" />}
           />
           <TabBtn
             active={activeTab === 'enquiries'}
             onClick={() => setActiveTab('enquiries')}
-            label={`Enquiries (${overview.contactEnquiries})`}
+            label={`${tr('Enquiries', 'അന്വേഷണങ്ങൾ')} (${overview.contactEnquiries})`}
             icon={<Mail className="w-4 h-4" />}
           />
         </div>
@@ -373,29 +377,29 @@ export function CmoDashboardPage() {
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <KpiCard
-          label="Total Grievances"
+          label={tr('Total Grievances', 'ആകെ പരാതികൾ')}
           value={overview.total}
-          sub={`${overview.atrPendingReview} ATR ready for review`}
+          sub={`${overview.atrPendingReview} ${tr('ATR ready for review', 'ATR പരിശോധനയ്ക്ക് തയ്യാർ')}`}
           icon={<FolderOpen className="w-4 h-4 text-indigo-600" />}
         />
         <KpiCard
-          label="Pending Action"
+          label={tr('Pending Action', 'നടപടിയിലുള്ളവ')}
           value={overview.pending}
-          sub={`${overview.escalated} escalated cases`}
+          sub={`${overview.escalated} ${tr('escalated cases', 'അടിയന്തിര പരാതികൾ')}`}
           valueClass="text-amber-700"
           icon={<Clock className="w-4 h-4 text-amber-600" />}
         />
         <KpiCard
-          label="Resolved"
+          label={tr('Resolved', 'പരിഹരിച്ചവ')}
           value={overview.resolved}
-          sub={`${overview.resolutionRate}% closure • ${overview.avgResolutionDays}d avg`}
+          sub={`${overview.resolutionRate}% ${tr('closure', 'പരിഹാര നിരക്ക്')} • ${overview.avgResolutionDays}d ${tr('avg', 'ശരാശരി')}`}
           valueClass="text-emerald-700"
           icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
         />
         <KpiCard
-          label="Overdue (SLA)"
+          label={tr('Overdue (SLA)', 'കാലാവധി കഴിഞ്ഞവ')}
           value={overview.overdue}
-          sub="Past target priority SLA"
+          sub={tr('Past target priority SLA', 'SLA സമയപരിധി കഴിഞ്ഞവ')}
           valueClass="text-rose-700"
           icon={<AlertTriangle className="w-4 h-4 text-rose-600" />}
         />
@@ -422,10 +426,10 @@ export function CmoDashboardPage() {
                 onChange={(e) => updateFilter('district', e.target.value)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white"
               >
-                <option value="All">All Districts</option>
+                <option value="All">{tr('All Districts', 'എല്ലാ ജില്ലകളും')}</option>
                 {metadata.districts?.map((d) => (
                   <option key={d} value={d}>
-                    {d}
+                    {tDistrict(d)}
                   </option>
                 ))}
               </select>
@@ -435,10 +439,10 @@ export function CmoDashboardPage() {
                 onChange={(e) => updateFilter('category', e.target.value)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white"
               >
-                <option value="All">All Categories</option>
+                <option value="All">{tr('All Categories', 'എല്ലാ വിഭാഗങ്ങളും')}</option>
                 {metadata.categories?.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {tCategory(c)}
                   </option>
                 ))}
               </select>
@@ -448,10 +452,10 @@ export function CmoDashboardPage() {
                 onChange={(e) => updateFilter('priority', e.target.value)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white"
               >
-                <option value="All">All Priorities</option>
+                <option value="All">{tr('All Priorities', 'എല്ലാ മുൻഗണനകളും')}</option>
                 {metadata.priorities?.map((p) => (
                   <option key={p} value={p}>
-                    {p}
+                    {tPriority(p)}
                   </option>
                 ))}
               </select>
@@ -461,10 +465,10 @@ export function CmoDashboardPage() {
                 onChange={(e) => updateFilter('status', e.target.value)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white"
               >
-                <option value="All">All Statuses</option>
+                <option value="All">{tr('All Statuses', 'എല്ലാ അവസ്ഥകളും')}</option>
                 {metadata.statuses?.map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {tStatus(s)}
                   </option>
                 ))}
               </select>
@@ -474,7 +478,7 @@ export function CmoDashboardPage() {
                 onChange={(e) => updateFilter('departmentId', e.target.value)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white"
               >
-                <option value="All">All Departments</option>
+                <option value="All">{tr('All Departments', 'എല്ലാ വകുപ്പുകളും')}</option>
                 {departments.map((d) => (
                   <option key={d._id} value={d._id}>
                     {d.code} — {d.name}
@@ -492,7 +496,7 @@ export function CmoDashboardPage() {
                     onChange={(e) => updateFilter('overdueOnly', e.target.checked)}
                     className="rounded border-slate-300 text-indigo-600"
                   />
-                  Overdue Only
+                  {tr('Overdue Only', 'കാലാവധി കഴിഞ്ഞവ മാത്രം')}
                 </label>
                 <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
                   <input
@@ -501,7 +505,7 @@ export function CmoDashboardPage() {
                     onChange={(e) => updateFilter('atrPendingOnly', e.target.checked)}
                     className="rounded border-slate-300 text-indigo-600"
                   />
-                  ATR Pending CMO Review
+                  {tr('ATR Pending CMO Review', 'ATR പരിശോധന കാത്തിരിക്കുന്നവ')}
                 </label>
 
                 <button
@@ -510,7 +514,7 @@ export function CmoDashboardPage() {
                   onClick={handleAutoEscalateOverdue}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 disabled:opacity-50 text-rose-800 border border-rose-200 font-semibold transition"
                 >
-                  <Zap className="w-3.5 h-3.5" /> Auto-Escalate Overdue
+                  <Zap className="w-3.5 h-3.5" /> {tr('Auto-Escalate Overdue', 'വൈകിയവ അടിയന്തിരമാക്കുക')}
                 </button>
 
                 <button
@@ -519,7 +523,7 @@ export function CmoDashboardPage() {
                   onClick={handleExportCsv}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-800 border border-slate-200 font-semibold transition"
                 >
-                  <Download className="w-3.5 h-3.5" /> Export CSV
+                  <Download className="w-3.5 h-3.5" /> {tr('Export CSV', 'CSV ഡൗൺലോഡ്')}
                 </button>
               </div>
 
@@ -534,14 +538,14 @@ export function CmoDashboardPage() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  placeholder="Search reference ID or subject..."
+                  placeholder={tr('Search reference ID or subject...', 'റഫറൻസ് ID അല്ലെങ്കിൽ വിഷയം തിരയുക...')}
                   className="flex-1 sm:w-64 px-3 py-2 rounded-lg border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-indigo-600"
                 />
                 <button
                   type="submit"
                   className="px-3.5 py-2 rounded-lg bg-slate-800 text-white text-xs font-semibold inline-flex items-center gap-1"
                 >
-                  <Search className="w-3.5 h-3.5" /> Filter
+                  <Search className="w-3.5 h-3.5" /> {tr('Filter', 'തിരയുക')}
                 </button>
               </form>
             </div>
@@ -550,7 +554,7 @@ export function CmoDashboardPage() {
           {selectedIds.length > 0 && (
             <div className="animate-slide-down bg-slate-900 text-white border border-slate-800 rounded-2xl p-3.5 shadow-md flex flex-wrap items-center justify-between gap-3 text-xs">
               <span className="font-bold text-amber-300">
-                {selectedIds.length} grievance(s) selected
+                {selectedIds.length} {tr('grievance(s) selected', 'പരാതികൾ തിരഞ്ഞെടുത്തു')}
               </span>
               <div className="flex flex-wrap items-center gap-2">
                 <select
@@ -558,7 +562,7 @@ export function CmoDashboardPage() {
                   onChange={(e) => setBatchDeptId(e.target.value)}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs outline-none"
                 >
-                  <option value="">Choose Department...</option>
+                  <option value="">{tr('Choose Department...', 'വകുപ്പ് തിരഞ്ഞെടുക്കുക...')}</option>
                   {departments.map((d) => (
                     <option key={d._id} value={d._id}>
                       {d.code} — {d.name}
@@ -571,7 +575,7 @@ export function CmoDashboardPage() {
                   onClick={handleBatchAssign}
                   className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold transition"
                 >
-                  Batch Assign
+                  {tr('Batch Assign', 'ഒന്നിച്ച് കൈമാറുക')}
                 </button>
                 <button
                   type="button"
@@ -579,14 +583,14 @@ export function CmoDashboardPage() {
                   onClick={handleBatchEscalate}
                   className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-semibold transition"
                 >
-                  Batch Escalate
+                  {tr('Batch Escalate', 'ഒന്നിച്ച് അടിയന്തിരമാക്കുക')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedIds([])}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition"
                 >
-                  Clear
+                  {tr('Clear', 'മായ്ക്കുക')}
                 </button>
               </div>
             </div>
@@ -594,10 +598,12 @@ export function CmoDashboardPage() {
 
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             {loading ? (
-              <div className="p-8 text-center text-sm text-slate-500">Loading grievances...</div>
+              <div className="p-8 text-center text-sm text-slate-500">
+                {tr('Loading grievances...', 'പരാതികൾ ലോഡ് ചെയ്യുന്നു...')}
+              </div>
             ) : grievances.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-500">
-                No grievances match the selected filters.
+                {tr('No grievances match the selected filters.', 'തിരഞ്ഞെടുത്ത ഫിൽട്ടറുകളിൽ പരാതികളില്ല.')}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -613,14 +619,14 @@ export function CmoDashboardPage() {
                           className="rounded border-slate-300 text-indigo-600"
                         />
                       </th>
-                      <th className="py-3 px-4">Ref ID</th>
-                      <th className="py-3 px-4">Citizen &amp; Subject</th>
-                      <th className="py-3 px-4">District / Category</th>
-                      <th className="py-3 px-4">Assigned Dept</th>
-                      <th className="py-3 px-4">Priority</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4">SLA Due</th>
-                      <th className="py-3 px-4 text-right">Manage</th>
+                      <th className="py-3 px-4">{tr('Ref ID', 'റഫറൻസ് ID')}</th>
+                      <th className="py-3 px-4">{tr('Citizen & Subject', 'പൗരനും വിഷയവും')}</th>
+                      <th className="py-3 px-4">{tr('District / Category', 'ജില്ല / വിഭാഗം')}</th>
+                      <th className="py-3 px-4">{tr('Assigned Dept', 'വകുപ്പ്')}</th>
+                      <th className="py-3 px-4">{tr('Priority', 'മുൻഗണന')}</th>
+                      <th className="py-3 px-4">{tr('Status', 'അവസ്ഥ')}</th>
+                      <th className="py-3 px-4">{tr('SLA Due', 'SLA തീയതി')}</th>
+                      <th className="py-3 px-4 text-right">{tr('Manage', 'നിയന്ത്രിക്കുക')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -641,30 +647,32 @@ export function CmoDashboardPage() {
                           </span>
                           {g.isEscalated && (
                             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-rose-700">
-                              <AlertTriangle className="w-3 h-3" /> Escalated
+                              <AlertTriangle className="w-3 h-3" /> {tr('Escalated', 'അടിയന്തിരം')}
                             </span>
                           )}
                           {g.atrSubmitted && g.status !== 'Resolved' && (
                             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-sky-700 block">
-                              ATR Ready
+                              {tr('ATR Ready', 'ATR തയ്യാർ')}
                             </span>
                           )}
                         </td>
                         <td className="py-3 px-4 max-w-xs">
                           <p className="font-semibold text-slate-900 truncate">{g.subject}</p>
                           <p className="text-xs text-slate-500">
-                            By {g.citizenId?.name || 'Citizen'}
+                            {tr('By', 'നൽകിയത്:')} {g.citizenId?.name || tr('Citizen', 'പൗരൻ')}
                           </p>
                         </td>
                         <td className="py-3 px-4 text-xs text-slate-700">
-                          <p className="font-medium">{g.district}</p>
-                          <p className="text-slate-500">{g.category}</p>
+                          <p className="font-medium">{tDistrict(g.district)}</p>
+                          <p className="text-slate-500">{tCategory(g.category)}</p>
                         </td>
                         <td className="py-3 px-4 text-xs text-slate-700">
                           {g.assignedDepartmentId ? (
                             <span className="font-semibold">{g.assignedDepartmentId.code}</span>
                           ) : (
-                            <span className="text-amber-700 font-medium">Unassigned</span>
+                            <span className="text-amber-700 font-medium">
+                              {tr('Unassigned', 'നിയമിച്ചിട്ടില്ല')}
+                            </span>
                           )}
                         </td>
                         <td className="py-3 px-4">
@@ -688,7 +696,7 @@ export function CmoDashboardPage() {
                             to={`/cmo/grievances/${g._id}`}
                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
                           >
-                            <Eye className="w-3.5 h-3.5" /> Open
+                            <Eye className="w-3.5 h-3.5" /> {tr('Open', 'തുറക്കുക')}
                           </Link>
                         </td>
                       </tr>
@@ -706,7 +714,9 @@ export function CmoDashboardPage() {
         <div className="space-y-6">
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-base font-bold text-slate-900 mb-3">Status Distribution</h2>
+              <h2 className="text-base font-bold text-slate-900 mb-3">
+                {tr('Status Distribution', 'അവസ്ഥ തിരിച്ചുള്ള വിതരണം')}
+              </h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -736,7 +746,7 @@ export function CmoDashboardPage() {
 
             <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h2 className="text-base font-bold text-slate-900 mb-3">
-                District-wise Grievances (Pending vs Resolved)
+                {tr('District-wise Grievances (Pending vs Resolved)', 'ജില്ല തിരിച്ചുള്ള പരാതികൾ')}
               </h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -757,7 +767,7 @@ export function CmoDashboardPage() {
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h2 className="text-base font-bold text-slate-900 mb-3">
-                Department-wise Workload
+                {tr('Department-wise Workload', 'വകുപ്പ് തിരിച്ചുള്ള പരാതികൾ')}
               </h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -776,7 +786,9 @@ export function CmoDashboardPage() {
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-              <h2 className="text-base font-bold text-slate-900">Priority &amp; SLA Snapshot</h2>
+              <h2 className="text-base font-bold text-slate-900">
+                {tr('Priority & SLA Snapshot', 'മുൻഗണന & SLA സംഗ്രഹം')}
+              </h2>
               <div className="space-y-3 text-sm">
                 {['High', 'Medium', 'Low'].map((p) => {
                   const count = stats.byPriority?.[p] || 0;
@@ -784,7 +796,9 @@ export function CmoDashboardPage() {
                   return (
                     <div key={p}>
                       <div className="flex justify-between text-xs font-semibold mb-1">
-                        <span>{p} Priority</span>
+                        <span>
+                          {tPriority(p)} {tr('Priority', 'മുൻഗണന')}
+                        </span>
                         <span>
                           {count} ({pct}%)
                         </span>
@@ -807,10 +821,11 @@ export function CmoDashboardPage() {
               </div>
               <div className="pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1">
                 <p>
-                  <strong>Closure Rate:</strong> {overview.resolutionRate}%
+                  <strong>{tr('Closure Rate:', 'പരിഹാര നിരക്ക്:')}</strong> {overview.resolutionRate}%
                 </p>
                 <p>
-                  <strong>Avg Time to Resolve:</strong> {overview.avgResolutionDays} days
+                  <strong>{tr('Avg Time to Resolve:', 'ശരാശരി പരിഹാര സമയം:')}</strong>{' '}
+                  {overview.avgResolutionDays} {tr('days', 'ദിവസം')}
                 </p>
               </div>
             </div>
@@ -818,15 +833,17 @@ export function CmoDashboardPage() {
 
           <div className="grid lg:grid-cols-2 gap-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm overflow-x-auto">
-              <h3 className="text-sm font-bold text-slate-900 mb-3">District Summary Table</h3>
+              <h3 className="text-sm font-bold text-slate-900 mb-3">
+                {tr('District Summary Table', 'ജില്ലാ സംഗ്രഹ പട്ടിക')}
+              </h3>
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase">
                   <tr>
-                    <th className="py-2 px-3">District</th>
-                    <th className="py-2 px-3">Total</th>
-                    <th className="py-2 px-3">Pending</th>
-                    <th className="py-2 px-3">Resolved</th>
-                    <th className="py-2 px-3">Overdue</th>
+                    <th className="py-2 px-3">{tr('District', 'ജില്ല')}</th>
+                    <th className="py-2 px-3">{tr('Total', 'ആകെ')}</th>
+                    <th className="py-2 px-3">{tr('Pending', 'ബാക്കി')}</th>
+                    <th className="py-2 px-3">{tr('Resolved', 'പരിഹരിച്ചത്')}</th>
+                    <th className="py-2 px-3">{tr('Overdue', 'വൈകിയത്')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -840,7 +857,9 @@ export function CmoDashboardPage() {
                       title="Click to filter queue by this district"
                       className="cursor-pointer hover:bg-indigo-50/70 transition"
                     >
-                      <td className="py-2 px-3 font-semibold text-indigo-800">{row.district}</td>
+                      <td className="py-2 px-3 font-semibold text-indigo-800">
+                        {tDistrict(row.district)}
+                      </td>
                       <td className="py-2 px-3">{row.total}</td>
                       <td className="py-2 px-3 text-amber-700 font-medium">{row.pending}</td>
                       <td className="py-2 px-3 text-emerald-700 font-medium">{row.resolved}</td>
@@ -852,15 +871,17 @@ export function CmoDashboardPage() {
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm overflow-x-auto">
-              <h3 className="text-sm font-bold text-slate-900 mb-3">Department Summary Table</h3>
+              <h3 className="text-sm font-bold text-slate-900 mb-3">
+                {tr('Department Summary Table', 'വകുപ്പ് സംഗ്രഹ പട്ടിക')}
+              </h3>
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase">
                   <tr>
-                    <th className="py-2 px-3">Department</th>
-                    <th className="py-2 px-3">Total</th>
-                    <th className="py-2 px-3">Pending</th>
-                    <th className="py-2 px-3">Resolved</th>
-                    <th className="py-2 px-3">Overdue</th>
+                    <th className="py-2 px-3">{tr('Department', 'വകുപ്പ്')}</th>
+                    <th className="py-2 px-3">{tr('Total', 'ആകെ')}</th>
+                    <th className="py-2 px-3">{tr('Pending', 'ബാക്കി')}</th>
+                    <th className="py-2 px-3">{tr('Resolved', 'പരിഹരിച്ചത്')}</th>
+                    <th className="py-2 px-3">{tr('Overdue', 'വൈകിയത്')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -894,13 +915,20 @@ export function CmoDashboardPage() {
       {activeTab === 'enquiries' && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-200">
-            <h2 className="text-base font-bold text-slate-900">Public Contact Enquiries</h2>
+            <h2 className="text-base font-bold text-slate-900">
+              {tr('Public Contact Enquiries', 'പൊതു അന്വേഷണങ്ങൾ')}
+            </h2>
             <p className="text-xs text-slate-500">
-              Submitted via the public Contact Us page and persisted in MongoDB.
+              {tr(
+                'Submitted via the public Contact Us page and persisted in MongoDB.',
+                'ബന്ധപ്പെടുക പേജ് വഴി ലഭിച്ച സന്ദേശങ്ങൾ.'
+              )}
             </p>
           </div>
           {enquiries.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-500">No contact enquiries yet.</div>
+            <div className="p-8 text-center text-sm text-slate-500">
+              {tr('No contact enquiries yet.', 'അന്വേഷണങ്ങളൊന്നും ഇതുവരെ ഇല്ല.')}
+            </div>
           ) : (
             <div className="divide-y divide-slate-100">
               {enquiries.map((item) => (

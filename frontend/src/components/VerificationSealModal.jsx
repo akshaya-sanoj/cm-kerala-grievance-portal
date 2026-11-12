@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { Check, CheckCircle2, Download, Link2, Printer, ShieldCheck, X } from 'lucide-react';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { formatDate } from '../utils/formatters.js';
 import { SlaCountdownBadge } from './SlaCountdownBadge.jsx';
 
 export function VerificationSealModal({ grievance, onClose }) {
+  const { tr, tStatus, tDistrict } = usePreferences();
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [copiedUrl, setCopiedUrl] = useState(false);
 
@@ -101,7 +103,7 @@ export function VerificationSealModal({ grievance, onClose }) {
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
-                Digital Verification Card
+                {tr('Digital Verification Card', 'ഡിജിറ്റൽ വെരിഫിക്കേഷൻ കാർഡ്')}
               </p>
               <h3 className="text-base font-extrabold">{grievance.referenceId}</h3>
             </div>
@@ -123,18 +125,19 @@ export function VerificationSealModal({ grievance, onClose }) {
                 <img
                   src={qrDataUrl}
                   alt={`QR verification code for ${grievance.referenceId}`}
-                  className="w-24 h-24 rounded-lg"
+                  className="w-24 h-24 rounded-lg mx-auto"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-lg bg-slate-100 animate-pulse" />
+                <div className="w-24 h-24 rounded-lg bg-slate-100 animate-pulse mx-auto" />
               )}
               <span className="text-[9px] font-semibold text-slate-500 block mt-1">
-                Scan to Verify
+                {tr('Scan to Verify', 'സ്കാൻ ചെയ്യുക')}
               </span>
             </div>
             <div className="space-y-1.5 min-w-0">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-                <CheckCircle2 className="w-4 h-4" /> Scannable Verification QR
+                <CheckCircle2 className="w-4 h-4" />{' '}
+                {tr('Scannable Verification QR', 'പരിശോധനാ QR കോഡ്')}
               </div>
               <p className="text-sm font-bold text-slate-900 line-clamp-2">{grievance.subject}</p>
               <SlaCountdownBadge dueDate={grievance.dueDate} status={grievance.status} />
@@ -143,17 +146,17 @@ export function VerificationSealModal({ grievance, onClose }) {
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="rounded-xl border border-slate-200 p-3">
-              <span className="text-slate-500 block">District</span>
-              <span className="font-bold text-slate-900">{grievance.district}</span>
+              <span className="text-slate-500 block">{tr('District', 'ജില്ല')}</span>
+              <span className="font-bold text-slate-900">{tDistrict(grievance.district)}</span>
             </div>
             <div className="rounded-xl border border-slate-200 p-3">
-              <span className="text-slate-500 block">Status</span>
-              <span className="font-bold text-slate-900">{grievance.status}</span>
+              <span className="text-slate-500 block">{tr('Status', 'നിലവിലെ അവസ്ഥ')}</span>
+              <span className="font-bold text-slate-900">{tStatus(grievance.status)}</span>
             </div>
             <div className="rounded-xl border border-slate-200 p-3 col-span-2">
-              <span className="text-slate-500 block">Assigned Department</span>
+              <span className="text-slate-500 block">{tr('Assigned Department', 'വകുപ്പ്')}</span>
               <span className="font-bold text-slate-900">
-                {grievance.assignedDepartment?.name || 'Pending CMO Assignment'}
+                {grievance.assignedDepartment?.name || tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
               </span>
             </div>
           </div>
@@ -164,7 +167,7 @@ export function VerificationSealModal({ grievance, onClose }) {
               onClick={handleDownloadReceipt}
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-bold transition"
             >
-              <Download className="w-4 h-4" /> Receipt (.txt)
+              <Download className="w-4 h-4" /> {tr('Receipt (.txt)', 'രസീത് (.txt)')}
             </button>
             <button
               type="button"
@@ -172,7 +175,7 @@ export function VerificationSealModal({ grievance, onClose }) {
               disabled={!qrDataUrl}
               className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 text-indigo-700 border border-indigo-200 text-xs font-bold transition"
             >
-              <Download className="w-4 h-4" /> Save QR
+              <Download className="w-4 h-4" /> {tr('Save QR', 'QR സേവ്')}
             </button>
             <button
               type="button"
@@ -181,11 +184,11 @@ export function VerificationSealModal({ grievance, onClose }) {
             >
               {copiedUrl ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-600" /> Copied
+                  <Check className="w-4 h-4 text-emerald-600" /> {tr('Copied', 'പകർത്തി')}
                 </>
               ) : (
                 <>
-                  <Link2 className="w-4 h-4" /> Copy Link
+                  <Link2 className="w-4 h-4" /> {tr('Copy Link', 'ലിങ്ക് പകർത്തുക')}
                 </>
               )}
             </button>
@@ -197,7 +200,7 @@ export function VerificationSealModal({ grievance, onClose }) {
               }}
               className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
             >
-              <Printer className="w-4 h-4" /> Print PDF
+              <Printer className="w-4 h-4" /> {tr('Print PDF', 'PDF പ്രിന്റ്')}
             </button>
           </div>
         </div>

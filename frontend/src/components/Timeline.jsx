@@ -1,10 +1,17 @@
 import { Lock, ShieldCheck } from 'lucide-react';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { formatDateTime, getRoleLabel } from '../utils/formatters.js';
 import { StatusBadge } from './StatusBadge.jsx';
 
 export function Timeline({ history = [] }) {
+  const { tr, tStage, tRole } = usePreferences();
+
   if (!history.length) {
-    return <p className="text-sm text-slate-500">No workflow history recorded yet.</p>;
+    return (
+      <p className="text-sm text-slate-500">
+        {tr('No workflow history recorded yet.', 'നടപടി ചരിത്രം ഇതുവരെ രേഖപ്പെടുത്തിയിട്ടില്ല.')}
+      </p>
+    );
   }
 
   return (
@@ -18,10 +25,12 @@ export function Timeline({ history = [] }) {
             <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={item.newStatus} />
-                <span className="text-xs font-semibold text-slate-700">{item.workflowStage}</span>
+                <span className="text-xs font-semibold text-slate-700">
+                  {tStage(item.workflowStage)}
+                </span>
                 {item.isInternal && (
                   <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200">
-                    <Lock className="w-3 h-3" /> Internal CMO Note
+                    <Lock className="w-3 h-3" /> {tr('Internal CMO Note', 'ആഭ്യന്തര CMO കുറിപ്പ്')}
                   </span>
                 )}
               </div>
@@ -29,11 +38,11 @@ export function Timeline({ history = [] }) {
             </div>
             <p className="text-sm text-slate-700 leading-relaxed">{item.remarks}</p>
             <p className="mt-1.5 text-xs text-slate-500">
-              Updated by{' '}
+              {tr('Updated by', 'പുതുക്കിയത്')}{' '}
               <span className="font-medium text-slate-700">
                 {item.changedByName || getRoleLabel(item.changedByRole)}
               </span>{' '}
-              ({getRoleLabel(item.changedByRole)})
+              ({tRole(item.changedByRole) || getRoleLabel(item.changedByRole)})
             </p>
           </div>
         </li>

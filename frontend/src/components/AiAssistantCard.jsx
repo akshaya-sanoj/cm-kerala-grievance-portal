@@ -1,4 +1,5 @@
 import { AlertTriangle, CheckCircle2, Cpu, Sparkles } from 'lucide-react';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { PriorityBadge, StatusBadge } from './StatusBadge.jsx';
 
 export function AiAssistantCard({
@@ -7,6 +8,8 @@ export function AiAssistantCard({
   showApplyButton = false,
   applied = false
 }) {
+  const { tr, tCategory, tPriority } = usePreferences();
+
   if (!analysis || !analysis.summary) return null;
 
   const isFallback = Boolean(analysis.isFallback);
@@ -27,7 +30,7 @@ export function AiAssistantCard({
             <Sparkles className="w-5 h-5 text-emerald-700" />
           )}
           <h4 className="font-bold text-sm text-slate-900">
-            AI Grievance Assistant (Advisory Only)
+            {tr('AI Grievance Assistant (Advisory Only)', 'AI പരാതി സഹായി (നിർദ്ദേശം മാത്രം)')}
           </h4>
         </div>
         <span
@@ -38,8 +41,8 @@ export function AiAssistantCard({
           }`}
         >
           {isFallback
-            ? `Labelled Fallback (${analysis.model || 'heuristic-fallback'})`
-            : `Live Gemini AI (${analysis.model || 'gemini'})`}
+            ? `${tr('Labelled Fallback', 'ഫോൾബാക്ക് മോഡ്')} (${analysis.model || 'heuristic-fallback'})`
+            : `${tr('Live Gemini AI', 'തത്സമയ Gemini AI')} (${analysis.model || 'gemini'})`}
         </span>
       </div>
 
@@ -47,25 +50,31 @@ export function AiAssistantCard({
         <div className="mb-3 flex items-start gap-2 text-xs text-amber-900 bg-amber-100/80 border border-amber-200 rounded-lg px-3 py-2">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
-            <strong>Fallback Mode Active:</strong> {analysis.fallbackReason} Suggestions are
-            rule-assisted heuristics and require human confirmation.
+            <strong>{tr('Fallback Mode Active:', 'ഫോൾബാക്ക് മോഡ് സജീവം:')}</strong>{' '}
+            {analysis.fallbackReason}{' '}
+            {tr(
+              'Suggestions are rule-assisted heuristics and require human confirmation.',
+              'നിർദ്ദേശങ്ങൾ ഉദ്യോഗസ്ഥ പരിശോധനയ്ക്ക് വിധേയമാണ്.'
+            )}
           </span>
         </div>
       )}
 
       <div className="grid sm:grid-cols-3 gap-3 mb-3 text-sm">
         <div className="bg-white rounded-lg p-2.5 border border-slate-200">
-          <p className="text-xs text-slate-500">Suggested Department</p>
+          <p className="text-xs text-slate-500">{tr('Suggested Department', 'നിർദ്ദേശിച്ച വകുപ്പ്')}</p>
           <p className="font-semibold text-slate-900">
             {analysis.suggestedDepartmentName || analysis.suggestedDepartmentCode || '—'}
           </p>
         </div>
         <div className="bg-white rounded-lg p-2.5 border border-slate-200">
-          <p className="text-xs text-slate-500">Suggested Category</p>
-          <p className="font-semibold text-slate-900">{analysis.suggestedCategory || '—'}</p>
+          <p className="text-xs text-slate-500">{tr('Suggested Category', 'നിർദ്ദേശിച്ച വിഭാഗം')}</p>
+          <p className="font-semibold text-slate-900">
+            {analysis.suggestedCategory ? tCategory(analysis.suggestedCategory) : '—'}
+          </p>
         </div>
         <div className="bg-white rounded-lg p-2.5 border border-slate-200">
-          <p className="text-xs text-slate-500">Recommended Priority</p>
+          <p className="text-xs text-slate-500">{tr('Recommended Priority', 'മുൻഗണനാ നില')}</p>
           <div className="mt-1">
             <PriorityBadge priority={analysis.recommendedPriority || 'Medium'} />
           </div>
@@ -74,12 +83,12 @@ export function AiAssistantCard({
 
       <div className="bg-white rounded-lg p-3 border border-slate-200 text-sm mb-3">
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-          Short CMO Summary
+          {tr('Short CMO Summary', 'ചുരുക്ക സംഗ്രഹം (CMO)')}
         </p>
         <p className="text-slate-800">{analysis.summary}</p>
         {analysis.reasoning && (
           <p className="text-xs text-slate-500 mt-1.5">
-            <strong>Rationale:</strong> {analysis.reasoning}
+            <strong>{tr('Rationale:', 'കാരണം:')}</strong> {analysis.reasoning}
           </p>
         )}
       </div>
@@ -88,7 +97,10 @@ export function AiAssistantCard({
         <div className="bg-white rounded-lg p-3 border border-amber-300 mb-3">
           <p className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-2 flex items-center gap-1.5">
             <AlertTriangle className="w-4 h-4" />
-            Potential Duplicate Grievances Flagged for Human Review
+            {tr(
+              'Potential Duplicate Grievances Flagged for Human Review',
+              'സമാനമായ പരാതികൾ (പരിശോധനയ്ക്ക്)'
+            )}
           </p>
           <ul className="space-y-1.5">
             {analysis.potentialDuplicates.map((dup) => (
@@ -103,7 +115,7 @@ export function AiAssistantCard({
                 <div className="flex items-center gap-2">
                   <StatusBadge status={dup.status} />
                   <span className="font-semibold text-amber-900">
-                    {Math.round((dup.similarityScore || 0) * 100)}% match
+                    {Math.round((dup.similarityScore || 0) * 100)}% {tr('match', 'സാമ്യം')}
                   </span>
                 </div>
               </li>
@@ -114,7 +126,10 @@ export function AiAssistantCard({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-slate-600">
-          Human-in-the-loop safeguard: AI never makes official routing or closure decisions.
+          {tr(
+            'Human-in-the-loop safeguard: AI never makes official routing or closure decisions.',
+            'ഉദ്യോഗസ്ഥ നിയന്ത്രണം: AI അന്തിമ തീരുമാനങ്ങൾ എടുക്കില്ല.'
+          )}
         </p>
         {showApplyButton && onApplySuggestions && (
           <button
@@ -128,8 +143,10 @@ export function AiAssistantCard({
           >
             <CheckCircle2 className="w-4 h-4" />
             {applied
-              ? `Applied (${analysis.suggestedCategory} • ${analysis.recommendedPriority})`
-              : 'Apply Suggested Category & Priority'}
+              ? `${tr('Applied', 'ബാധകമാക്കി')} (${tCategory(analysis.suggestedCategory)} • ${tPriority(
+                  analysis.recommendedPriority
+                )})`
+              : tr('Apply Suggested Category & Priority', 'നിർദ്ദേശിച്ച വിഭാഗവും മുൻഗണനയും ചേർക്കുക')}
           </button>
         )}
       </div>

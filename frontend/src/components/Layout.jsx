@@ -23,7 +23,7 @@ import { StatusBadge } from './StatusBadge.jsx';
 
 export function Layout({ children }) {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme, lang, toggleLang, t } = usePreferences();
+  const { isDark, toggleTheme, lang, toggleLang, t, tr, tRole } = usePreferences();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -70,9 +70,21 @@ export function Layout({ children }) {
   ];
 
   const infoLinks = [
-    { to: '/about', label: 'About Us', desc: 'Mission, vision & prototype notice' },
-    { to: '/contact', label: 'Contact Us', desc: 'Send an enquiry to helpdesk' },
-    { to: '/faq', label: 'FAQ', desc: 'Common questions & SLA rules' }
+    {
+      to: '/about',
+      label: tr('About Us', 'ഞങ്ങളെക്കുറിച്ച്'),
+      desc: tr('Mission, vision & prototype notice', 'ലക്ഷ്യം, കാഴ്ചപ്പാട് & പ്രോട്ടോടൈപ്പ് വിവരങ്ങൾ')
+    },
+    {
+      to: '/contact',
+      label: tr('Contact Us', 'ബന്ധപ്പെടുക'),
+      desc: tr('Send an enquiry to helpdesk', 'ഹെൽപ്പ്ഡെസ്കിലേക്ക് സന്ദേശം അയയ്ക്കുക')
+    },
+    {
+      to: '/faq',
+      label: tr('FAQ', 'ചോദ്യോത്തരങ്ങൾ'),
+      desc: tr('Common questions & SLA rules', 'പൊതുവായ സംശയങ്ങളും SLA നിയമങ്ങളും')
+    }
   ];
 
   useEffect(() => {
@@ -113,12 +125,14 @@ export function Layout({ children }) {
         <span className="inline-flex items-center gap-2 flex-wrap justify-center">
           <span className="inline-flex items-center gap-1.5 font-semibold text-amber-300">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            Recruitment Prototype
+            {tr('Recruitment Prototype', 'റിക്രൂട്ട്മെന്റ് പ്രോട്ടോടൈപ്പ്')}
           </span>
           <span className="text-slate-600">•</span>
           <span>
-            WhiteMatrix Assessment Demo — Not an official Government of Kerala / CMO website.
-            Fictional sample data only.
+            {tr(
+              'WhiteMatrix Assessment Demo — Not an official Government of Kerala / CMO website. Fictional sample data only.',
+              'WhiteMatrix സാങ്കേതിക പരീക്ഷണ ഡെമോ — ഇത് ഔദ്യോഗിക കേരള സർക്കാർ / CMO വെബ്സൈറ്റ് അല്ല. സാങ്കൽപ്പിക വിവരങ്ങൾ മാത്രം.'
+            )}
           </span>
         </span>
       </div>
@@ -254,7 +268,7 @@ export function Layout({ children }) {
                       <div className="animate-slide-down absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
                         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                           <span className="text-xs font-bold text-slate-900">
-                            Recent Workflow Activity
+                            {tr('Recent Workflow Activity', 'സമീപകാല നടപടികൾ')}
                           </span>
                           <button
                             type="button"
@@ -267,7 +281,7 @@ export function Layout({ children }) {
                         <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
                           {activity.length === 0 ? (
                             <p className="p-4 text-xs text-slate-500 text-center">
-                              No recent activity yet.
+                              {tr('No recent activity yet.', 'സമീപകാല പ്രവർത്തനങ്ങൾ ഒന്നും ഇല്ല.')}
                             </p>
                           ) : (
                             activity.slice(0, 6).map((item) => (
@@ -308,7 +322,9 @@ export function Layout({ children }) {
                     <p className="text-xs font-semibold text-slate-800 max-w-[120px] truncate">
                       {user.name}
                     </p>
-                    <p className="text-[11px] text-slate-500">{getRoleLabel(user.role)}</p>
+                    <p className="text-[11px] text-slate-500">
+                      {tRole(user.role) || getRoleLabel(user.role)}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -401,14 +417,17 @@ export function Layout({ children }) {
                     onClick={() => setMobileOpen(false)}
                     className="w-full text-center px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold"
                   >
-                    Go to {getRoleLabel(user.role)} Dashboard
+                    {tr(
+                      `Go to ${getRoleLabel(user.role)} Dashboard`,
+                      `${tRole(user.role) || getRoleLabel(user.role)} ഡാഷ്ബോർഡ്`
+                    )}
                   </Link>
                   <button
                     type="button"
                     onClick={handleLogout}
                     className="w-full text-center px-4 py-2 rounded-xl border border-rose-200 text-rose-700 text-sm font-semibold"
                   >
-                    Logout ({user.name})
+                    {tr('Logout', 'ലോഗൗട്ട്')} ({user.name})
                   </button>
                 </>
               ) : (
@@ -448,69 +467,81 @@ export function Layout({ children }) {
           <div>
             <div className="flex items-center gap-2.5 text-white font-bold text-base mb-2">
               <Building2 className="w-5 h-5 text-amber-400" />
-              CM Kerala Public Grievance Portal
+              {tr('CM Kerala Public Grievance Portal', 'സി.എം. കേരള പൊതുജന പരാതി പോർട്ടൽ')}
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              A full-stack recruitment prototype demonstrating transparent citizen grievance
-              submission, CMO routing, department action tracking, and Gemini AI-assisted triage.
+              {tr(
+                'A full-stack recruitment prototype demonstrating transparent citizen grievance submission, CMO routing, department action tracking, and Gemini AI-assisted triage.',
+                'സുതാര്യമായ പരാതി സമർപ്പണം, CMO കൈമാറ്റം, വകുപ്പുതല നടപടി നിരീക്ഷണം, Gemini AI വിശകലനം എന്നിവ കാണിക്കുന്ന ഫുൾ-സ്റ്റാക്ക് പ്രോട്ടോടൈപ്പ്.'
+              )}
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white mb-3">Portal Pages</h3>
+            <h3 className="text-sm font-semibold text-white mb-3">
+              {tr('Portal Pages', 'പോർട്ടൽ പേജുകൾ')}
+            </h3>
             <ul className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs">
               <li>
                 <Link to="/citizen/submit" className="hover:text-amber-300">
-                  Submit Grievance
+                  {t.ctaSubmit}
                 </Link>
               </li>
               <li>
                 <Link to="/track" className="hover:text-amber-300">
-                  Track Status
+                  {t.navTrack}
                 </Link>
               </li>
               <li>
                 <Link to="/departments" className="hover:text-amber-300">
-                  Departments
+                  {t.navDepartments}
                 </Link>
               </li>
               <li>
                 <Link to="/how-it-works" className="hover:text-amber-300">
-                  How It Works
+                  {t.navHow}
                 </Link>
               </li>
               <li>
                 <Link to="/about" className="hover:text-amber-300">
-                  About Us
+                  {tr('About Us', 'ഞങ്ങളെക്കുറിച്ച്')}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-amber-300">
-                  Contact Us
+                  {tr('Contact Us', 'ബന്ധപ്പെടുക')}
                 </Link>
               </li>
               <li>
                 <Link to="/faq" className="hover:text-amber-300">
-                  FAQ
+                  {tr('FAQ', 'ചോദ്യോത്തരങ്ങൾ')}
                 </Link>
               </li>
               <li>
                 <Link to="/login" className="hover:text-amber-300">
-                  Demo Login
+                  {tr('Demo Login', 'ഡെമോ ലോഗിൻ')}
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white mb-3">Prototype Compliance</h3>
+            <h3 className="text-sm font-semibold text-white mb-3">
+              {tr('Prototype Compliance', 'പ്രോട്ടോടൈപ്പ് അറിയിപ്പ്')}
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Built exclusively for WhiteMatrix Software Solutions technical assessment. Not
-              affiliated with or endorsed by the Government of Kerala or the Chief Minister&apos;s
-              Office. All records and credentials are fictional.
+              {tr(
+                "Built exclusively for WhiteMatrix Software Solutions technical assessment. Not affiliated with or endorsed by the Government of Kerala or the Chief Minister's Office. All records and credentials are fictional.",
+                'WhiteMatrix Software Solutions സാങ്കേതിക വിലയിരുത്തലിനായി നിർമ്മിച്ചത്. കേരള സർക്കാരുമായോ മുഖ്യമന്ത്രിയുടെ ഓഫീസുമായോ ഔദ്യോഗിക ബന്ധമില്ല. എല്ലാ വിവരങ്ങളും സാങ്കൽപ്പികമാണ്.'
+              )}
             </p>
           </div>
         </div>
         <div className="border-t border-slate-800/80 py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-          <span>CM Kerala Public Grievance Redressal Portal (Recruitment Prototype)</span>
+          <span>
+            {tr(
+              'CM Kerala Public Grievance Redressal Portal (Recruitment Prototype)',
+              'സി.എം. കേരള പൊതുജന പരാതി പരിഹാര പോർട്ടൽ (റിക്രൂട്ട്മെന്റ് പ്രോട്ടോടൈപ്പ്)'
+            )}
+          </span>
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-semibold text-slate-300">
             <span className="relative flex h-2 w-2">
               {health.ok && (
@@ -527,12 +558,12 @@ export function Layout({ children }) {
               />
             </span>
             {!health.checked
-              ? 'Checking System Status...'
+              ? tr('Checking System Status...', 'സിസ്റ്റം നില പരിശോധിക്കുന്നു...')
               : health.ok && health.db
-              ? 'API Live • MongoDB Atlas Connected'
+              ? tr('API Live • MongoDB Atlas Connected', 'API സജീവം • MongoDB ബന്ധിപ്പിച്ചു')
               : health.ok
-              ? 'API Live • Reconnecting DB'
-              : 'API Offline'}
+              ? tr('API Live • Reconnecting DB', 'API സജീവം • DB പുനഃസ്ഥാപിക്കുന്നു')
+              : tr('API Offline', 'API ഓഫ്‌ലൈൻ')}
           </span>
         </div>
       </footer>

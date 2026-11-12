@@ -14,9 +14,11 @@ import { AttachmentList } from '../../components/AttachmentList.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { StatusStepper } from '../../components/StatusStepper.jsx';
 import { Timeline } from '../../components/Timeline.jsx';
+import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
 export function CitizenGrievanceDetailPage() {
+  const { tr, tDistrict, tCategory } = usePreferences();
   const { id } = useParams();
   const [grievance, setGrievance] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -104,14 +106,15 @@ export function CitizenGrievanceDetailPage() {
           to="/citizen/dashboard"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-900"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Citizen Dashboard
+          <ArrowLeft className="w-4 h-4" />{' '}
+          {tr('Back to Citizen Dashboard', 'പൗര ഡാഷ്ബോർഡിലേക്ക് മടങ്ങുക')}
         </Link>
         <button
           type="button"
           onClick={() => window.print()}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
         >
-          <Printer className="w-3.5 h-3.5" /> Print Record
+          <Printer className="w-3.5 h-3.5" /> {tr('Print Record', 'പ്രിന്റ് എടുക്കുക')}
         </button>
       </div>
 
@@ -137,7 +140,7 @@ export function CitizenGrievanceDetailPage() {
             <PriorityBadge priority={grievance.priority} />
             {grievance.isEscalated && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
-                <AlertTriangle className="w-3 h-3" /> Escalated
+                <AlertTriangle className="w-3 h-3" /> {tr('Escalated', 'അടിയന്തിരമാക്കി')}
               </span>
             )}
           </div>
@@ -147,30 +150,32 @@ export function CitizenGrievanceDetailPage() {
 
         <div className="grid sm:grid-cols-4 gap-3 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3.5">
           <div>
-            <span className="text-slate-500 block">District</span>
-            <strong className="text-slate-800">{grievance.district}</strong>
+            <span className="text-slate-500 block">{tr('District', 'ജില്ല')}</span>
+            <strong className="text-slate-800">{tDistrict(grievance.district)}</strong>
           </div>
           <div>
-            <span className="text-slate-500 block">Category</span>
-            <strong className="text-slate-800">{grievance.category}</strong>
+            <span className="text-slate-500 block">{tr('Category', 'വിഭാഗം')}</span>
+            <strong className="text-slate-800">{tCategory(grievance.category)}</strong>
           </div>
           <div>
-            <span className="text-slate-500 block">Assigned Department</span>
+            <span className="text-slate-500 block">{tr('Assigned Department', 'വകുപ്പ്')}</span>
             <strong className="text-slate-800">
-              {grievance.assignedDepartmentId?.name || 'Pending CMO Assignment'}
+              {grievance.assignedDepartmentId?.name ||
+                tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
             </strong>
           </div>
           <div>
-            <span className="text-slate-500 block">Target SLA Due</span>
+            <span className="text-slate-500 block">{tr('Target SLA Due', 'ലക്ഷ്യ SLA തീയതി')}</span>
             <strong className={grievance.isOverdue ? 'text-rose-700' : 'text-slate-800'}>
-              {formatDate(grievance.dueDate)} {grievance.isOverdue ? '(Overdue)' : ''}
+              {formatDate(grievance.dueDate)}{' '}
+              {grievance.isOverdue ? `(${tr('Overdue', 'കാലാവധി കഴിഞ്ഞു')})` : ''}
             </strong>
           </div>
         </div>
 
         <div>
           <h2 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-            Complaint Description
+            {tr('Complaint Description', 'പരാതി വിവരണം')}
           </h2>
           <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
             {grievance.description}
@@ -180,7 +185,8 @@ export function CitizenGrievanceDetailPage() {
         {grievance.actionTakenReport && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
             <p className="text-xs font-bold text-emerald-900 uppercase tracking-wide mb-1 flex items-center gap-1.5">
-              <FileCheck2 className="w-4 h-4" /> Official Action-Taken Report
+              <FileCheck2 className="w-4 h-4" />{' '}
+              {tr('Official Action-Taken Report', 'ഔദ്യോഗിക നടപടി റിപ്പോർട്ട് (ATR)')}
             </p>
             <p className="text-sm text-emerald-950">{grievance.actionTakenReport}</p>
           </div>
@@ -197,13 +203,18 @@ export function CitizenGrievanceDetailPage() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-500" />
-              {grievance.feedback ? 'Your Resolution Feedback' : 'Submit Resolution Feedback'}
+              {grievance.feedback
+                ? tr('Your Resolution Feedback', 'നിങ്ങളുടെ അഭിപ്രായം')
+                : tr('Submit Resolution Feedback', 'അഭിപ്രായം രേഖപ്പെടുത്തുക')}
             </h2>
             {grievance.feedback ? (
               <div className="space-y-2 text-sm">
                 <p>
-                  <strong>Rating:</strong> {grievance.feedback.rating} / 5 stars (
-                  {grievance.feedback.isSatisfied ? 'Satisfied' : 'Dissatisfied'})
+                  <strong>{tr('Rating:', 'റേറ്റിംഗ്:')}</strong> {grievance.feedback.rating} / 5 (
+                  {grievance.feedback.isSatisfied
+                    ? tr('Satisfied', 'തൃപ്തികരം')
+                    : tr('Dissatisfied', 'അതൃപ്തി')}
+                  )
                 </p>
                 {grievance.feedback.comment && (
                   <p className="text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
@@ -216,7 +227,7 @@ export function CitizenGrievanceDetailPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Rating (1–5)
+                      {tr('Rating (1–5)', 'റേറ്റിംഗ് (1–5)')}
                     </label>
                     <select
                       value={rating}
@@ -225,22 +236,22 @@ export function CitizenGrievanceDetailPage() {
                     >
                       {[5, 4, 3, 2, 1].map((n) => (
                         <option key={n} value={n}>
-                          {n} Star{n > 1 ? 's' : ''}
+                          {n} {tr('Stars', 'നക്ഷത്രം')}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Outcome
+                      {tr('Outcome', 'അനുഭവം')}
                     </label>
                     <select
                       value={isSatisfied ? 'yes' : 'no'}
                       onChange={(e) => setIsSatisfied(e.target.value === 'yes')}
                       className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm bg-white"
                     >
-                      <option value="yes">Satisfied</option>
-                      <option value="no">Not Satisfied</option>
+                      <option value="yes">{tr('Satisfied', 'തൃപ്തികരം')}</option>
+                      <option value="no">{tr('Not Satisfied', 'തൃപ്തികരമല്ല')}</option>
                     </select>
                   </div>
                 </div>
@@ -248,7 +259,7 @@ export function CitizenGrievanceDetailPage() {
                   rows={3}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Share feedback about resolution quality..."
+                  placeholder={tr('Share feedback about resolution quality...', 'പരിഹാരത്തെക്കുറിച്ച് അഭിപ്രായം എഴുതുക...')}
                   className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm"
                 />
                 <button
@@ -256,7 +267,7 @@ export function CitizenGrievanceDetailPage() {
                   disabled={busy}
                   className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
                 >
-                  Submit Feedback
+                  {tr('Submit Feedback', 'അഭിപ്രായം സമർപ്പിക്കുക')}
                 </button>
               </form>
             )}
@@ -265,11 +276,13 @@ export function CitizenGrievanceDetailPage() {
           <div className="bg-white border border-rose-200 rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
               <RefreshCw className="w-5 h-5 text-rose-600" />
-              Issue Not Resolved? Reopen Grievance
+              {tr('Issue Not Resolved? Reopen Grievance', 'പരിഹാരമായില്ലേ? പരാതി വീണ്ടും തുറക്കുക')}
             </h2>
             <p className="text-xs text-slate-600 mb-3">
-              If the action taken did not resolve the grievance on ground, reopen it to notify the
-              CMO for re-evaluation.
+              {tr(
+                'If the action taken did not resolve the grievance on ground, reopen it to notify the CMO for re-evaluation.',
+                'പ്രശ്നം പരിഹരിക്കപ്പെട്ടിട്ടില്ലെങ്കിൽ പുനഃപരിശോധനയ്ക്കായി CMO-യെ അറിയിക്കാൻ പരാതി വീണ്ടും തുറക്കാം.'
+              )}
             </p>
             <form onSubmit={handleReopen} className="space-y-3">
               <textarea
@@ -278,7 +291,7 @@ export function CitizenGrievanceDetailPage() {
                 rows={3}
                 value={reopenReason}
                 onChange={(e) => setReopenReason(e.target.value)}
-                placeholder="Explain why the grievance needs reopening..."
+                placeholder={tr('Explain why the grievance needs reopening...', 'വീണ്ടും തുറക്കുന്നതിനുള്ള കാരണം വ്യക്തമാക്കുക...')}
                 className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm"
               />
               <button
@@ -286,7 +299,7 @@ export function CitizenGrievanceDetailPage() {
                 disabled={busy}
                 className="px-4 py-2 rounded-lg bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold"
               >
-                Reopen Grievance
+                {tr('Reopen Grievance', 'പരാതി വീണ്ടും തുറക്കുക')}
               </button>
             </form>
           </div>
@@ -295,7 +308,9 @@ export function CitizenGrievanceDetailPage() {
 
       {/* Full Public History */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900 mb-4">CMO & Department Updates Timeline</h2>
+        <h2 className="text-lg font-bold text-slate-900 mb-4">
+          {tr('CMO & Department Updates Timeline', 'CMO & വകുപ്പ് നടപടി ചരിത്രം')}
+        </h2>
         <Timeline history={grievance.history} />
       </div>
     </div>
