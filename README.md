@@ -4,6 +4,12 @@
 
 A full-stack public grievance redressal platform connecting citizens, the Chief Minister's Office (CMO), and government department officers with an end-to-end audited lifecycle (`Submitted` → `Under Review` → `In Progress` → `Resolved` / `Reopened`) and a **Google Gemini AI Grievance Assistant** (with a clearly labelled heuristic fallback).
 
+## Live Deployment & Repository
+
+- **Live Deployed Portal:** https://cm-kerala-grievance-portal-rn89.onrender.com
+- **API Health Check:** https://cm-kerala-grievance-portal-rn89.onrender.com/api/health
+- **GitHub Repository:** https://github.com/akshaya-sanoj/cm-kerala-grievance-portal
+
 ---
 
 ## Core Modules Implemented
