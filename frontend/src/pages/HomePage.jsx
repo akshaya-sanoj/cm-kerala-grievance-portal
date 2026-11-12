@@ -22,6 +22,7 @@ import { DepartmentBadge } from '../components/DepartmentBadge.jsx';
 import { Reveal } from '../components/Reveal.jsx';
 import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 
 const WORKFLOW_STEPS = [
   {
@@ -85,6 +86,7 @@ const PLACEHOLDER_REFS = [
 
 export function HomePage() {
   const { user } = useAuth();
+  const { t } = usePreferences();
   const navigate = useNavigate();
   const [refInput, setRefInput] = useState('');
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -271,18 +273,17 @@ export function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-80" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
               </span>
-              Live State Portal • 14 Kerala Districts • Gemini AI Triage
+              {t.heroBadge}
             </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.12]">
-              Direct, Transparent{' '}
+              {t.heroHeadlineStart}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-200">
-                Public Redressal
+                {t.heroHeadlineAccent}
               </span>{' '}
-              for Kerala
+              {t.heroHeadlineEnd}
             </h1>
             <p className="text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed">
-              Submit grievances directly to the Chief Minister&apos;s Office (CMO), follow every
-              department action in real time, and verify outcomes transparently.
+              {t.heroDesc}
             </p>
             <div className="flex flex-wrap items-center gap-3.5 pt-1">
               <Link
@@ -290,20 +291,20 @@ export function HomePage() {
                 className="btn-shimmer group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25 transition"
               >
                 <FilePlus2 className="w-4 h-4" />
-                Submit Grievance
+                {t.ctaSubmit}
               </Link>
               <Link
                 to="/track"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-[0.98] border border-white/20 text-white font-semibold text-sm backdrop-blur transition"
               >
                 <Search className="w-4 h-4" />
-                Track Grievance
+                {t.ctaTrack}
               </Link>
               <Link
                 to="/login"
                 className="group inline-flex items-center gap-1.5 px-4 py-3 text-sm font-semibold text-amber-300 hover:text-amber-200 transition"
               >
-                CMO / Officer Demo Login{' '}
+                {t.ctaDemo}{' '}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -351,7 +352,7 @@ export function HomePage() {
             <div className="animate-float-slow absolute -inset-2 bg-gradient-to-tr from-indigo-500/35 via-amber-400/25 to-sky-400/30 rounded-[28px] blur-xl pointer-events-none" />
             <div className="relative bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/20">
               <div className="flex items-center justify-between gap-2 mb-1">
-                <h2 className="text-lg font-bold text-slate-900">Track Grievance Status</h2>
+                <h2 className="text-lg font-bold text-slate-900">{t.quickTrackTitle}</h2>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -360,9 +361,7 @@ export function HomePage() {
                   Live Lookup
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mb-5">
-                Enter your unique Reference ID to inspect department status and timeline.
-              </p>
+              <p className="text-xs text-slate-500 mb-5">{t.quickTrackSub}</p>
               <form onSubmit={handleQuickTrack} className="space-y-3">
                 <input
                   type="text"
@@ -376,7 +375,7 @@ export function HomePage() {
                   className="btn-shimmer w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Search className="w-4 h-4" />
-                  Check Live Status
+                  {t.quickTrackBtn}
                 </button>
               </form>
               <div className="mt-5 pt-4 border-t border-slate-100">
@@ -482,10 +481,10 @@ export function HomePage() {
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                    Mandatory Lifecycle
+                    {t.howBadge}
                   </p>
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
-                    How Redressal Works
+                    {t.howTitle}
                   </h2>
                 </div>
                 <button
@@ -563,11 +562,9 @@ export function HomePage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-                    <Cpu className="w-3.5 h-3.5 animate-pulse" /> Interactive Gemini AI Sandbox
+                    <Cpu className="w-3.5 h-3.5 animate-pulse" /> {t.aiBadge}
                   </p>
-                  <h3 className="text-xl font-extrabold text-slate-900 mt-1">
-                    Test Live AI Triage Now
-                  </h3>
+                  <h3 className="text-xl font-extrabold text-slate-900 mt-1">{t.aiTitle}</h3>
                 </div>
                 {aiPreview && (
                   <span
@@ -820,10 +817,10 @@ export function HomePage() {
           <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                Nodal Wings
+                {t.featuredBadge}
               </p>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
-                Featured Government Departments
+                {t.featuredTitle}
               </h2>
             </div>
             <Link

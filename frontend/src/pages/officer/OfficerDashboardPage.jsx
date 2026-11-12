@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AlertTriangle, Building2, CheckCircle2, Clock, Eye, FileCheck2, Search } from 'lucide-react';
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
+import { SlaCountdownBadge } from '../../components/SlaCountdownBadge.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
@@ -190,10 +191,11 @@ export function OfficerDashboardPage() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-xs whitespace-nowrap">
-                      <span className={g.isOverdue ? 'text-rose-700 font-bold' : 'text-slate-600'}>
-                        {formatDate(g.dueDate)} {g.isOverdue ? '(Overdue)' : ''}
+                    <td className="py-3 px-4 text-xs whitespace-nowrap space-y-1">
+                      <span className={g.isOverdue ? 'text-rose-700 font-bold block' : 'text-slate-600 block'}>
+                        {formatDate(g.dueDate)}
                       </span>
+                      <SlaCountdownBadge dueDate={g.dueDate} status={g.status} />
                     </td>
                     <td className="py-3 px-4 text-right">
                       <Link

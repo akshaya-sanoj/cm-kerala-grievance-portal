@@ -27,6 +27,7 @@ import {
 } from 'recharts';
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
+import { SlaCountdownBadge } from '../../components/SlaCountdownBadge.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
@@ -74,6 +75,8 @@ export function CmoDashboardPage() {
   const [autoSync, setAutoSync] = useState(true);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [actionBusy, setActionBusy] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [batchDeptId, setBatchDeptId] = useState('');
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
@@ -171,6 +174,86 @@ export function CmoDashboardPage() {
       const res = await api.post('/cmo/escalate-overdue');
       setNotice(res.data.message);
       addToast(res.data.message);
+      await Promise.all([loadInitialData(), loadGrievances(filters)]);
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+  function toggleSelectRow(id) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  function toggleSelectAll() {
+    if (!grievances.length) return;
+    if (selectedIds.length === grievances.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(grievances.map((g) => g._id));
+    }
+  }
+
+  async function handleBatchEscalate() {
+    const targets = grievances.filter(
+      (g) => selectedIds.includes(g._id) && g.status !== 'Resolved'
+    );
+    if (!targets.length) {
+      setError('No active (non-resolved) grievances selected to escalate.');
+      return;
+    }
+    setActionBusy(true);
+    setNotice('');
+    setError('');
+    try {
+      const results = await Promise.allSettled(
+        targets.map((g) =>
+          api.post(`/cmo/grievances/${g._id}/escalate`, {
+            reason: 'Batch priority escalation by CMO Dashboard',
+            bumpPriorityToHigh: true
+          })
+        )
+      );
+      const okCount = results.filter((r) => r.status === 'fulfilled').length;
+      const msg = `Batch escalated ${okCount} of ${targets.length} selected grievance(s).`;
+      setNotice(msg);
+      addToast(msg);
+      setSelectedIds([]);
+      await Promise.all([loadInitialData(), loadGrievances(filters)]);
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
+  async function handleBatchAssign() {
+    if (!batchDeptId) {
+      setError('Choose a target department for batch assignment.');
+      return;
+    }
+    const targets = grievances.filter((g) => selectedIds.includes(g._id));
+    if (!targets.length) return;
+    setActionBusy(true);
+    setNotice('');
+    setError('');
+    try {
+      const results = await Promise.allSettled(
+        targets.map((g) =>
+          api.post(`/cmo/grievances/${g._id}/assign`, {
+            departmentId: batchDeptId,
+            instructions: 'Routed via CMO Batch Action Queue'
+          })
+        )
+      );
+      const okCount = results.filter((r) => r.status === 'fulfilled').length;
+      const msg = `Assigned ${okCount} of ${targets.length} selected grievance(s) to department.`;
+      setNotice(msg);
+      addToast(msg);
+      setSelectedIds([]);
       await Promise.all([loadInitialData(), loadGrievances(filters)]);
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -464,6 +547,51 @@ export function CmoDashboardPage() {
             </div>
           </div>
 
+          {selectedIds.length > 0 && (
+            <div className="animate-slide-down bg-slate-900 text-white border border-slate-800 rounded-2xl p-3.5 shadow-md flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span className="font-bold text-amber-300">
+                {selectedIds.length} grievance(s) selected
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={batchDeptId}
+                  onChange={(e) => setBatchDeptId(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs outline-none"
+                >
+                  <option value="">Choose Department...</option>
+                  {departments.map((d) => (
+                    <option key={d._id} value={d._id}>
+                      {d.code} — {d.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  disabled={actionBusy || !batchDeptId}
+                  onClick={handleBatchAssign}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold transition"
+                >
+                  Batch Assign
+                </button>
+                <button
+                  type="button"
+                  disabled={actionBusy}
+                  onClick={handleBatchEscalate}
+                  className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-semibold transition"
+                >
+                  Batch Escalate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds([])}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             {loading ? (
               <div className="p-8 text-center text-sm text-slate-500">Loading grievances...</div>
@@ -476,6 +604,15 @@ export function CmoDashboardPage() {
                 <table className="w-full text-left border-collapse text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
                     <tr>
+                      <th className="py-3 px-3 w-8">
+                        <input
+                          type="checkbox"
+                          checked={grievances.length > 0 && selectedIds.length === grievances.length}
+                          onChange={toggleSelectAll}
+                          aria-label="Select all grievances"
+                          className="rounded border-slate-300 text-indigo-600"
+                        />
+                      </th>
                       <th className="py-3 px-4">Ref ID</th>
                       <th className="py-3 px-4">Citizen &amp; Subject</th>
                       <th className="py-3 px-4">District / Category</th>
@@ -489,6 +626,15 @@ export function CmoDashboardPage() {
                   <tbody className="divide-y divide-slate-100">
                     {grievances.map((g) => (
                       <tr key={g._id} className="hover:bg-slate-50/70">
+                        <td className="py-3 px-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(g._id)}
+                            onChange={() => toggleSelectRow(g._id)}
+                            aria-label={`Select ${g.referenceId}`}
+                            className="rounded border-slate-300 text-indigo-600"
+                          />
+                        </td>
                         <td className="py-3 px-4 whitespace-nowrap">
                           <span className="font-mono text-xs font-bold text-indigo-700 block">
                             {g.referenceId}
@@ -527,11 +673,15 @@ export function CmoDashboardPage() {
                         <td className="py-3 px-4">
                           <StatusBadge status={g.status} />
                         </td>
-                        <td className="py-3 px-4 text-xs whitespace-nowrap">
-                          <span className={g.isOverdue ? 'text-rose-700 font-bold' : 'text-slate-600'}>
+                        <td className="py-3 px-4 text-xs whitespace-nowrap space-y-1">
+                          <span
+                            className={
+                              g.isOverdue ? 'text-rose-700 font-bold block' : 'text-slate-600 block'
+                            }
+                          >
                             {formatDate(g.dueDate)}
-                            {g.isOverdue ? ' (Overdue)' : ''}
                           </span>
+                          <SlaCountdownBadge dueDate={g.dueDate} status={g.status} />
                         </td>
                         <td className="py-3 px-4 text-right">
                           <Link

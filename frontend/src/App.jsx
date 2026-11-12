@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout.jsx';
 import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { PreferencesProvider } from './context/PreferencesContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { AboutPage } from './pages/AboutPage.jsx';
 import { ContactPage } from './pages/ContactPage.jsx';
@@ -22,10 +23,11 @@ import { OfficerGrievanceDetailPage } from './pages/officer/OfficerGrievanceDeta
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <Layout>
+    <PreferencesProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <Layout>
           <Routes>
             {/* Public Website */}
             <Route path="/" element={<HomePage />} />
@@ -104,9 +106,10 @@ export default function App() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Layout>
+          </Layout>
         </BrowserRouter>
       </ToastProvider>
     </AuthProvider>
+    </PreferencesProvider>
   );
 }

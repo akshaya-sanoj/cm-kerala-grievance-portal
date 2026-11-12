@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, Copy, FilePlus2, Paperclip, Printer, Sparkles } from 'lucide-react';
+import { CheckCircle2, Copy, FilePlus2, Paperclip, Printer, RotateCcw, Sparkles } from 'lucide-react';
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { AiAssistantCard } from '../../components/AiAssistantCard.jsx';
+
+const DRAFT_STORAGE_KEY = 'cm_kerala_grievance_draft';
 
 const FALLBACK_METADATA = {
   districts: [
@@ -48,13 +50,30 @@ export function SubmitGrievancePage() {
     ? presetDistrict
     : '';
   const [metadata, setMetadata] = useState(FALLBACK_METADATA);
-  const [form, setForm] = useState({
-    district: initialDistrict,
-    category: initialCategory,
-    subject: '',
-    description: '',
-    priority: 'Medium'
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || 'null');
+      if (saved && typeof saved === 'object') {
+        return {
+          district: initialDistrict || saved.district || '',
+          category: initialCategory || saved.category || '',
+          subject: saved.subject || '',
+          description: saved.description || '',
+          priority: saved.priority || 'Medium'
+        };
+      }
+    } catch {
+      // ignore invalid stored draft
+    }
+    return {
+      district: initialDistrict,
+      category: initialCategory,
+      subject: '',
+      description: '',
+      priority: 'Medium'
+    };
   });
+  const [draftSavedAt, setDraftSavedAt] = useState(null);
   const [file, setFile] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
@@ -62,6 +81,49 @@ export function SubmitGrievancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [submittedResult, setSubmittedResult] = useState(null);
+
+  useEffect(() => {
+    const hasContent = Boolean(form.subject || form.description || form.district || form.category);
+    if (!hasContent || submittedResult) return;
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(form));
+      setDraftSavedAt(new Date());
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [form, submittedResult]);
+
+  const qualityInfo = useMemo(() => {
+    let score = 0;
+    if (form.district) score += 20;
+    if (form.category) score += 20;
+    if (form.subject.trim().length >= 8) score += 20;
+    if (form.description.trim().length >= 30) score += 20;
+    if (form.description.trim().length >= 90) score += 20;
+    const label =
+      score >= 80 ? 'Detailed & Ready for Gemini AI' : score >= 40 ? 'Good Progress' : 'Needs Details';
+    const barClass =
+      score >= 80 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-slate-400';
+    return { score, label, barClass };
+  }, [form]);
+
+  function handleClearDraft() {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    setForm({
+      district: '',
+      category: '',
+      subject: '',
+      description: '',
+      priority: 'Medium'
+    });
+    setAiAnalysis(null);
+    setCitizenAcceptedAi(false);
+    setDraftSavedAt(null);
+  }
 
   useEffect(() => {
     api
@@ -137,6 +199,11 @@ export function SubmitGrievancePage() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
+      try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
       setSubmittedResult(res.data);
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -207,11 +274,45 @@ export function SubmitGrievancePage() {
         <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
           Citizen Grievance Intake
         </p>
-        <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Submit a New Grievance</h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Describe your issue clearly and use the optional AI Grievance Assistant to review
-          suggested department, category, urgency priority, and potential duplicates.
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Submit a New Grievance</h1>
+            <p className="text-sm text-slate-600 mt-1">
+              Describe your issue clearly and use the optional AI Grievance Assistant to review
+              suggested department, category, urgency priority, and potential duplicates.
+            </p>
+          </div>
+          {draftSavedAt && (
+            <div className="flex items-center gap-2 text-xs">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                Draft auto-saved
+              </span>
+              <button
+                type="button"
+                onClick={handleClearDraft}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold"
+              >
+                <RotateCcw className="w-3 h-3" /> Clear
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Live Complaint Completeness Meter */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-bold text-slate-700">Complaint Detail Completeness</span>
+          <span className="font-semibold text-indigo-700">
+            {qualityInfo.label} ({qualityInfo.score}%)
+          </span>
+        </div>
+        <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+          <div
+            style={{ width: `${qualityInfo.score}%` }}
+            className={`h-full rounded-full transition-all duration-300 ${qualityInfo.barClass}`}
+          />
+        </div>
       </div>
 
       {error && (

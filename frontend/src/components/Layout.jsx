@@ -4,21 +4,26 @@ import {
   Bell,
   Building2,
   ChevronDown,
+  Languages,
   LogOut,
   Menu,
+  Moon,
   Search,
   Shield,
+  Sun,
   UserCheck,
   X
 } from 'lucide-react';
 import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { usePreferences } from '../context/PreferencesContext.jsx';
 import { formatDateTime, getDashboardPathForRole, getRoleLabel } from '../utils/formatters.js';
 import { CommandPalette } from './CommandPalette.jsx';
 import { StatusBadge } from './StatusBadge.jsx';
 
 export function Layout({ children }) {
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme, lang, toggleLang, t } = usePreferences();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -26,6 +31,25 @@ export function Layout({ children }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [activity, setActivity] = useState([]);
+  const [health, setHealth] = useState({ checked: false, ok: false, db: false });
+
+  useEffect(() => {
+    const checkHealth = () => {
+      api
+        .get('/health')
+        .then((res) =>
+          setHealth({
+            checked: true,
+            ok: Boolean(res.data?.success),
+            db: Boolean(res.data?.databaseConnected)
+          })
+        )
+        .catch(() => setHealth({ checked: true, ok: false, db: false }));
+    };
+    checkHealth();
+    const timer = setInterval(checkHealth, 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     function handleShortcut(e) {
@@ -39,10 +63,10 @@ export function Layout({ children }) {
   }, []);
 
   const primaryLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/departments', label: 'Departments' },
-    { to: '/how-it-works', label: 'How It Works' },
-    { to: '/track', label: 'Track Grievance' }
+    { to: '/', label: t.navHome },
+    { to: '/departments', label: t.navDepartments },
+    { to: '/how-it-works', label: t.navHow },
+    { to: '/track', label: t.navTrack }
   ];
 
   const infoLinks = [
@@ -110,15 +134,13 @@ export function Layout({ children }) {
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight whitespace-nowrap">
-                    CM Kerala Portal
+                    {t.portalTitle}
                   </p>
                   <span className="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
                     Prototype
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 whitespace-nowrap">
-                  Public Grievance Redressal
-                </p>
+                <p className="text-[11px] text-slate-500 whitespace-nowrap">{t.portalSub}</p>
               </div>
             </Link>
 
@@ -152,7 +174,7 @@ export function Layout({ children }) {
                   onClick={() => setInfoOpen((prev) => !prev)}
                   className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap transition"
                 >
-                  Help &amp; Info
+                  {t.navInfo}
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
                 {infoOpen && (
@@ -175,19 +197,41 @@ export function Layout({ children }) {
               </div>
             </nav>
 
-            {/* Auth Controls */}
-            <div className="hidden lg:flex items-center gap-2.5 relative shrink-0">
+            {/* Auth & Preferences Controls */}
+            <div className="hidden lg:flex items-center gap-2 relative shrink-0">
               <button
                 type="button"
                 onClick={() => setPaletteOpen(true)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-xs font-medium text-slate-600 hover:text-indigo-800 transition"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-xs font-medium text-slate-600 hover:text-indigo-800 transition"
                 title="Quick Jump & Track (Ctrl+K)"
               >
                 <Search className="w-3.5 h-3.5" />
-                <span>Quick Jump</span>
-                <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500">
+                <span>{t.quickJump}</span>
+                <kbd className="font-mono text-[10px] px-1 py-0.5 rounded bg-white border border-slate-200 text-slate-500">
                   Ctrl+K
                 </kbd>
+              </button>
+              <button
+                type="button"
+                onClick={toggleLang}
+                title="Switch English / Malayalam"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 text-xs font-bold text-slate-700 transition"
+              >
+                <Languages className="w-3.5 h-3.5 text-indigo-600" />
+                {lang === 'en' ? 'ML' : 'EN'}
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label="Toggle color theme"
+                className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 text-slate-700 transition"
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-700" />
+                )}
               </button>
               {user ? (
                 <>
@@ -292,7 +336,23 @@ export function Layout({ children }) {
             </div>
 
             {/* Mobile menu toggle */}
-            <div className="lg:hidden flex items-center gap-1.5">
+            <div className="lg:hidden flex items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleLang}
+                className="px-2 py-1 rounded-lg text-[11px] font-bold text-slate-700 hover:bg-slate-100"
+                aria-label="Toggle language"
+              >
+                {lang === 'en' ? 'ML' : 'EN'}
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+                aria-label="Toggle theme"
+              >
+                {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              </button>
               <button
                 type="button"
                 onClick={() => setPaletteOpen(true)}
@@ -447,8 +507,31 @@ export function Layout({ children }) {
             </p>
           </div>
         </div>
-        <div className="border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">
-          CM Kerala Public Grievance Redressal Portal (Recruitment Prototype)
+        <div className="border-t border-slate-800/80 py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+          <span>CM Kerala Public Grievance Redressal Portal (Recruitment Prototype)</span>
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-semibold text-slate-300">
+            <span className="relative flex h-2 w-2">
+              {health.ok && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              )}
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${
+                  !health.checked
+                    ? 'bg-slate-500'
+                    : health.ok && health.db
+                    ? 'bg-emerald-400'
+                    : 'bg-amber-400'
+                }`}
+              />
+            </span>
+            {!health.checked
+              ? 'Checking System Status...'
+              : health.ok && health.db
+              ? 'API Live • MongoDB Atlas Connected'
+              : health.ok
+              ? 'API Live • Reconnecting DB'
+              : 'API Offline'}
+          </span>
         </div>
       </footer>
     </div>
