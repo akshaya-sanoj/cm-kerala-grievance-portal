@@ -13,7 +13,7 @@ export function AiAssistantCard({
 
   return (
     <div
-      className={`rounded-xl border p-4 ${
+      className={`animate-scale-in rounded-xl border p-4 ${
         isFallback
           ? 'bg-amber-50/70 border-amber-300'
           : 'bg-emerald-50/70 border-emerald-300'

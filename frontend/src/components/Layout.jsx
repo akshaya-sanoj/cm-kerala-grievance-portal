@@ -132,7 +132,7 @@ export function Layout({ children }) {
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
                 {infoOpen && (
-                  <div className="absolute left-0 top-full pt-1 w-64 z-50">
+                  <div className="animate-slide-down absolute left-0 top-full pt-1 w-64 z-50">
                     <div className="bg-white border border-slate-200 rounded-2xl shadow-xl p-2 space-y-1">
                       {infoLinks.map((item) => (
                         <Link
@@ -169,7 +169,7 @@ export function Layout({ children }) {
                     </button>
 
                     {bellOpen && (
-                      <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+                      <div className="animate-slide-down absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
                         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                           <span className="text-xs font-bold text-slate-900">
                             Recent Workflow Activity

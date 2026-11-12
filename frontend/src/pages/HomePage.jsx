@@ -15,6 +15,7 @@ import {
 import { api, getApiErrorMessage } from '../api/client.js';
 import { AnimatedNumber } from '../components/AnimatedNumber.jsx';
 import { DepartmentBadge } from '../components/DepartmentBadge.jsx';
+import { Reveal } from '../components/Reveal.jsx';
 import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -156,8 +157,10 @@ export function HomePage() {
       {/* 1. Airy Executive Hero */}
       <section className="civic-gradient text-white relative overflow-hidden">
         <div className="hero-grid absolute inset-0 pointer-events-none" />
+        <div className="animate-float-slow absolute -top-20 -right-16 w-80 h-80 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
+        <div className="animate-float-slow absolute -bottom-24 -left-16 w-96 h-96 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-12 gap-12 items-center relative z-10">
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-6 animate-fade-up">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-amber-200 text-xs font-semibold">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -179,31 +182,32 @@ export function HomePage() {
             <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <Link
                 to={user?.role === 'citizen' ? '/citizen/submit' : '/register'}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition"
+                className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition"
               >
                 <FilePlus2 className="w-4 h-4" />
                 Submit Grievance
               </Link>
               <Link
                 to="/track"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur transition"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-[0.98] border border-white/20 text-white font-semibold text-sm backdrop-blur transition"
               >
                 <Search className="w-4 h-4" />
                 Track Grievance
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-1.5 px-4 py-3 text-sm font-semibold text-amber-300 hover:text-amber-200 transition"
+                className="group inline-flex items-center gap-1.5 px-4 py-3 text-sm font-semibold text-amber-300 hover:text-amber-200 transition"
               >
-                CMO / Officer Demo Login <ArrowRight className="w-4 h-4" />
+                CMO / Officer Demo Login{' '}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
 
           {/* Single Clean Quick-Track Card */}
-          <div className="lg:col-span-5 relative">
-            <div className="absolute -inset-2 bg-gradient-to-tr from-indigo-500/25 via-amber-400/20 to-sky-400/20 rounded-[28px] blur-xl pointer-events-none" />
-            <div className="relative bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/20 animate-fade-up">
+          <div className="lg:col-span-5 relative animate-fade-up-delayed">
+            <div className="animate-float-slow absolute -inset-2 bg-gradient-to-tr from-indigo-500/25 via-amber-400/20 to-sky-400/20 rounded-[28px] blur-xl pointer-events-none" />
+            <div className="relative bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/20">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h2 className="text-lg font-bold text-slate-900">Track Grievance Status</h2>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -281,6 +285,7 @@ export function HomePage() {
       </section>
 
       {/* 3. Spacious 2-Column Interactive Workflow & Live Gemini AI Playground */}
+      <Reveal>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12">
         <div className="grid lg:grid-cols-12 gap-10 items-start">
           {/* Left: Clean Interactive 5-Step Lifecycle */}
@@ -492,8 +497,10 @@ export function HomePage() {
           </div>
         )}
       </section>
+      </Reveal>
 
       {/* 4. Spacious Featured Departments */}
+      <Reveal delayMs={80}>
       <section className="bg-white border-y border-slate-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
@@ -532,6 +539,7 @@ export function HomePage() {
           </div>
         </div>
       </section>
+      </Reveal>
     </div>
   );
 }

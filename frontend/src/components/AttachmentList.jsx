@@ -87,7 +87,7 @@ export function AttachmentList({ attachments = [] }) {
           onClick={closePreview}
         >
           <div
-            className="bg-white rounded-2xl max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden shadow-2xl"
+            className="animate-scale-in bg-white rounded-2xl max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-4">

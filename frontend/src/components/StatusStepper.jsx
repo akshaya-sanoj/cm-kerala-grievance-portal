@@ -37,9 +37,9 @@ export function StatusStepper({ status }) {
           return (
             <div
               key={step.key}
-              className={`rounded-lg p-3 border transition ${
+              className={`rounded-lg p-3 border transition-all duration-300 ${
                 active
-                  ? 'bg-white border-indigo-600 ring-2 ring-indigo-100 shadow-sm'
+                  ? 'bg-white border-indigo-600 ring-2 ring-indigo-100 shadow-sm scale-[1.01]'
                   : completed
                   ? 'bg-emerald-50/70 border-emerald-300'
                   : 'bg-white/60 border-slate-200 opacity-70'
@@ -47,11 +47,11 @@ export function StatusStepper({ status }) {
             >
               <div className="flex items-center gap-2 mb-1">
                 <span
-                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
                     completed
                       ? 'bg-emerald-600 text-white'
                       : active
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-indigo-600 text-white animate-pulse'
                       : 'bg-slate-200 text-slate-600'
                   }`}
                 >
