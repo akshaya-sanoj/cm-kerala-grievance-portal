@@ -9,30 +9,54 @@
 }
 
 .civic-gradient {
-  background: radial-gradient(circle at 82% 18%, rgba(245, 158, 11, 0.18), transparent 42%),
-    radial-gradient(circle at 12% 85%, rgba(79, 70, 229, 0.25), transparent 45%),
+  background: radial-gradient(circle at 82% 18%, rgba(245, 158, 11, 0.24), transparent 44%),
+    radial-gradient(circle at 12% 85%, rgba(99, 102, 241, 0.34), transparent 48%),
     linear-gradient(135deg, #090d1a 0%, #131c38 50%, #1e293b 100%);
+  background-size: 130% 130%;
+  animation: gradientAurora 12s ease-in-out infinite;
 }
 
 .hero-grid {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
   background-size: 36px 36px;
 }
 
 .hover-lift {
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 200ms ease;
 }
 .hover-lift:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px -14px rgba(15, 23, 42, 0.16);
+}
+
+@keyframes gradientAurora {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(26px);
   }
   to {
     opacity: 1;
@@ -43,7 +67,7 @@
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
@@ -51,10 +75,25 @@
   }
 }
 
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.015) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(18px);
+    transform: translateX(24px);
   }
   to {
     opacity: 1;
@@ -65,7 +104,7 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -76,46 +115,106 @@
 @keyframes floatSlow {
   0%,
   100% {
-    transform: translateY(0px) translateX(0px);
+    transform: translateY(0px) translateX(0px) scale(1);
   }
   50% {
-    transform: translateY(-10px) translateX(6px);
+    transform: translateY(-20px) translateX(12px) scale(1.07);
   }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+  }
+  45%,
+  100% {
+    transform: translateX(240%) skewX(-22deg);
+  }
+}
+
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-fade-up {
-  animation: fadeUp 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeUp 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-fade-up-delayed {
-  animation: fadeUp 580ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+  animation: fadeUp 750ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
 }
 
 .animate-scale-in {
-  animation: scaleIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: scaleIn 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pop-in {
+  animation: popIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: slideInRight 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-slide-down {
-  animation: slideDown 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: slideDown 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-float-slow {
-  animation: floatSlow 6s ease-in-out infinite;
+  animation: floatSlow 6.5s ease-in-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
-  .animate-fade-up-delayed,
-  .animate-scale-in,
-  .animate-slide-in-right,
-  .animate-slide-down,
-  .animate-float-slow {
-    animation: none !important;
-  }
+.animate-progress-fill {
+  transform-origin: left center;
+  animation: progressFill 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 32s linear infinite;
+}
+.marquee-wrapper:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.42) 50%,
+    transparent 100%
+  );
+  animation: shimmerSweep 3.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @media print {

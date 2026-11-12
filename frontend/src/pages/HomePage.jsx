@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   Building2,
   CheckCircle2,
   Clock,
+  Compass,
   Cpu,
   FilePlus2,
   MapPin,
+  Pause,
+  Play,
+  Radio,
   Search,
   Sparkles,
   TrendingUp
@@ -22,26 +26,31 @@ import { useAuth } from '../context/AuthContext.jsx';
 const WORKFLOW_STEPS = [
   {
     step: '01',
+    short: 'Submit',
     title: 'Citizen Submits Grievance',
     desc: 'Select Kerala district, category, upload supporting photo/PDF, and preview Gemini AI triage suggestions.'
   },
   {
     step: '02',
-    title: 'Unique Reference ID Issued',
-    desc: 'System issues an instant tracking code (e.g., KL-CMO-2026-100101) and computes SLA target dates.'
+    short: 'Ref ID & AI',
+    title: 'Unique Reference ID & AI Triage',
+    desc: 'System issues an instant tracking code (e.g., KL-CMO-2026-100101), runs Gemini triage, and computes SLA dates.'
   },
   {
     step: '03',
+    short: 'CMO Route',
     title: 'CMO Reviews & Forwards',
     desc: 'CMO verifies AI summary & potential duplicate flags, adds remarks, and routes to the relevant department.'
   },
   {
     step: '04',
+    short: 'Field ATR',
     title: 'Department Investigates & Submits ATR',
     desc: 'Assigned officer logs field updates and uploads an Action-Taken Report (ATR) back to the CMO.'
   },
   {
     step: '05',
+    short: 'Verified',
     title: 'Verify, Rate or Reopen',
     desc: 'CMO approves closure; citizen rates service or reopens the grievance if unresolved on ground.'
   }
@@ -68,11 +77,20 @@ const AI_PRESETS = [
   }
 ];
 
+const PLACEHOLDER_REFS = [
+  'e.g., KL-CMO-2026-100101',
+  'e.g., KL-CMO-2026-100103',
+  'e.g., KL-CMO-2026-100105'
+];
+
 export function HomePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [refInput, setRefInput] = useState('');
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [heroStage, setHeroStage] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
+  const [autoPlaySteps, setAutoPlaySteps] = useState(true);
 
   // Live public AI playground state
   const [aiText, setAiText] = useState(AI_PRESETS[0].text);
@@ -81,7 +99,7 @@ export function HomePage() {
   const [aiPreview, setAiPreview] = useState(null);
   const [aiError, setAiError] = useState('');
 
-  // Live stats & recent activity feed
+  // Live stats, ticker feed, metadata & SLA estimator state
   const [stats, setStats] = useState({
     totalGrievances: 8,
     resolvedGrievances: 2,
@@ -91,6 +109,27 @@ export function HomePage() {
   });
   const [recentFeed, setRecentFeed] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [metadata, setMetadata] = useState({ districts: [], categories: [] });
+  const [estDistrict, setEstDistrict] = useState('Thiruvananthapuram');
+  const [estCategory, setEstCategory] = useState('Public Infrastructure');
+
+  // Auto-cycle Hero live pipeline indicator & placeholder every 2s
+  useEffect(() => {
+    const heroTimer = setInterval(() => {
+      setHeroStage((prev) => (prev + 1) % WORKFLOW_STEPS.length);
+      setPlaceholderIdx((prev) => (prev + 1) % PLACEHOLDER_REFS.length);
+    }, 2200);
+    return () => clearInterval(heroTimer);
+  }, []);
+
+  // Auto-play interactive 5-step lifecycle walkthrough
+  useEffect(() => {
+    if (!autoPlaySteps) return undefined;
+    const stepTimer = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % WORKFLOW_STEPS.length);
+    }, 3600);
+    return () => clearInterval(stepTimer);
+  }, [autoPlaySteps]);
 
   useEffect(() => {
     const loadStats = () => {
@@ -108,17 +147,41 @@ export function HomePage() {
     loadStats();
     const timer = setInterval(loadStats, 20000);
 
-    api
-      .get('/departments')
-      .then((res) => {
-        if (Array.isArray(res.data?.departments)) {
-          setDepartments(res.data.departments.slice(0, 6));
-        }
+    Promise.all([api.get('/departments'), api.get('/metadata')])
+      .then(([deptRes, metaRes]) => {
+        const deptList = deptRes.data?.departments || [];
+        const meta = metaRes.data?.metadata || {};
+        setDepartments(deptList);
+        setMetadata({
+          districts: meta.districts || [],
+          categories: meta.categories || []
+        });
+        if (meta.districts?.length) setEstDistrict(meta.districts[0]);
+        if (meta.categories?.length) setEstCategory(meta.categories[0]);
       })
       .catch(() => {});
 
     return () => clearInterval(timer);
   }, []);
+
+  const matchedDepartment = useMemo(() => {
+    if (!departments.length) return null;
+    return (
+      departments.find((d) => (d.categories || []).includes(estCategory)) ||
+      departments.find((d) => d.code === 'GRV') ||
+      departments[0]
+    );
+  }, [departments, estCategory]);
+
+  const estimatedDueText = useMemo(() => {
+    const days = matchedDepartment?.slaDays || 7;
+    const dt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    return dt.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }, [matchedDepartment]);
 
   function handleQuickTrack(e) {
     e.preventDefault();
@@ -152,25 +215,67 @@ export function HomePage() {
       ? Math.round((stats.resolvedGrievances / stats.totalGrievances) * 100)
       : 0;
 
+  const tickerItems =
+    recentFeed.length > 0
+      ? [...recentFeed, ...recentFeed]
+      : [
+          {
+            referenceId: 'KL-CMO-2026-100101',
+            district: 'Thiruvananthapuram',
+            subject: 'Damaged approach road near Technopark',
+            status: 'In Progress'
+          },
+          {
+            referenceId: 'KL-CMO-2026-100103',
+            district: 'Ernakulam',
+            subject: 'Drinking water supply disruption in Ward 12',
+            status: 'Resolved'
+          },
+          {
+            referenceId: 'KL-CMO-2026-100105',
+            district: 'Kozhikode',
+            subject: 'Primary Health Centre medical supplies delay',
+            status: 'Under Review'
+          },
+          {
+            referenceId: 'KL-CMO-2026-100101',
+            district: 'Thiruvananthapuram',
+            subject: 'Damaged approach road near Technopark',
+            status: 'In Progress'
+          },
+          {
+            referenceId: 'KL-CMO-2026-100103',
+            district: 'Ernakulam',
+            subject: 'Drinking water supply disruption in Ward 12',
+            status: 'Resolved'
+          },
+          {
+            referenceId: 'KL-CMO-2026-100105',
+            district: 'Kozhikode',
+            subject: 'Primary Health Centre medical supplies delay',
+            status: 'Under Review'
+          }
+        ];
+
   return (
     <div>
-      {/* 1. Airy Executive Hero */}
+      {/* 1. Airy Animated Executive Hero */}
       <section className="civic-gradient text-white relative overflow-hidden">
         <div className="hero-grid absolute inset-0 pointer-events-none" />
-        <div className="animate-float-slow absolute -top-20 -right-16 w-80 h-80 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
-        <div className="animate-float-slow absolute -bottom-24 -left-16 w-96 h-96 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-12 gap-12 items-center relative z-10">
+        <div className="animate-float-slow absolute -top-20 -right-16 w-96 h-96 rounded-full bg-amber-400/20 blur-3xl pointer-events-none" />
+        <div className="animate-float-slow absolute -bottom-24 -left-16 w-[28rem] h-[28rem] rounded-full bg-indigo-400/25 blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-22 grid lg:grid-cols-12 gap-12 items-center relative z-10">
           <div className="lg:col-span-7 space-y-6 animate-fade-up">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-amber-200 text-xs font-semibold">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-80" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
               </span>
               Live State Portal • 14 Kerala Districts • Gemini AI Triage
             </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.12]">
               Direct, Transparent{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-200">
                 Public Redressal
               </span>{' '}
               for Kerala
@@ -179,10 +284,10 @@ export function HomePage() {
               Submit grievances directly to the Chief Minister&apos;s Office (CMO), follow every
               department action in real time, and verify outcomes transparently.
             </p>
-            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+            <div className="flex flex-wrap items-center gap-3.5 pt-1">
               <Link
                 to={user?.role === 'citizen' ? '/citizen/submit' : '/register'}
-                className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition"
+                className="btn-shimmer group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25 transition"
               >
                 <FilePlus2 className="w-4 h-4" />
                 Submit Grievance
@@ -202,16 +307,56 @@ export function HomePage() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
+
+            {/* Live Auto-Cycling Pipeline Preview Strip */}
+            <div className="pt-2">
+              <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                Real-Time Redressal Pipeline
+              </p>
+              <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                {WORKFLOW_STEPS.map((st, idx) => {
+                  const active = heroStage === idx;
+                  return (
+                    <button
+                      key={st.step}
+                      type="button"
+                      onClick={() => {
+                        setHeroStage(idx);
+                        setActiveStep(idx);
+                      }}
+                      className={`text-left rounded-xl px-2.5 py-2 border transition-all duration-500 ${
+                        active
+                          ? 'bg-amber-400/20 border-amber-300 text-white shadow-md scale-[1.03]'
+                          : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                      }`}
+                    >
+                      <span
+                        className={`font-mono text-[10px] font-bold block ${
+                          active ? 'text-amber-300' : 'text-slate-500'
+                        }`}
+                      >
+                        {st.step}
+                      </span>
+                      <span className="text-[11px] font-semibold truncate block">{st.short}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Single Clean Quick-Track Card */}
           <div className="lg:col-span-5 relative animate-fade-up-delayed">
-            <div className="animate-float-slow absolute -inset-2 bg-gradient-to-tr from-indigo-500/25 via-amber-400/20 to-sky-400/20 rounded-[28px] blur-xl pointer-events-none" />
+            <div className="animate-float-slow absolute -inset-2 bg-gradient-to-tr from-indigo-500/35 via-amber-400/25 to-sky-400/30 rounded-[28px] blur-xl pointer-events-none" />
             <div className="relative bg-white text-slate-900 rounded-3xl p-7 shadow-2xl border border-white/20">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h2 className="text-lg font-bold text-slate-900">Track Grievance Status</h2>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
                   Live Lookup
                 </span>
               </div>
@@ -223,12 +368,12 @@ export function HomePage() {
                   type="text"
                   value={refInput}
                   onChange={(e) => setRefInput(e.target.value)}
-                  placeholder="e.g., KL-CMO-2026-100101"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
+                  placeholder={PLACEHOLDER_REFS[placeholderIdx]}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition"
                 />
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-sm"
+                  className="btn-shimmer w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Search className="w-4 h-4" />
                   Check Live Status
@@ -242,7 +387,7 @@ export function HomePage() {
                       key={id}
                       type="button"
                       onClick={() => navigate(`/track?ref=${id}`)}
-                      className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-800 border border-slate-200 transition"
+                      className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-800 border border-slate-200 transition hover:-translate-y-0.5"
                     >
                       {id}
                     </button>
@@ -262,245 +407,414 @@ export function HomePage() {
             label="Total Grievances"
             value={stats.totalGrievances}
             sub="Synced live from MongoDB"
+            barColor="bg-indigo-600"
+            barPct={100}
+            delayMs={0}
           />
           <StatCard
             icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
             label="Resolved"
             value={stats.resolvedGrievances}
             sub={`${resolutionRate}% closure rate`}
+            barColor="bg-emerald-500"
+            barPct={Math.max(18, resolutionRate)}
+            delayMs={90}
           />
           <StatCard
             icon={<Clock className="w-5 h-5 text-amber-600" />}
             label="Active / In Progress"
             value={stats.inProgressGrievances + (stats.submittedGrievances || 0)}
             sub="Monitored under SLA"
+            barColor="bg-amber-500"
+            barPct={68}
+            delayMs={180}
           />
           <StatCard
             icon={<Building2 className="w-5 h-5 text-sky-600" />}
             label="Departments"
             value={stats.activeDepartments}
             sub={`Avg rating ${stats.averageRating}/5`}
+            barColor="bg-sky-500"
+            barPct={92}
+            delayMs={270}
           />
         </div>
       </section>
 
-      {/* 3. Spacious 2-Column Interactive Workflow & Live Gemini AI Playground */}
-      <Reveal>
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
-          {/* Left: Clean Interactive 5-Step Lifecycle */}
-          <div className="lg:col-span-6 space-y-5">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                Mandatory Lifecycle
-              </p>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
-                How Redressal Works
-              </h2>
-            </div>
-
-            <div className="space-y-2.5">
-              {WORKFLOW_STEPS.map((item, idx) => {
-                const isActive = activeStep === idx;
-                return (
-                  <button
-                    key={item.step}
-                    type="button"
-                    onClick={() => setActiveStep(idx)}
-                    className={`w-full text-left rounded-2xl px-5 py-4 border transition ${
-                      isActive
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                        : 'bg-white text-slate-900 border-slate-200 hover:border-indigo-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
-                          isActive
-                            ? 'bg-amber-400 text-slate-950'
-                            : 'bg-indigo-50 text-indigo-700'
-                        }`}
-                      >
-                        {item.step}
-                      </span>
-                      <span className="font-bold text-sm">{item.title}</span>
-                    </div>
-                    {isActive && (
-                      <p className="text-xs text-slate-300 mt-2 pl-10 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+      {/* Continuous Live Scrolling Ticker Ribbon */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div className="marquee-wrapper bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-md overflow-hidden flex items-center">
+          <div className="shrink-0 bg-amber-400 text-slate-950 px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 z-10">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-900 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-900" />
+            </span>
+            Live Ticker
           </div>
-
-          {/* Right: Live Gemini AI Interactive Sandbox */}
-          <div className="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-7 shadow-sm space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5" /> Interactive Gemini AI Sandbox
-                </p>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1">
-                  Test Live AI Triage Now
-                </h3>
-              </div>
-              {aiPreview && (
-                <span
-                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
-                    aiPreview.isFallback
-                      ? 'bg-amber-50 text-amber-800 border-amber-300'
-                      : 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                  }`}
-                >
-                  {aiPreview.isFallback
-                    ? `Fallback (${aiPreview.model})`
-                    : `Live Gemini (${aiPreview.model})`}
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              {AI_PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => {
-                    setAiText(p.text);
-                    setAiDistrict(p.district);
-                    handleLiveAiPreview(p.text, p.district);
-                  }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-800 border-slate-200 transition"
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-
-            <textarea
-              rows={3}
-              value={aiText}
-              onChange={(e) => setAiText(e.target.value)}
-              placeholder="Type any Kerala civic complaint to test live Gemini AI classification..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
-            />
-
-            {aiError && (
-              <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
-                {aiError}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="text-xs text-slate-500 inline-flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                District: <strong>{aiDistrict}</strong>
-              </span>
-              <button
-                type="button"
-                disabled={aiLoading}
-                onClick={() => handleLiveAiPreview()}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-amber-300 text-xs font-bold transition"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                {aiLoading ? 'Analyzing with Gemini...' : 'Run Live AI Preview'}
-              </button>
-            </div>
-
-            {aiPreview && (
-              <div className="space-y-3 pt-2 border-t border-slate-100">
-                <div className="grid sm:grid-cols-3 gap-2.5 text-xs">
-                  <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3">
-                    <span className="text-[10px] font-bold uppercase text-indigo-700 block">
-                      Department
-                    </span>
-                    <span className="font-bold text-slate-900">
-                      {aiPreview.suggestedDepartmentName}
-                    </span>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <span className="text-[10px] font-bold uppercase text-slate-500 block">
-                      Category
-                    </span>
-                    <span className="font-bold text-slate-900">{aiPreview.suggestedCategory}</span>
-                  </div>
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
-                    <span className="text-[10px] font-bold uppercase text-amber-800 block">
-                      Priority
-                    </span>
-                    <div className="mt-1">
-                      <PriorityBadge priority={aiPreview.recommendedPriority} />
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-700 bg-slate-50 rounded-xl p-3 border border-slate-200">
-                  <strong>CMO Summary:</strong> {aiPreview.summary}
-                </p>
-                <div className="flex justify-end">
-                  <Link
-                    to={
-                      user?.role === 'citizen'
-                        ? `/citizen/submit?district=${encodeURIComponent(
-                            aiDistrict
-                          )}&category=${encodeURIComponent(aiPreview.suggestedCategory)}`
-                        : '/login'
-                    }
-                    className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:text-indigo-900"
-                  >
-                    Submit this grievance in portal <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Live Public Redressal Feed */}
-        {recentFeed.length > 0 && (
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-                </span>
-                <h3 className="text-sm font-bold text-slate-900">
-                  Live Public Grievance Activity
-                </h3>
-              </div>
-              <Link to="/track" className="text-xs font-semibold text-indigo-700 hover:underline">
-                Track any ID →
-              </Link>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {recentFeed.map((item) => (
+          <div className="overflow-hidden flex-1 py-2">
+            <div className="animate-marquee flex items-center gap-6 px-4">
+              {tickerItems.map((item, idx) => (
                 <Link
-                  key={item.referenceId}
+                  key={`${item.referenceId}-${idx}`}
                   to={`/track?ref=${encodeURIComponent(item.referenceId)}`}
-                  className="rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-indigo-50/50 hover:border-indigo-300 p-3.5 transition block"
+                  className="inline-flex items-center gap-2.5 text-xs text-slate-200 hover:text-amber-300 whitespace-nowrap transition"
                 >
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="font-mono text-[11px] font-bold text-indigo-700 truncate">
-                      {item.referenceId}
-                    </span>
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <p className="text-xs font-semibold text-slate-900 line-clamp-1">
-                    {item.subject}
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-1">{item.district}</p>
+                  <span className="font-mono font-bold text-amber-300">{item.referenceId}</span>
+                  <span className="text-slate-500">•</span>
+                  <span className="font-semibold text-white">{item.district}</span>
+                  <span className="text-slate-400 max-w-[220px] truncate">{item.subject}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-indigo-200 border border-white/10">
+                    {item.status}
+                  </span>
                 </Link>
               ))}
             </div>
           </div>
-        )}
-      </section>
+        </div>
+      </div>
+
+      {/* 3. Spacious 2-Column Interactive Workflow & Live Gemini AI Playground */}
+      <Reveal>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
+          <div className="grid lg:grid-cols-12 gap-10 items-start">
+            {/* Left: Clean Interactive 5-Step Lifecycle with Auto-Play */}
+            <div className="lg:col-span-6 space-y-5">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+                    Mandatory Lifecycle
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+                    How Redressal Works
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAutoPlaySteps((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-indigo-50 text-xs font-semibold text-slate-700 shadow-xs transition"
+                >
+                  {autoPlaySteps ? (
+                    <>
+                      <Pause className="w-3.5 h-3.5 text-indigo-600" /> Auto-Playing
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5 text-indigo-600" /> Resume Auto-Play
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Animated Step Progress Meter */}
+              <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  style={{ width: `${((activeStep + 1) / WORKFLOW_STEPS.length) * 100}%` }}
+                  className="h-full bg-gradient-to-r from-indigo-600 to-amber-400 transition-all duration-500 ease-out"
+                />
+              </div>
+
+              <div className="space-y-2.5">
+                {WORKFLOW_STEPS.map((item, idx) => {
+                  const isActive = activeStep === idx;
+                  return (
+                    <button
+                      key={item.step}
+                      type="button"
+                      onClick={() => {
+                        setActiveStep(idx);
+                        setAutoPlaySteps(false);
+                      }}
+                      className={`w-full text-left rounded-2xl px-5 py-4 border transition-all duration-300 ${
+                        isActive
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-[1.01]'
+                          : 'bg-white text-slate-900 border-slate-200 hover:border-indigo-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`font-mono text-xs font-bold px-2 py-0.5 rounded transition-colors ${
+                              isActive
+                                ? 'bg-amber-400 text-slate-950'
+                                : 'bg-indigo-50 text-indigo-700'
+                            }`}
+                          >
+                            {item.step}
+                          </span>
+                          <span className="font-bold text-sm">{item.title}</span>
+                        </div>
+                        {isActive && (
+                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                        )}
+                      </div>
+                      {isActive && (
+                        <p className="animate-slide-down text-xs text-slate-300 mt-2 pl-10 leading-relaxed">
+                          {item.desc}
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right: Live Gemini AI Interactive Sandbox */}
+            <div className="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-7 shadow-sm space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
+                    <Cpu className="w-3.5 h-3.5 animate-pulse" /> Interactive Gemini AI Sandbox
+                  </p>
+                  <h3 className="text-xl font-extrabold text-slate-900 mt-1">
+                    Test Live AI Triage Now
+                  </h3>
+                </div>
+                {aiPreview && (
+                  <span
+                    className={`animate-pop-in text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+                      aiPreview.isFallback
+                        ? 'bg-amber-50 text-amber-800 border-amber-300'
+                        : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    }`}
+                  >
+                    {aiPreview.isFallback
+                      ? `Fallback (${aiPreview.model})`
+                      : `Live Gemini (${aiPreview.model})`}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {AI_PRESETS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setAiText(p.text);
+                      setAiDistrict(p.district);
+                      handleLiveAiPreview(p.text, p.district);
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold border bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-800 border-slate-200 transition active:scale-[0.97]"
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                rows={3}
+                value={aiText}
+                onChange={(e) => setAiText(e.target.value)}
+                placeholder="Type any Kerala civic complaint to test live Gemini AI classification..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-600 outline-none"
+              />
+
+              {aiError && (
+                <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                  {aiError}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs text-slate-500 inline-flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                  District: <strong>{aiDistrict}</strong>
+                </span>
+                <button
+                  type="button"
+                  disabled={aiLoading}
+                  onClick={() => handleLiveAiPreview()}
+                  className="btn-shimmer inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60 text-amber-300 text-xs font-bold transition"
+                >
+                  <Sparkles className={`w-3.5 h-3.5 ${aiLoading ? 'animate-spin' : ''}`} />
+                  {aiLoading ? 'Analyzing with Gemini...' : 'Run Live AI Preview'}
+                </button>
+              </div>
+
+              {aiPreview && (
+                <div className="animate-pop-in space-y-3 pt-2 border-t border-slate-100">
+                  <div className="grid sm:grid-cols-3 gap-2.5 text-xs">
+                    <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3">
+                      <span className="text-[10px] font-bold uppercase text-indigo-700 block">
+                        Department
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {aiPreview.suggestedDepartmentName}
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <span className="text-[10px] font-bold uppercase text-slate-500 block">
+                        Category
+                      </span>
+                      <span className="font-bold text-slate-900">{aiPreview.suggestedCategory}</span>
+                    </div>
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                      <span className="text-[10px] font-bold uppercase text-amber-800 block">
+                        Priority
+                      </span>
+                      <div className="mt-1">
+                        <PriorityBadge priority={aiPreview.recommendedPriority} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-700 bg-slate-50 rounded-xl p-3 border border-slate-200">
+                    <strong>CMO Summary:</strong> {aiPreview.summary}
+                  </p>
+                  <div className="flex justify-end">
+                    <Link
+                      to={
+                        user?.role === 'citizen'
+                          ? `/citizen/submit?district=${encodeURIComponent(
+                              aiDistrict
+                            )}&category=${encodeURIComponent(aiPreview.suggestedCategory)}`
+                          : '/login'
+                      }
+                      className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 hover:text-indigo-900"
+                    >
+                      Submit this grievance in portal <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Interactive SLA & Routing Estimator */}
+          <div className="civic-gradient rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+            <div className="grid lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-5 space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                  <Compass className="w-4 h-4" /> Instant Routing &amp; SLA Estimator
+                </p>
+                <h3 className="text-2xl font-extrabold">
+                  Check Target Resolution Time Before Submitting
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Pick your Kerala district and issue category to preview the responsible nodal
+                  department and committed SLA window.
+                </p>
+              </div>
+              <div className="lg:col-span-7 bg-white text-slate-900 rounded-2xl p-5 shadow-lg space-y-4">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+                      Kerala District
+                    </label>
+                    <select
+                      value={estDistrict}
+                      onChange={(e) => setEstDistrict(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-indigo-600 outline-none"
+                    >
+                      {(metadata.districts.length
+                        ? metadata.districts
+                        : ['Thiruvananthapuram', 'Ernakulam', 'Kozhikode']
+                      ).map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold uppercase text-slate-500 block mb-1">
+                      Issue Category
+                    </label>
+                    <select
+                      value={estCategory}
+                      onChange={(e) => setEstCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-indigo-600 outline-none"
+                    >
+                      {(metadata.categories.length
+                        ? metadata.categories
+                        : ['Public Infrastructure', 'Healthcare', 'Electricity & Power']
+                      ).map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {matchedDepartment && (
+                  <div
+                    key={`${estDistrict}-${estCategory}`}
+                    className="animate-pop-in flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <DepartmentBadge code={matchedDepartment.code} />
+                        <span className="text-xs font-bold text-slate-900">
+                          {matchedDepartment.name}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600">
+                        SLA: <strong>{matchedDepartment.slaDays} days</strong> • Target Completion:{' '}
+                        <strong className="text-indigo-700">{estimatedDueText}</strong>
+                      </p>
+                    </div>
+                    <Link
+                      to={
+                        user?.role === 'citizen'
+                          ? `/citizen/submit?district=${encodeURIComponent(
+                              estDistrict
+                            )}&category=${encodeURIComponent(estCategory)}`
+                          : '/login'
+                      }
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition"
+                    >
+                      Start Submission <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Live Public Redressal Feed */}
+          {recentFeed.length > 0 && (
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                  </span>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Live Public Grievance Activity
+                  </h3>
+                </div>
+                <Link to="/track" className="text-xs font-semibold text-indigo-700 hover:underline">
+                  Track any ID →
+                </Link>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {recentFeed.map((item, idx) => (
+                  <Reveal key={item.referenceId} delayMs={idx * 70}>
+                    <Link
+                      to={`/track?ref=${encodeURIComponent(item.referenceId)}`}
+                      className="rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-indigo-50/50 hover:border-indigo-300 hover-lift p-3.5 transition block h-full"
+                    >
+                      <div className="flex items-center justify-between gap-1 mb-1.5">
+                        <span className="font-mono text-[11px] font-bold text-indigo-700 truncate">
+                          {item.referenceId}
+                        </span>
+                        <StatusBadge status={item.status} />
+                      </div>
+                      <p className="text-xs font-semibold text-slate-900 line-clamp-1">
+                        {item.subject}
+                      </p>
+                      <p className="text-[11px] text-slate-500 mt-1">{item.district}</p>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
       </Reveal>
 
       {/* 4. Spacious Featured Departments */}
-      <Reveal delayMs={80}>
       <section className="bg-white border-y border-slate-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
@@ -521,42 +835,67 @@ export function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {departments.map((dept) => (
-              <div
-                key={dept._id}
-                className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 hover:bg-white hover:shadow-lg hover:border-indigo-300 hover-lift"
-              >
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <DepartmentBadge code={dept.code} />
-                  <span className="text-xs text-slate-500 font-medium">
-                    SLA: {dept.slaDays} days
-                  </span>
-                </div>
-                <h3 className="font-bold text-slate-900 mb-2">{dept.name}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{dept.description}</p>
-              </div>
-            ))}
+            {departments.slice(0, 6).map((dept, idx) => {
+              const speedPct = Math.max(25, Math.min(100, Math.round((12 - dept.slaDays) * 10)));
+              return (
+                <Reveal key={dept._id} delayMs={idx * 80}>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 hover:bg-white hover:border-indigo-300 hover-lift h-full flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <DepartmentBadge code={dept.code} />
+                        <span className="text-xs text-slate-500 font-semibold">
+                          SLA: {dept.slaDays} days
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-slate-900 mb-2">{dept.name}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">{dept.description}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500">
+                        <span>SLA Response Speed</span>
+                        <span className="text-indigo-700">
+                          {dept.slaDays <= 3 ? 'Rapid' : 'Standard'}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                        <div
+                          style={{ width: `${speedPct}%` }}
+                          className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-amber-400 animate-progress-fill"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>
-      </Reveal>
     </div>
   );
 }
 
-function StatCard({ icon, label, value, sub }) {
+function StatCard({ icon, label, value, sub, barColor, barPct, delayMs = 0 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md hover-lift animate-fade-up">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-slate-500">{label}</span>
-        <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-center">
-          {icon}
+    <Reveal delayMs={delayMs}>
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md hover-lift h-full">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-slate-500">{label}</span>
+          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-center">
+            {icon}
+          </div>
+        </div>
+        <p className="text-3xl font-extrabold text-slate-900">
+          <AnimatedNumber value={value} />
+        </p>
+        <p className="text-xs text-slate-500 mt-1 mb-3">{sub}</p>
+        <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+          <div
+            style={{ width: `${barPct}%` }}
+            className={`h-full rounded-full ${barColor} animate-progress-fill`}
+          />
         </div>
       </div>
-      <p className="text-3xl font-extrabold text-slate-900">
-        <AnimatedNumber value={value} />
-      </p>
-      <p className="text-xs text-slate-500 mt-1">{sub}</p>
-    </div>
+    </Reveal>
   );
 }

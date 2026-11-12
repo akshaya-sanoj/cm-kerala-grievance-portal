@@ -1,18 +1,42 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Bell, Building2, ChevronDown, LogOut, Menu, Shield, UserCheck, X } from 'lucide-react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Bell,
+  Building2,
+  ChevronDown,
+  LogOut,
+  Menu,
+  Search,
+  Shield,
+  UserCheck,
+  X
+} from 'lucide-react';
 import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { formatDateTime, getDashboardPathForRole, getRoleLabel } from '../utils/formatters.js';
+import { CommandPalette } from './CommandPalette.jsx';
 import { StatusBadge } from './StatusBadge.jsx';
 
 export function Layout({ children }) {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [activity, setActivity] = useState([]);
+
+  useEffect(() => {
+    function handleShortcut(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
 
   const primaryLinks = [
     { to: '/', label: 'Home' },
@@ -153,6 +177,18 @@ export function Layout({ children }) {
 
             {/* Auth Controls */}
             <div className="hidden lg:flex items-center gap-2.5 relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setPaletteOpen(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-xs font-medium text-slate-600 hover:text-indigo-800 transition"
+                title="Quick Jump & Track (Ctrl+K)"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Quick Jump</span>
+                <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500">
+                  Ctrl+K
+                </kbd>
+              </button>
               {user ? (
                 <>
                   <div className="relative">
@@ -256,14 +292,24 @@ export function Layout({ children }) {
             </div>
 
             {/* Mobile menu toggle */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen((prev) => !prev)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            <div className="lg:hidden flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setPaletteOpen(true)}
+                className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+                aria-label="Quick search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileOpen((prev) => !prev)}
+                className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+                aria-label="Toggle navigation menu"
+              >
+                {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -326,7 +372,13 @@ export function Layout({ children }) {
         )}
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <div key={location.pathname} className="animate-page-enter">
+          {children}
+        </div>
+      </main>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
 
       {/* Clean Standard Footer */}
       <footer className="no-print bg-slate-950 text-slate-300 border-t border-slate-800 mt-16">

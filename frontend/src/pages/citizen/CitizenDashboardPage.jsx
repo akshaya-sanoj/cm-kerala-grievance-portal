@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { api, getApiErrorMessage } from '../../api/client.js';
 import { LiveSyncBar } from '../../components/LiveSyncBar.jsx';
+import { SlaCountdownBadge } from '../../components/SlaCountdownBadge.jsx';
 import { PriorityBadge, StatusBadge } from '../../components/StatusBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
@@ -208,8 +209,11 @@ export function CitizenDashboardPage() {
                     <td className="py-3.5 px-4">
                       <PriorityBadge priority={g.priority} />
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 space-y-1">
                       <StatusBadge status={g.status} />
+                      <div>
+                        <SlaCountdownBadge dueDate={g.dueDate} status={g.status} />
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap">
                       {formatDate(g.createdAt)}

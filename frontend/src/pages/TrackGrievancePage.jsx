@@ -9,14 +9,17 @@ import {
   Link2,
   MapPin,
   Printer,
+  QrCode,
   Search,
   Star
 } from 'lucide-react';
 import { api, getApiErrorMessage } from '../api/client.js';
 import { LiveSyncBar } from '../components/LiveSyncBar.jsx';
+import { SlaCountdownBadge } from '../components/SlaCountdownBadge.jsx';
 import { PriorityBadge, StatusBadge } from '../components/StatusBadge.jsx';
 import { StatusStepper } from '../components/StatusStepper.jsx';
 import { Timeline } from '../components/Timeline.jsx';
+import { VerificationSealModal } from '../components/VerificationSealModal.jsx';
 import { formatDate } from '../utils/formatters.js';
 
 export function TrackGrievancePage() {
@@ -30,6 +33,7 @@ export function TrackGrievancePage() {
   const [error, setError] = useState('');
   const [grievance, setGrievance] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [sealOpen, setSealOpen] = useState(false);
 
   const lookupGrievance = useCallback(async (targetRef, silent = false) => {
     const cleaned = String(targetRef || '').trim().toUpperCase();
@@ -141,7 +145,7 @@ export function TrackGrievancePage() {
       )}
 
       {grievance && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-pop-in">
           <LiveSyncBar
             autoSync={autoSync}
             onToggleAutoSync={() => setAutoSync((prev) => !prev)}
@@ -160,6 +164,7 @@ export function TrackGrievancePage() {
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={grievance.status} />
                 <PriorityBadge priority={grievance.priority} />
+                <SlaCountdownBadge dueDate={grievance.dueDate} status={grievance.status} />
                 {grievance.isEscalated && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
                     <AlertTriangle className="w-3 h-3" /> Escalated
@@ -246,6 +251,13 @@ export function TrackGrievancePage() {
               >
                 <Printer className="w-3.5 h-3.5" /> Print Status Summary
               </button>
+              <button
+                type="button"
+                onClick={() => setSealOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-semibold transition"
+              >
+                <QrCode className="w-3.5 h-3.5" /> Official Receipt &amp; QR Card
+              </button>
             </div>
           </div>
 
@@ -253,6 +265,11 @@ export function TrackGrievancePage() {
             <h3 className="text-lg font-bold text-slate-900 mb-4">Public Status History</h3>
             <Timeline history={grievance.history} />
           </div>
+
+          <VerificationSealModal
+            grievance={sealOpen ? grievance : null}
+            onClose={() => setSealOpen(false)}
+          />
         </div>
       )}
     </div>
