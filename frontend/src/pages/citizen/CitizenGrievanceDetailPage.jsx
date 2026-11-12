@@ -18,7 +18,7 @@ import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
 export function CitizenGrievanceDetailPage() {
-  const { tr, tDistrict, tCategory } = usePreferences();
+  const { tr, tDistrict, tCategory, tDeptName } = usePreferences();
   const { id } = useParams();
   const [grievance, setGrievance] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -160,7 +160,7 @@ export function CitizenGrievanceDetailPage() {
           <div>
             <span className="text-slate-500 block">{tr('Assigned Department', 'വകുപ്പ്')}</span>
             <strong className="text-slate-800">
-              {grievance.assignedDepartmentId?.name ||
+              {tDeptName(grievance.assignedDepartmentId) ||
                 tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
             </strong>
           </div>

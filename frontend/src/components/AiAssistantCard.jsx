@@ -8,7 +8,7 @@ export function AiAssistantCard({
   showApplyButton = false,
   applied = false
 }) {
-  const { tr, tCategory, tPriority } = usePreferences();
+  const { tr, tCategory, tPriority, tDeptName } = usePreferences();
 
   if (!analysis || !analysis.summary) return null;
 
@@ -64,7 +64,9 @@ export function AiAssistantCard({
         <div className="bg-white rounded-lg p-2.5 border border-slate-200">
           <p className="text-xs text-slate-500">{tr('Suggested Department', 'നിർദ്ദേശിച്ച വകുപ്പ്')}</p>
           <p className="font-semibold text-slate-900">
-            {analysis.suggestedDepartmentName || analysis.suggestedDepartmentCode || '—'}
+            {tDeptName(analysis.suggestedDepartmentName, analysis.suggestedDepartmentCode) ||
+              analysis.suggestedDepartmentCode ||
+              '—'}
           </p>
         </div>
         <div className="bg-white rounded-lg p-2.5 border border-slate-200">

@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   CATEGORY_ML,
+  DEPARTMENT_CODE_BY_NAME,
+  DEPARTMENT_ML,
   DISTRICT_ML,
   PRIORITY_ML,
   ROLE_ML,
@@ -127,7 +129,28 @@ export function PreferencesProvider({ children }) {
       tDistrict: (d) => (isMl ? DISTRICT_ML[d] || d : d),
       tCategory: (c) => (isMl ? CATEGORY_ML[c] || c : c),
       tStage: (st) => (isMl ? STAGE_ML[st] || st : st),
-      tRole: (r) => (isMl ? ROLE_ML[r] || r : r)
+      tRole: (r) => (isMl ? ROLE_ML[r] || r : r),
+      tDeptName: (deptOrName, codeOverride) => {
+        if (!deptOrName) return '';
+        if (!isMl) return typeof deptOrName === 'string' ? deptOrName : deptOrName.name || '';
+        const code =
+          codeOverride ||
+          (typeof deptOrName === 'object' ? deptOrName.code : DEPARTMENT_CODE_BY_NAME[deptOrName]);
+        if (code && DEPARTMENT_ML[code]) return DEPARTMENT_ML[code].name;
+        return typeof deptOrName === 'string' ? deptOrName : deptOrName.name || '';
+      },
+      tDeptDesc: (dept) => {
+        if (!dept) return '';
+        if (!isMl) return dept.description || '';
+        const code = dept.code || DEPARTMENT_CODE_BY_NAME[dept.name];
+        return (code && DEPARTMENT_ML[code]?.description) || dept.description || '';
+      },
+      tDeptHead: (dept) => {
+        if (!dept) return '';
+        if (!isMl) return dept.headDesignation || '';
+        const code = dept.code || DEPARTMENT_CODE_BY_NAME[dept.name];
+        return (code && DEPARTMENT_ML[code]?.headDesignation) || dept.headDesignation || '';
+      }
     };
   }, [theme, lang]);
 

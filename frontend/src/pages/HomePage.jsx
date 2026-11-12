@@ -104,7 +104,7 @@ const PLACEHOLDER_REFS = [
 
 export function HomePage() {
   const { user } = useAuth();
-  const { t, tr, tDistrict, tCategory, tStatus } = usePreferences();
+  const { t, tr, tDistrict, tCategory, tStatus, tDeptName, tDeptDesc } = usePreferences();
   const navigate = useNavigate();
   const [refInput, setRefInput] = useState('');
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -664,7 +664,7 @@ export function HomePage() {
                         {tr('Department', 'വകുപ്പ്')}
                       </span>
                       <span className="font-bold text-slate-900">
-                        {aiPreview.suggestedDepartmentName}
+                        {tDeptName(aiPreview.suggestedDepartmentName, aiPreview.suggestedDepartmentCode)}
                       </span>
                     </div>
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -779,7 +779,7 @@ export function HomePage() {
                       <div className="flex items-center gap-2">
                         <DepartmentBadge code={matchedDepartment.code} />
                         <span className="text-xs font-bold text-slate-900">
-                          {matchedDepartment.name}
+                          {tDeptName(matchedDepartment)}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-600">
@@ -883,8 +883,8 @@ export function HomePage() {
                           SLA: {dept.slaDays} {tr('days', 'ദിവസം')}
                         </span>
                       </div>
-                      <h3 className="font-bold text-slate-900 mb-2">{dept.name}</h3>
-                      <p className="text-xs text-slate-600 leading-relaxed">{dept.description}</p>
+                      <h3 className="font-bold text-slate-900 mb-2">{tDeptName(dept)}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">{tDeptDesc(dept)}</p>
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500">

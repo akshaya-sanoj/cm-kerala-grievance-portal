@@ -9,7 +9,7 @@ import { usePreferences } from '../context/PreferencesContext.jsx';
 
 export function DepartmentsPage() {
   const { user } = useAuth();
-  const { tr, tCategory } = usePreferences();
+  const { tr, tCategory, tDeptName, tDeptDesc, tDeptHead } = usePreferences();
   const [departments, setDepartments] = useState([]);
   const [search, setSearch] = useState('');
   const [slaFilter, setSlaFilter] = useState('all');
@@ -142,13 +142,13 @@ export function DepartmentsPage() {
                       SLA: {dept.slaDays} {tr('days', 'ദിവസം')}
                     </span>
                   </div>
-                  <h2 className="text-lg font-bold text-slate-900 mb-2">{dept.name}</h2>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">{dept.description}</p>
+                  <h2 className="text-lg font-bold text-slate-900 mb-2">{tDeptName(dept)}</h2>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-4">{tDeptDesc(dept)}</p>
                 </div>
                 <div className="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
                   <p>
                     <strong className="text-slate-700">{tr('Nodal Head:', 'വകുപ്പ് മേധാവി:')}</strong>{' '}
-                    {dept.headDesignation}
+                    {tDeptHead(dept)}
                   </p>
                   {dept.categories?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">

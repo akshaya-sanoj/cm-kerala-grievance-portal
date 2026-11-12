@@ -21,7 +21,7 @@ import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
 export function CmoGrievanceDetailPage() {
-  const { tr, tDistrict, tCategory, tPriority } = usePreferences();
+  const { tr, tDistrict, tCategory, tPriority, tDeptName } = usePreferences();
   const { id } = useParams();
   const [grievance, setGrievance] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -251,7 +251,7 @@ export function CmoGrievanceDetailPage() {
           <div>
             <span className="text-slate-500 block">{tr('Assigned Department', 'വകുപ്പ്')}</span>
             <strong className="text-slate-800">
-              {grievance.assignedDepartmentId?.name || tr('Unassigned', 'നിയമിച്ചിട്ടില്ല')}
+              {tDeptName(grievance.assignedDepartmentId) || tr('Unassigned', 'നിയമിച്ചിട്ടില്ല')}
             </strong>
           </div>
           <div>
@@ -319,7 +319,7 @@ export function CmoGrievanceDetailPage() {
                 <option value="">{tr('Select Department', 'വകുപ്പ് തിരഞ്ഞെടുക്കുക')}</option>
                 {departments.map((d) => (
                   <option key={d._id} value={d._id}>
-                    {d.code} — {d.name}
+                    {d.code} — {tDeptName(d)}
                   </option>
                 ))}
               </select>

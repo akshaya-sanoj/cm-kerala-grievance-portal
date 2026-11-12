@@ -47,7 +47,7 @@ function escapeCsvCell(value) {
 }
 
 export function CmoDashboardPage() {
-  const { tr, tStatus, tPriority, tDistrict, tCategory } = usePreferences();
+  const { tr, tStatus, tPriority, tDistrict, tCategory, tDeptName } = usePreferences();
   const [activeTab, setActiveTab] = useState('grievances');
   const [stats, setStats] = useState(null);
   const [grievances, setGrievances] = useState([]);
@@ -481,7 +481,7 @@ export function CmoDashboardPage() {
                 <option value="All">{tr('All Departments', 'എല്ലാ വകുപ്പുകളും')}</option>
                 {departments.map((d) => (
                   <option key={d._id} value={d._id}>
-                    {d.code} — {d.name}
+                    {d.code} — {tDeptName(d)}
                   </option>
                 ))}
               </select>
@@ -896,7 +896,7 @@ export function CmoDashboardPage() {
                       className="cursor-pointer hover:bg-indigo-50/70 transition"
                     >
                       <td className="py-2 px-3 font-semibold text-indigo-800">
-                        {row.code} — {row.name}
+                        {row.code} — {tDeptName(row.name, row.code)}
                       </td>
                       <td className="py-2 px-3">{row.total}</td>
                       <td className="py-2 px-3 text-amber-700 font-medium">{row.pending}</td>

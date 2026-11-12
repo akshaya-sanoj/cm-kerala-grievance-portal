@@ -19,7 +19,7 @@ import { formatDate } from '../../utils/formatters.js';
 
 export function CitizenDashboardPage() {
   const { user } = useAuth();
-  const { tr, tStatus, tDistrict, tCategory } = usePreferences();
+  const { tr, tStatus, tDistrict, tCategory, tDeptName } = usePreferences();
   const [grievances, setGrievances] = useState([]);
   const [summary, setSummary] = useState({ total: 0, pending: 0, resolved: 0 });
   const [statusFilter, setStatusFilter] = useState('All');
@@ -213,7 +213,7 @@ export function CitizenDashboardPage() {
                       </p>
                     </td>
                     <td className="py-3.5 px-4 text-xs text-slate-700">
-                      {g.assignedDepartmentId?.name ||
+                      {tDeptName(g.assignedDepartmentId) ||
                         tr('Awaiting CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
                     </td>
                     <td className="py-3.5 px-4">

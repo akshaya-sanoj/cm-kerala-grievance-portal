@@ -24,7 +24,7 @@ import { usePreferences } from '../context/PreferencesContext.jsx';
 import { formatDate } from '../utils/formatters.js';
 
 export function TrackGrievancePage() {
-  const { tr, tDistrict, tStage } = usePreferences();
+  const { tr, tDistrict, tStage, tDeptName } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialRef = searchParams.get('ref') || '';
   const [refId, setRefId] = useState(initialRef);
@@ -192,7 +192,8 @@ export function TrackGrievancePage() {
                 <Building2 className="w-4 h-4 text-slate-400" />
                 <span>
                   <strong>{tr('Department:', 'വകുപ്പ്:')}</strong>{' '}
-                  {grievance.assignedDepartment?.name || tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
+                  {tDeptName(grievance.assignedDepartment) ||
+                    tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">

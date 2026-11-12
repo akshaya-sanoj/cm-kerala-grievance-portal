@@ -11,7 +11,7 @@ import { formatDate } from '../../utils/formatters.js';
 
 export function OfficerDashboardPage() {
   const { user } = useAuth();
-  const { tr, tStatus, tDistrict, tCategory } = usePreferences();
+  const { tr, tStatus, tDistrict, tCategory, tDeptName } = usePreferences();
   const [grievances, setGrievances] = useState([]);
   const [summary, setSummary] = useState({
     total: 0,
@@ -61,7 +61,8 @@ export function OfficerDashboardPage() {
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5" />
-            {user?.department?.name || tr('Department Officer Portal', 'വകുപ്പ് ഉദ്യോഗസ്ഥ പോർട്ടൽ')}
+            {tDeptName(user?.department) ||
+              tr('Department Officer Portal', 'വകുപ്പ് ഉദ്യോഗസ്ഥ പോർട്ടൽ')}
           </p>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
             {tr('Department Officer Dashboard', 'വകുപ്പ് ഉദ്യോഗസ്ഥ ഡാഷ്ബോർഡ്')}

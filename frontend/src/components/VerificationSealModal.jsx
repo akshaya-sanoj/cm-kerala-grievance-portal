@@ -6,7 +6,7 @@ import { formatDate } from '../utils/formatters.js';
 import { SlaCountdownBadge } from './SlaCountdownBadge.jsx';
 
 export function VerificationSealModal({ grievance, onClose }) {
-  const { tr, tStatus, tDistrict } = usePreferences();
+  const { tr, tStatus, tDistrict, tDeptName } = usePreferences();
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [copiedUrl, setCopiedUrl] = useState(false);
 
@@ -156,7 +156,8 @@ export function VerificationSealModal({ grievance, onClose }) {
             <div className="rounded-xl border border-slate-200 p-3 col-span-2">
               <span className="text-slate-500 block">{tr('Assigned Department', 'വകുപ്പ്')}</span>
               <span className="font-bold text-slate-900">
-                {grievance.assignedDepartment?.name || tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
+                {tDeptName(grievance.assignedDepartment) ||
+                  tr('Pending CMO Assignment', 'CMO നിയമനം കാത്തിരിക്കുന്നു')}
               </span>
             </div>
           </div>
